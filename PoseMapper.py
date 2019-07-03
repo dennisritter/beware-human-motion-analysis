@@ -42,9 +42,8 @@ class PoseMapper:
             raise ValueError(
                 "'mapping' parameter must be a member of 'PoseMapping' enumeration.")
         self.mapping = mapping
-        print(self.mapping)
 
-    def map(self, input: str) -> str:
+    def map(self, input: str) -> dict:
         """
         Parameters
         ----------
@@ -52,13 +51,23 @@ class PoseMapper:
             The Pose input string to convert into the constructor specified output.
         Returns
         ----------
-        str   
-           The converted output Pose string for the given input in the constructor specified output pose format.   
+        str
+           The converted output Pose string for the given input in the constructor specified output pose format.
         """
         if (self.mapping == PoseMappingEnum.MOCAP_TO_OPENPOSE_MPI):
-            return self.map_mocap_to_openpose_mpi(input)
+            mocap_sequence = json.loads(input)
+            mpi_sequence = []
+            # For each pose in the keypoints Array
+            for pose in mocap_sequence["keypoints"]:
+                # Accessing the actual keypoint through the timestamp object key
+                for timestamp in pose:
+                    mocap_parts_positions = pose[timestamp]
+                    mpi_parts_positions = self.map_mocap_to_openpose_mpi(
+                        mocap_parts_positions)
+                    mpi_sequence.append({f'{timestamp}': mpi_parts_positions})
+            return mpi_sequence
 
-    def map_mocap_to_openpose_mpi(self, input: str) -> dict:
+    def map_mocap_to_openpose_mpi(self, input: dict) -> dict:
         """
         Parameters
         ----------
@@ -69,32 +78,32 @@ class PoseMapper:
         dict
            A MPII pose representation dictionary of the MOCAP input pose string.
         """
-        mocap_dict = json.loads(input)
+        mocap_parts_positions = input
         # For each Body Part
-        for key in mocap_dict:
-            part_position = mocap_dict[key].split(',')
+        for key in mocap_parts_positions:
+            part_position = mocap_parts_positions[key].split(',')
             part_position_dict = {}
             # Convert part position Array<str> to Dictionary containing float values
             part_position_dict['x'] = float(part_position[0])
             part_position_dict['y'] = float(part_position[1])
             part_position_dict['z'] = float(part_position[2])
-            mocap_dict[key] = part_position_dict
+            mocap_parts_positions[key] = part_position_dict
         # The Output Dictionary
         op_mpi_dict = {
-            "RAnkle": mocap_dict["RightAnkle"],
-            "RKnee": mocap_dict["RightKnee"],
-            "RHip": mocap_dict["RightHip"],
-            "LHip": mocap_dict["LeftHip"],
-            "LKnee": mocap_dict["LeftKnee"],
-            "LAnkle": mocap_dict["LeftAnkle"],
-            "Chest": mocap_dict["Torso"],
-            "Neck": mocap_dict["Neck"],
-            "Head": mocap_dict["Head"],
-            "RWrist": mocap_dict["RightWrist"],
-            "RElbow": mocap_dict["RightElbow"],
-            "RShoulder": mocap_dict["RightShoulder"],
-            "LShoulder": mocap_dict["LeftShoulder"],
-            "LElbow": mocap_dict["LeftElbow"],
-            "LWrist": mocap_dict["LeftWrist"],
+            "RAnkle": mocap_parts_positions["RightAnkle"],
+            "RKnee": mocap_parts_positions["RightKnee"],
+            "RHip": mocap_parts_positions["RightHip"],
+            "LHip": mocap_parts_positions["LeftHip"],
+            "LKnee": mocap_parts_positions["LeftKnee"],
+            "LAnkle": mocap_parts_positions["LeftAnkle"],
+            "Chest": mocap_parts_positions["Torso"],
+            "Neck": mocap_parts_positions["Neck"],
+            "Head": mocap_parts_positions["Head"],
+            "RWrist": mocap_parts_positions["RightWrist"],
+            "RElbow": mocap_parts_positions["RightElbow"],
+            "RShoulder": mocap_parts_positions["RightShoulder"],
+            "LShoulder": mocap_parts_positions["LeftShoulder"],
+            "LElbow": mocap_parts_positions["LeftElbow"],
+            "LWrist": mocap_parts_positions["LeftWrist"],
         }
         return op_mpi_dict
