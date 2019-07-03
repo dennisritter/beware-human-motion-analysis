@@ -12,7 +12,7 @@ mocap_opmpi_mapper = PoseMapper(PoseMappingEnum.MOCAP_TO_OPENPOSE_MPI)
 # Convert mocap json string Positions to dictionary with openpose MPI postions
 sequence = mocap_opmpi_mapper.map(MOCAP_SEQUENCE)
 
-# TODO: Create function in PoseMapper or somewhere else to do this.
+# TODO: Adjust Mapping output to be more like this array in order to parse it much easier
 # Create 3d Array storing keypoints for each part by their Mapped index
 # Visualization of the arrays structure:
 # [
@@ -31,6 +31,7 @@ for pose in sequence:
                 [pose[timestamp][part]["x"], pose[timestamp][part]["y"], pose[timestamp][part]["z"]])
 sequence_arr = np.array(sequence_arr)
 
+# TODO: Find method to plot one graph visualizing a motion of multiple keypoints
 # Plotting Lines of the motions
 fig = plt.figure()
 ax = plt.axes(projection='3d')

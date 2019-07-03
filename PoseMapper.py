@@ -1,6 +1,19 @@
 from enum import Enum
 import json
 
+# TODO: Optimize returned values
+# TODO: Implement Sequence class
+# {
+#   body_parts: ["Head", "Neck", "RShoulder", "RElbow", ...],
+#   body_pairs: [[["Head", "Neck"], ["Neck", "RShoulder"], ["RShoulder", "RElbow"], ["RElbow", "RWrist"], ...],
+#   positions: [
+#                 [[part-i.x, part-i.y, part-i.z], [part-i.x, part-i.y, part-i.z], [part-i.x, part-i.y, part-i.z]],
+#                 [[part-i+1.x, part-i+1.y, part-i+1.z], [part-i+1.x, part-i+1.y, part-i+1.z], [part-i+1.x, part-i+1.y, part-i+1.z]],
+#                 ...
+#              ],
+#   timestamps: [<someTimestamp>] -> Must be same size as arrays contained in positions (num_keypoints == num_timestamps)
+# }
+
 
 class PoseMappingEnum(Enum):
     MOCAP_TO_OPENPOSE_MPI = 1
@@ -51,12 +64,22 @@ class PoseMapper:
             The Pose input string to convert into the constructor specified output.
         Returns
         ----------
-        str
-           The converted output Pose string for the given input in the constructor specified output pose format.
+        dict
+           The converted output Pose dictionary for the given input in the constructor specified output pose format.
         """
         return self.map_sequence_mocap_to_openpose_mpi(input)
 
     def map_sequence_mocap_to_openpose_mpi(self, input: str) -> dict:
+        """
+        Parameters
+        ----------
+        input : str
+            The sequence mocap input string to convert into a openpose MPI output dictionary.
+        Returns
+        ----------
+        dict
+           The converted output Pose dictionary for the given input in the constructor specified output pose format.
+        """
         mocap_sequence = json.loads(input)
         mpi_sequence = []
         # For each pose in the keypoints Array
@@ -74,7 +97,7 @@ class PoseMapper:
         """
         Parameters
         ----------
-        input : str
+        input : dict
             The MOCAP Pose input string to convert into the MPII representation.
         Returns
         ----------
