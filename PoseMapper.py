@@ -54,18 +54,21 @@ class PoseMapper:
         str
            The converted output Pose string for the given input in the constructor specified output pose format.
         """
-        if (self.mapping == PoseMappingEnum.MOCAP_TO_OPENPOSE_MPI):
-            mocap_sequence = json.loads(input)
-            mpi_sequence = []
-            # For each pose in the keypoints Array
-            for pose in mocap_sequence["keypoints"]:
-                # Accessing the actual keypoint through the timestamp object key
-                for timestamp in pose:
-                    mocap_parts_positions = pose[timestamp]
-                    mpi_parts_positions = self.map_mocap_to_openpose_mpi(
-                        mocap_parts_positions)
-                    mpi_sequence.append({f'{timestamp}': mpi_parts_positions})
-            return mpi_sequence
+        return self.map_sequence_mocap_to_openpose_mpi(input)
+
+    def map_sequence_mocap_to_openpose_mpi(self, input: str) -> dict:
+        mocap_sequence = json.loads(input)
+        mpi_sequence = []
+        # For each pose in the keypoints Array
+        for pose in mocap_sequence["keypoints"]:
+            # Accessing the actual keypoint through the timestamp object key
+            for timestamp in pose:
+                mocap_parts_positions = pose[timestamp]
+                mpi_parts_positions = self.map_mocap_to_openpose_mpi(
+                    mocap_parts_positions)
+                # TODO: Check if we really need the timestamp here
+                mpi_sequence.append({f'{timestamp}': mpi_parts_positions})
+        return mpi_sequence
 
     def map_mocap_to_openpose_mpi(self, input: dict) -> dict:
         """
