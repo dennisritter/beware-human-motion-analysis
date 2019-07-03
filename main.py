@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
 from PoseMapper import PoseMapper
 from PoseMapper import PoseMappingEnum
 
@@ -21,11 +22,35 @@ MOCAP_TESTPOSE = """{
     "LeftShoulder": "0.1544218, 0.05747554, 0.8311753",
     "Head": "0.02427456, 0.2437453, 0.7632803"
 }"""
+MOCAP_SEQUENCE = ""
+
+with open('example.json', 'r') as myfile:
+    MOCAP_SEQUENCE = myfile.read()
 
 mocap_opmpi_mapper = PoseMapper(PoseMappingEnum.MOCAP_TO_OPENPOSE_MPI)
 # Convert mocap json string Positions to dictionary with openpose MPI postions
-pose = mocap_opmpi_mapper.map(MOCAP_TESTPOSE)
+sequence = mocap_opmpi_mapper.map(MOCAP_SEQUENCE)
+# Create 3d Array storing keypoints for each part by their Mapped index
+# Visualization of the arrays structure:
+# [
+#   [[part-i.x, part-i.y, part-i.z], [part-i.x, part-i.y, part-i.z], [part-i.x, part-i.y, part-i.z]],
+#   [[part-i+1.x, part-i+1.y, part-i+1.z], [part-i+1.x, part-i+1.y, part-i+1.z], [part-i+1.x, part-i+1.y, part-i+1.z]],
+#   ...
+# ]
+sequence_arr = []
+for ele in range(len(PoseMapper.OPENPOSE_MPI_BODY_PARTS) - 1):
+    sequence_arr.append([])
 
+for pose in sequence:
+    for timestamp in pose:
+        for part in pose[timestamp]:
+            sequence_arr[PoseMapper.OPENPOSE_MPI_BODY_PARTS[part]].append(
+                [pose[timestamp][part]["x"], pose[timestamp][part]["y"], pose[timestamp][part]["z"]])
+
+sequence_arr = np.array(sequence_arr)
+# print(np.shape(sequence_arr))
+print(sequence_arr)
+"""
 fig = plt.figure()
 ax = plt.axes(projection='3d')
 ax.set_xlabel('X Label')
@@ -35,3 +60,4 @@ for key in pose:
     ax.scatter3D(pose[key]["x"], pose[key]["y"], pose[key]["z"])
 
 plt.show()
+"""
