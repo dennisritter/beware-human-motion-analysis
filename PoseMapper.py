@@ -2,29 +2,18 @@ from enum import Enum
 import json
 from Sequence import Sequence
 
-# TODO: Optimize returned values
-# TODO: Implement Sequence class
-# {
-#   body_parts: ["Head", "Neck", "RShoulder", "RElbow", ...],
-#   body_pairs: [["Head", "Neck"], ["Neck", "RShoulder"], ["RShoulder", "RElbow"], ["RElbow", "RWrist"], ...],
-#   positions: [
-#                 [[part-i.x, part-i.y, part-i.z], [part-i.x, part-i.y, part-i.z], [part-i.x, part-i.y, part-i.z]],
-#                 [[part-i+1.x, part-i+1.y, part-i+1.z], [part-i+1.x, part-i+1.y, part-i+1.z], [part-i+1.x, part-i+1.y, part-i+1.z]],
-#                 ...
-#              ],
-#   timestamps: [<someTimestamp>] -> Must be same size as arrays contained in positions (num_keypoints == num_timestamps)
-# }
-
 
 class PoseMappingEnum(Enum):
     MOCAP = 1
 
 
 class PoseMapper:
+    # TODO: Remove?
     OPENPOSE_MPI_BODY_PARTS = {"Head": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
                                "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
                                "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "Chest": 14,
                                "Background": 15}
+    # TODO: Remove?
     OPENPOSE_MPI_PAIRS = [["Head", "Neck"],
                           ["Neck", "RShoulder"],
                           ["RShoulder", "RElbow"],
@@ -45,7 +34,7 @@ class PoseMapper:
         Parameters
         ----------
         mapping : PoseMappingEnum
-            A PoseMapping Enumeration member defining input/output format of the mapper.
+            A PoseMapping Enumeration member defining input format of the PoseMapper instance.
 
         Returns
         ----------
@@ -62,16 +51,26 @@ class PoseMapper:
         Parameters
         ----------
         input : str
-            The Pose input string to convert into the constructor specified output.
+            The motion sequence input string to convert.
         Returns
         ----------
-        dict
-           The converted output Pose dictionary for the given input in the constructor specified output pose format.
+        Sequence
+           The Sequence Object instance representing the motion sequence of the input string.
         """
         if (self.mapping == PoseMappingEnum.MOCAP):
             return self.map_sequence_mocap(input)
 
     def map_sequence_mocap(self, input: str) -> Sequence:
+        """
+        Parameters
+        ----------
+        input : str
+            The mocap motion sequence input string to convert.
+        Returns
+        ----------
+        Sequence
+           The Sequence Object instance representing the motion sequence of the input string.
+        """
         mocap_sequence = json.loads(input)
         body_parts = []
         positions = []
