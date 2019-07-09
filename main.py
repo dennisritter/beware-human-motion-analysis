@@ -14,7 +14,7 @@ sequence = mocap_opmpi_mapper.map(MOCAP_SEQUENCE)
 print(sequence.positions)
 print(sequence.timestamps)
 print(sequence.body_parts)
-"""
+
 # TODO: Find method to plot one graph visualizing a motion of multiple keypoints
 # Plotting Lines of the motions
 fig = plt.figure()
@@ -23,13 +23,12 @@ ax.set_xlabel('X Label')
 ax.set_ylabel('Y Label')
 ax.set_zlabel('Z Label')
 # Plot movement of all parts stored in array
-for i in range(len(sequence_arr)):
+for i in range(len(sequence.body_parts)):
     px, py, pz = [], [], []
-    px = sequence_arr[i][:, 0]
-    py = sequence_arr[i][:, 1]
-    pz = sequence_arr[i][:, 2]
+    px = sequence.positions[i][:, 0]
+    py = sequence.positions[i][:, 1]
+    pz = sequence.positions[i][:, 2]
     ax.plot(px, py, pz, label=list(
-        PoseMapper.OPENPOSE_MPI_BODY_PARTS.keys())[i])
+        sequence.body_parts)[i])
 ax.legend()
 plt.show()
-"""

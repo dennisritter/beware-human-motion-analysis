@@ -1,5 +1,6 @@
 from enum import Enum
 import json
+import numpy
 from Sequence import Sequence
 
 
@@ -71,10 +72,18 @@ class PoseMapper:
         Sequence
            The Sequence Object instance representing the motion sequence of the input string.
         """
+        MOCAP_BODY_PARTS = {"Head": 0, "Neck": 1, "RightShoulder": 2, "RightElbow": 3, "RightWrist": 4,
+                            "LeftShoulder": 5, "LeftElbow": 6, "LeftWrist": 7, "RightHip": 8, "RightKnee": 9,
+                            "RightAnkle": 10, "LeftHip": 11, "LeftKnee": 12, "LeftAnkle": 13, "Torso": 14, "Waist": 15, }
         mocap_sequence = json.loads(input)
-        body_parts = []
+        body_parts = numpy.empty(len(MOCAP_BODY_PARTS), dtype=object)
         positions = []
         timestamps = []
+
+        # Add Body Parts to body_parts array in the correct order
+        for (key, item) in MOCAP_BODY_PARTS.items():
+            body_parts[item] = key
+            positions.append([])
 
         # For each keypoint in the keypoints Array
         for keypoint in mocap_sequence["keypoints"]:
@@ -83,15 +92,11 @@ class PoseMapper:
                 # Store timestamp in timestamp List
                 timestamps.append(float(timestamp))
                 # Append 1st level list to positions
-                positions.append([])
                 part_positions = keypoint[timestamp]
                 for body_part in part_positions:
-                    # Add all body parts if not added already
-                    if (len(body_parts) < len(part_positions.keys())):
-                        body_parts.append(body_part)
                     # Append position in [x_pos, y_pos, z_pos] format to the 1st level last list (the last timestamp index)
                     position = part_positions[body_part].split(",")
-                    positions[len(positions)-1].append([float(position[0]), float(
+                    positions[MOCAP_BODY_PARTS[body_part]].append([float(position[0]), float(
                         position[1]), float(position[2])])
 
         return Sequence(body_parts, positions, timestamps)
