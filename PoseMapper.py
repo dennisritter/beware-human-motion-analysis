@@ -1,11 +1,12 @@
 from enum import Enum
 import json
+from Sequence import Sequence
 
 # TODO: Optimize returned values
 # TODO: Implement Sequence class
 # {
 #   body_parts: ["Head", "Neck", "RShoulder", "RElbow", ...],
-#   body_pairs: [[["Head", "Neck"], ["Neck", "RShoulder"], ["RShoulder", "RElbow"], ["RElbow", "RWrist"], ...],
+#   body_pairs: [["Head", "Neck"], ["Neck", "RShoulder"], ["RShoulder", "RElbow"], ["RElbow", "RWrist"], ...],
 #   positions: [
 #                 [[part-i.x, part-i.y, part-i.z], [part-i.x, part-i.y, part-i.z], [part-i.x, part-i.y, part-i.z]],
 #                 [[part-i+1.x, part-i+1.y, part-i+1.z], [part-i+1.x, part-i+1.y, part-i+1.z], [part-i+1.x, part-i+1.y, part-i+1.z]],
@@ -16,7 +17,7 @@ import json
 
 
 class PoseMappingEnum(Enum):
-    MOCAP_TO_OPENPOSE_MPI = 1
+    MOCAP = 1
 
 
 class PoseMapper:
@@ -56,7 +57,7 @@ class PoseMapper:
                 "'mapping' parameter must be a member of 'PoseMapping' enumeration.")
         self.mapping = mapping
 
-    def map(self, input: str) -> dict:
+    def map(self, input: str) -> Sequence:
         """
         Parameters
         ----------
@@ -67,69 +68,31 @@ class PoseMapper:
         dict
            The converted output Pose dictionary for the given input in the constructor specified output pose format.
         """
-        return self.map_sequence_mocap_to_openpose_mpi(input)
+        if (self.mapping == PoseMappingEnum.MOCAP):
+            return self.map_sequence_mocap(input)
 
-    def map_sequence_mocap_to_openpose_mpi(self, input: str) -> dict:
-        """
-        Parameters
-        ----------
-        input : str
-            The sequence mocap input string to convert into a openpose MPI output dictionary.
-        Returns
-        ----------
-        dict
-           The converted output Pose dictionary for the given input in the constructor specified output pose format.
-        """
+    def map_sequence_mocap(self, input: str) -> Sequence:
         mocap_sequence = json.loads(input)
-        mpi_sequence = []
-        # For each pose in the keypoints Array
-        for pose in mocap_sequence["keypoints"]:
-            # Accessing the actual keypoint through the timestamp object key
-            for timestamp in pose:
-                mocap_parts_positions = pose[timestamp]
-                mpi_parts_positions = self.map_mocap_to_openpose_mpi(
-                    mocap_parts_positions)
-                # TODO: Check if we really need the timestamp here
-                mpi_sequence.append({f'{timestamp}': mpi_parts_positions})
-        return mpi_sequence
+        body_parts = []
+        positions = []
+        timestamps = []
 
-    def map_mocap_to_openpose_mpi(self, input: dict) -> dict:
-        """
-        Parameters
-        ----------
-        input : dict
-            The MOCAP Pose input string to convert into the MPII representation.
-        Returns
-        ----------
-        dict
-           A MPII pose representation dictionary of the MOCAP input pose string.
-        """
-        mocap_parts_positions = input
-        # For each Body Part
-        for key in mocap_parts_positions:
-            part_position = mocap_parts_positions[key].split(',')
-            part_position_dict = {}
-            # Convert part position Array<str> to Dictionary containing float values
-            part_position_dict['x'] = float(part_position[0])
-            part_position_dict['y'] = float(part_position[1])
-            part_position_dict['z'] = float(part_position[2])
-            mocap_parts_positions[key] = part_position_dict
-        # The Output Dictionary
-        op_mpi_dict = {
-            "RAnkle": mocap_parts_positions["RightAnkle"],
-            "RKnee": mocap_parts_positions["RightKnee"],
-            "RHip": mocap_parts_positions["RightHip"],
-            "LHip": mocap_parts_positions["LeftHip"],
-            "LKnee": mocap_parts_positions["LeftKnee"],
-            "LAnkle": mocap_parts_positions["LeftAnkle"],
-            "Chest": mocap_parts_positions["Torso"],
-            "Neck": mocap_parts_positions["Neck"],
-            "Head": mocap_parts_positions["Head"],
-            "RWrist": mocap_parts_positions["RightWrist"],
-            "RElbow": mocap_parts_positions["RightElbow"],
-            "RShoulder": mocap_parts_positions["RightShoulder"],
-            "LShoulder": mocap_parts_positions["LeftShoulder"],
-            "LElbow": mocap_parts_positions["LeftElbow"],
-            "LWrist": mocap_parts_positions["LeftWrist"],
-        }
-        return op_mpi_dict
+        # For each keypoint in the keypoints Array
+        for keypoint in mocap_sequence["keypoints"]:
+            # Accessing the actual keypoint through the timestamp object key
+            for timestamp in keypoint:
+                # Store timestamp in timestamp List
+                timestamps.append(float(timestamp))
+                # Append 1st level list to positions
+                positions.append([])
+                part_positions = keypoint[timestamp]
+                for body_part in part_positions:
+                    # Add all body parts if not added already
+                    if (len(body_parts) < len(part_positions.keys())):
+                        body_parts.append(body_part)
+                    # Append position in [x_pos, y_pos, z_pos] format to the 1st level last list (the last timestamp index)
+                    position = part_positions[body_part].split(",")
+                    positions[len(positions)-1].append([float(position[0]), float(
+                        position[1]), float(position[2])])
+
+        return Sequence(body_parts, positions, timestamps)
