@@ -11,6 +11,9 @@ with open('data/example.json', 'r') as myfile:
 mocap_opmpi_mapper = PoseMapper(PoseMappingEnum.MOCAP)
 # Convert mocap json string Positions to dictionary with openpose MPI postions
 sequence = mocap_opmpi_mapper.map(MOCAP_SEQUENCE)
+print(sequence.positions)
+print(sequence.timestamps)
+print(sequence.body_parts)
 """
 # TODO: Find method to plot one graph visualizing a motion of multiple keypoints
 # Plotting Lines of the motions
