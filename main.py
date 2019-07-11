@@ -39,7 +39,18 @@ def plot_example_mocap_sequence():
 
 
 def plot_PCA():
-    PCA.run()
+    MOCAP_SEQUENCE = ""
+    with open('data/example.json', 'r') as myfile:
+        MOCAP_SEQUENCE = myfile.read()
+
+    mocap_opmpi_mapper = PoseMapper(PoseMappingEnum.MOCAP)
+    # Convert mocap json string Positions to dictionary with openpose MPI postions
+    sequence = mocap_opmpi_mapper.map(MOCAP_SEQUENCE)
+    # print(sequence.positions)
+    # print(sequence.timestamps)
+    # print(sequence.body_parts)
+
+    PCA.run(sequence)
 
 
 plot_PCA()

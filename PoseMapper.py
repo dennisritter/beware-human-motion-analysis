@@ -99,4 +99,16 @@ class PoseMapper:
                     positions[MOCAP_BODY_PARTS[body_part]].append([float(position[0]), float(
                         position[1]), float(position[2])])
 
+        positions = numpy.array(positions)
+        timestamps = numpy.array(timestamps)
+        body_parts = numpy.array(body_parts)
+
+        # Center Positions by subtracting the mean of each coordinate
+        positions[:, :,
+                  0] -= numpy.mean(numpy.ndarray.flatten(positions[:, :, 0]))
+        positions[:, :,
+                  1] -= numpy.mean(numpy.ndarray.flatten(positions[:, :, 1]))
+        positions[:, :,
+                  2] -= numpy.mean(numpy.ndarray.flatten(positions[:, :, 2]))
+
         return Sequence(body_parts, positions, timestamps)

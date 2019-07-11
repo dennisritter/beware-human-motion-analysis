@@ -1,3 +1,4 @@
+from sklearn.datasets import load_digits
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -6,6 +7,35 @@ from sklearn.decomposition import PCA
 sns.set()
 
 
+def run(data):
+    X = data.positions  # Dimensions: num_body_parts * num_keypoints * xyz
+    X_flat = np.ndarray.flatten(X).reshape(X.shape[1], -1)
+    print(f"X: {X}")
+    print(f"X.shape: {np.shape(X)}")
+    print(f"X_flat: {X_flat}")
+    print(f"X_flat.shape: {np.shape(X_flat)}")
+
+    # Calc PCs
+    pca = PCA(n_components=3)
+    xPCA = pca.fit_transform(X_flat)
+    xPCA_inverse = pca.inverse_transform(xPCA)
+
+    # Plotting
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    # Plot pose
+    ax.scatter(X[:, :, 0], X[:, :, 1], X[:, :, 2], marker=",", c="blue")
+    # Plot components
+    print(f"xPCA: {xPCA}")
+    #ax.scatter(xPCA[:, 0], xPCA[:, 1], xPCA[:, 2], marker='.', c="red")
+    # Plot components inverse
+    #ax.scatter(xPCA_inverse[:, 0], xPCA_inverse[:, 1], xPCA_inverse[:, 2])
+    ax.axis('square')
+    plt.show()
+
+
+# EXAMPLE 1
+"""
 def draw_vector(v0, v1, ax=None):
     ax = ax or plt.gca()
     arrowprops = dict(arrowstyle='->',
@@ -31,7 +61,8 @@ pca.fit(X)
 # plot data
 plt.scatter(X[:, 0], X[:, 1], alpha=0.2)
 for length, vector in zip(pca.explained_variance_, pca.components_):
-    v = vector * np.sqrt(length)
+    v = vector * np.sqrt(length) * 2
     draw_vector(pca.mean_, pca.mean_ + v)
 plt.axis('equal')
 plt.show()
+"""

@@ -8,6 +8,9 @@ class Sequence:
         # Example: ["Head", "Neck", "RShoulder", "RElbow", ...]
         self.body_parts = numpy.array(body_parts)
         # Defines positions of each bodypart
+        # 1. Dimension = Bodypart
+        # 2. Dimension = Time
+        # 3. Dimension = x, y, z
         # Example: [
         #             [[part-i.x, part-i.y, part-i.z], [part-i.x, part-i.y, part-i.z], [part-i.x, part-i.y, part-i.z]],
         #             [[part-i+1.x, part-i+1.y, part-i+1.z], [part-i+1.x, part-i+1.y, part-i+1.z], [part-i+1.x, part-i+1.y, part-i+1.z]],
