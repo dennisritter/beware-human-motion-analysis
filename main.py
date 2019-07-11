@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-
+import seaborn as sns
 from PoseMapper import PoseMapper
 from PoseMapper import PoseMappingEnum
-
 import PCA
+
+sns.set()
 
 
 def plot_example_mocap_sequence():
@@ -46,11 +47,21 @@ def plot_PCA():
     mocap_opmpi_mapper = PoseMapper(PoseMappingEnum.MOCAP)
     # Convert mocap json string Positions to dictionary with openpose MPI postions
     sequence = mocap_opmpi_mapper.map(MOCAP_SEQUENCE)
-    # print(sequence.positions)
-    # print(sequence.timestamps)
-    # print(sequence.body_parts)
 
-    PCA.run(sequence)
+    xPCA = PCA.calc_pc(sequence)
+    # Plotting Sequence
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    # Plot original sequence (joint positions for all bodyparts and all keypoints)
+    # ax.scatter(X[:, :, 0], X[:, :, 1], X[:, :, 2], marker=",", c="blue")
+    # Visualize PCs
+    ax.scatter(xPCA[:, 0], xPCA[:, 1], xPCA[:, 2], marker='.', c="red")
+    # Connect points from PCs to 3D-Line
+    ax.plot(xPCA[:, 0], xPCA[:, 1], xPCA[:, 2], c="blue")
+    # Plot PCs inverse (reconstruct original sequence from PCs)
+    # ax.scatter(xPCA_inverse[:, 0], xPCA_inverse[:, 1], xPCA_inverse[:, 2])
+    ax.axis('square')
+    plt.show()
 
 
 plot_PCA()
