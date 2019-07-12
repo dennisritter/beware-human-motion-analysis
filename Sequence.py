@@ -3,11 +3,15 @@ import numpy
 
 class Sequence:
 
-    def __init__(self, body_parts: list, positions: list, timestamps: list):
+    def __init__(self, body_parts: list, positions: list, timestamps: list, name: str = 'sequence'):
+        self.name = name
         # Number, order and label of tracked body parts
         # Example: ["Head", "Neck", "RShoulder", "RElbow", ...]
         self.body_parts = numpy.array(body_parts)
         # Defines positions of each bodypart
+        # 1. Dimension = Bodypart
+        # 2. Dimension = Time
+        # 3. Dimension = x, y, z
         # Example: [
         #             [[part-i.x, part-i.y, part-i.z], [part-i.x, part-i.y, part-i.z], [part-i.x, part-i.y, part-i.z]],
         #             [[part-i+1.x, part-i+1.y, part-i+1.z], [part-i+1.x, part-i+1.y, part-i+1.z], [part-i+1.x, part-i+1.y, part-i+1.z]],
