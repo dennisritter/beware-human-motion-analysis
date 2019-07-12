@@ -4,8 +4,8 @@ import seaborn as sns
 from PoseMapper import PoseMapper
 from PoseMapper import PoseMappingEnum
 import numpy as np
-import PCA
 import Sequence
+import distance
 
 sns.set()
 
@@ -41,37 +41,19 @@ def plot_example_mocap_sequence():
     plt.show()
 
 
-def plot_pca(sequence: Sequence):
-    """
-    Plots Three components of the PCA for the given Sequence.
-    """
-    xPCA = PCA.calc_pc(sequence)
-    # Plotting Sequence
-    fig = plt.figure()
-    ax = plt.axes(projection='3d')
-    # Plot original sequence (joint positions for all bodyparts and all keypoints)
-    # ax.scatter(X[:, :, 0], X[:, :, 1], X[:, :, 2], marker=",", c="blue")
-    # Visualize PCs
-    ax.scatter(xPCA[:, 0], xPCA[:, 1], xPCA[:, 2], marker='.', c="red")
-    # Connect points from PCs to 3D-Line
-    ax.plot(xPCA[:, 0], xPCA[:, 1], xPCA[:, 2], c="blue", label=sequence.name)
-    # Plot PCs inverse (reconstruct original sequence from PCs)
-    # ax.scatter(xPCA_inverse[:, 0], xPCA_inverse[:, 1], xPCA_inverse[:, 2])
-    ax.axis('square')
-    ax.legend()
-    plt.show()
-
-
-def plot_pca_compare(seqs: list):
+def plot_pcas(seqs: list):
     """
     Plots all sequences of the given list.
+    Parameters
+    ----------
+    seqs : list<Sequence>
+        A list of sequences to plot
     """
-
-    # Plotting Sequence
+    # Plotting Sequences
     fig = plt.figure(figsize=(10, 10), dpi=80)
     ax = plt.axes(projection='3d')
     for sequence in seqs:
-        xPCA = PCA.calc_pc(sequence)
+        xPCA = sequence.get_pcs(num_components=3)
         # Visualize PCs
         ax.scatter(xPCA[:, 0], xPCA[:, 1], xPCA[:, 2], marker='.', c="red")
         # Connect points from PCs to 3D-Line
@@ -96,4 +78,10 @@ seq2 = mocap_opmpi_mapper.map(mocap_seq2, 'arms-front')
 seq1.positions = seq1.positions[:, :150, :]
 seq2.positions = seq2.positions[:, :150, :]
 
-plot_pca_compare([seq1, seq2])
+# Calculate Hausdorff distance between two sequences' principal component graphs
+u = seq1.positions_2d
+v = seq2.positions_2d
+print(distance.hausdorff(u, v))
+
+
+plot_pcas([seq1, seq2])
