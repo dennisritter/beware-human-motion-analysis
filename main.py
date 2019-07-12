@@ -65,23 +65,26 @@ def plot_pcas(seqs: list):
 
 
 with open('data/arms-side.json', 'r') as myfile:
-    mocap_seq2 = myfile.read()
-with open('data/arms-front.json', 'r') as myfile:
     mocap_seq1 = myfile.read()
+with open('data/arms-front.json', 'r') as myfile:
+    mocap_seq2 = myfile.read()
+with open('data/squat.json', 'r') as myfile:
+    mocap_seq3 = myfile.read()
 
 # Get PoseMapper instance for MOCAP sequences in json
 mocap_opmpi_mapper = PoseMapper(PoseMappingEnum.MOCAP)
 # Convert mocap json string Positions to Sequence Object
 seq1 = mocap_opmpi_mapper.map(mocap_seq1, 'arms-side')
 seq2 = mocap_opmpi_mapper.map(mocap_seq2, 'arms-front')
+seq3 = mocap_opmpi_mapper.map(mocap_seq3, 'squat')
 # Cut sequence to same length -> 150 Keypoints in this case
 seq1.positions = seq1.positions[:, :150, :]
 seq2.positions = seq2.positions[:, :150, :]
+seq3.positions = seq3.positions[:, :150, :]
 
 # Calculate Hausdorff distance between two sequences' principal component graphs
-u = seq1.positions_2d
-v = seq2.positions_2d
+u = seq2.positions_2d
+v = seq3.positions_2d
 print(distance.hausdorff(u, v))
 
-
-plot_pcas([seq1, seq2])
+plot_pcas([seq2, seq3])
