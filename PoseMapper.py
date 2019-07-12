@@ -47,7 +47,7 @@ class PoseMapper:
                 "'mapping' parameter must be a member of 'PoseMapping' enumeration.")
         self.mapping = mapping
 
-    def map(self, input: str) -> Sequence:
+    def map(self, input: str, name: str = 'sequence') -> Sequence:
         """
         Parameters
         ----------
@@ -59,9 +59,9 @@ class PoseMapper:
            The Sequence Object instance representing the motion sequence of the input string.
         """
         if (self.mapping == PoseMappingEnum.MOCAP):
-            return self.map_sequence_mocap(input)
+            return self.map_sequence_mocap(input, name=name)
 
-    def map_sequence_mocap(self, input: str) -> Sequence:
+    def map_sequence_mocap(self, input: str, name='sequence') -> Sequence:
         """
         Parameters
         ----------
@@ -111,4 +111,4 @@ class PoseMapper:
         positions[:, :,
                   2] -= numpy.mean(numpy.ndarray.flatten(positions[:, :, 2]))
 
-        return Sequence(body_parts, positions, timestamps)
+        return Sequence(body_parts, positions, timestamps, name=name)
