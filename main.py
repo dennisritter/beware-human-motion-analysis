@@ -77,14 +77,18 @@ mocap_opmpi_mapper = PoseMapper(PoseMappingEnum.MOCAP)
 seq1 = mocap_opmpi_mapper.map(mocap_seq1, 'arms-side')
 seq2 = mocap_opmpi_mapper.map(mocap_seq2, 'arms-front')
 seq3 = mocap_opmpi_mapper.map(mocap_seq3, 'squat')
-# Cut sequence to same length -> 150 Keypoints in this case
-seq1.positions = seq1.positions[:, :150, :]
-seq2.positions = seq2.positions[:, :150, :]
-seq3.positions = seq3.positions[:, :150, :]
+
 
 # Calculate Hausdorff distance between two sequences' principal component graphs
-u = seq2.positions_2d
-v = seq3.positions_2d
-print(distance.hausdorff(u, v))
+u = seq1.get_pcs()
+v = seq2.get_pcs()
+print(u)
+# Cut sequence to same length -> 150 Keypoints in this case
+print(f"Hausdorff distance: {distance.hausdorff(u, v)[0]}")
+# TODO: Check how to prepare parametersfor dtw function
+# TODO: Consider usage of another dtw function module
+dtw_distance, dtw_path = distance.fastdtw(np.ndarray.flatten(
+    seq1.get_pcs()), np.ndarray.flatten(seq2.get_pcs()))
+print(f"Dynamic Time Warping distance: {dtw_distance}")
 
 plot_pcas([seq2, seq3])
