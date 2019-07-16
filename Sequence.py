@@ -36,9 +36,6 @@ class Sequence:
         Returns the positions for all keypoints in 
         shape: (num_keypoints, num_bodyparts * xyz).
         """
-        print("2d seq positions")
-        print(numpy.ndarray.flatten(self.positions).reshape(
-            self.positions.shape[1], -1))
         return numpy.ndarray.flatten(self.positions).reshape(self.positions.shape[1], -1)
 
     def get_pcs(self, num_components: int = 3):
