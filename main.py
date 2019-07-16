@@ -65,19 +65,22 @@ def plot_pcas(seqs: list):
     plt.show()
 
 
-with open('data/arms-side.json', 'r') as myfile:
+with open('data/squat_1/complete-session.json', 'r') as myfile:
     mocap_seq1 = myfile.read()
-with open('data/arms-front.json', 'r') as myfile:
+with open('data/squat_2/complete-session.json', 'r') as myfile:
     mocap_seq2 = myfile.read()
-with open('data/squat.json', 'r') as myfile:
+with open('data/squat_false/complete-session.json', 'r') as myfile:
     mocap_seq3 = myfile.read()
+with open('data/no_squat/complete-session.json', 'r') as myfile:
+    mocap_seq4 = myfile.read()
 
 # Get PoseMapper instance for MOCAP sequences in json
 mocap_opmpi_mapper = PoseMapper(PoseMappingEnum.MOCAP)
 # Convert mocap json string Positions to Sequence Object
-seq1 = mocap_opmpi_mapper.map(mocap_seq1, 'arms-side')
-seq2 = mocap_opmpi_mapper.map(mocap_seq2, 'arms-front')
-seq3 = mocap_opmpi_mapper.map(mocap_seq3, 'squat')
+seq1 = mocap_opmpi_mapper.map(mocap_seq1, 'squat_1')
+seq2 = mocap_opmpi_mapper.map(mocap_seq2, 'squat_2')
+seq3 = mocap_opmpi_mapper.map(mocap_seq3, 'squat_false')
+seq4 = mocap_opmpi_mapper.map(mocap_seq3, 'no_squat')
 
 
 # Calculate Hausdorff distance between two sequences' principal component graphs
