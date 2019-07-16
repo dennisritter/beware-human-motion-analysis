@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 from sklearn.decomposition import PCA
 
 
@@ -8,7 +8,7 @@ class Sequence:
         self.name = name
         # Number, order and label of tracked body parts
         # Example: ["Head", "Neck", "RShoulder", "RElbow", ...]
-        self.body_parts = numpy.array(body_parts)
+        self.body_parts = np.array(body_parts)
         # Defines positions of each bodypart
         # TODO: Change to: Time, Bodypart, xyz
         # 1. Dimension = Time
@@ -20,10 +20,10 @@ class Sequence:
         #           ...
         #          ]
         # shape: (num_body_parts, num_keypoints, xyz)
-        self.positions = numpy.array(positions)
+        self.positions = np.array(positions)
         # Timestamps for when the positions have been tracked
         # Example: [<someTimestamp1>, <someTimestamp2>, <someTimestamp3>, ...]
-        self.timestamps = numpy.array(timestamps)
+        self.timestamps = np.array(timestamps)
         """ We need this at some point, maybe
         # Skeleton connections between bodyparts
         # Example: [["Head", "Neck"], ["Neck", "RShoulder"], ["RShoulder", "RElbow"], ["RElbow", "RWrist"], ...],
@@ -34,9 +34,10 @@ class Sequence:
     def get_positions_2d(self):
         """
         Returns the positions for all keypoints in 
-        shape: (num_keypoints, num_bodyparts * xyz).
+        shape: (num_frames, num_bodyparts * xyz).
         """
-        return numpy.ndarray.flatten(self.positions).reshape(self.positions.shape[1], -1)
+
+        return np.reshape(self.positions, (self.positions.shape[0], -1))
 
     def get_pcs(self, num_components: int = 3):
         """

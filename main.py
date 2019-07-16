@@ -10,38 +10,6 @@ import distance
 # C:/Users/dennis/Anaconda3/Scripts/activate.bat
 sns.set()
 
-
-def plot_example_mocap_sequence():
-    MOCAP_SEQUENCE = ""
-    with open('data/example.json', 'r') as myfile:
-        MOCAP_SEQUENCE = myfile.read()
-
-    mocap_opmpi_mapper = PoseMapper(PoseMappingEnum.MOCAP)
-    # Convert mocap json string Positions to dictionary with openpose MPI postions
-    sequence = mocap_opmpi_mapper.map(MOCAP_SEQUENCE)
-    # print(sequence.positions)
-    # print(sequence.timestamps)
-    # print(sequence.body_parts)
-
-    # TODO: Find method to plot one graph visualizing a motion of multiple keypoints
-    # Plotting Lines of the motions --> Use PCA?
-    fig = plt.figure()
-    ax = plt.axes(projection='3d')
-    ax.set_xlabel('X Label')
-    ax.set_ylabel('Y Label')
-    ax.set_zlabel('Z Label')
-    # Plot movement of all parts stored in array
-    for i in range(len(sequence.body_parts)):
-        px, py, pz = [], [], []
-        px = sequence.positions[i][:, 0]
-        py = sequence.positions[i][:, 1]
-        pz = sequence.positions[i][:, 2]
-        ax.plot(px, py, pz, label=list(
-            sequence.body_parts)[i])
-    ax.legend()
-    plt.show()
-
-
 def plot_pcas(seqs: list):
     """
     Plots all sequences of the given list.
@@ -67,7 +35,7 @@ def plot_pcas(seqs: list):
 
 with open('data/squat_1/complete-session.json', 'r') as myfile:
     mocap_seq1 = myfile.read()
-with open('data/squat_2/complete-session.json', 'r') as myfile:
+with open('data/squat_4/complete-session.json', 'r') as myfile:
     mocap_seq2 = myfile.read()
 with open('data/squat_false/complete-session.json', 'r') as myfile:
     mocap_seq3 = myfile.read()
@@ -86,8 +54,8 @@ seq4 = mocap_opmpi_mapper.map(mocap_seq4, 'no_squat')
 example_seq = mocap_opmpi_mapper.map(example, 'example')
 
 # Calculate Hausdorff distance between two sequences' principal component graphs
-u = seq1.get_pcs()
-v = seq2.get_pcs()
+u = seq2.get_pcs()
+v = seq3.get_pcs()
 # Cut sequence to same length -> 150 Keypoints in this case
 print(f"Hausdorff distance: {distance.hausdorff(u, v)[0]}")
 # TODO: Check how to prepare parametersfor dtw function
