@@ -10,13 +10,14 @@ class Sequence:
         # Example: ["Head", "Neck", "RShoulder", "RElbow", ...]
         self.body_parts = numpy.array(body_parts)
         # Defines positions of each bodypart
-        # 1. Dimension = Bodypart
-        # 2. Dimension = Time
+        # TODO: Change to: Time, Bodypart, xyz
+        # 1. Dimension = Time
+        # 2. Dimension = Bodypart
         # 3. Dimension = x, y, z
         # Example: [
-        #             [[part-i.x, part-i.y, part-i.z], [part-i.x, part-i.y, part-i.z], [part-i.x, part-i.y, part-i.z]],
-        #             [[part-i+1.x, part-i+1.y, part-i+1.z], [part-i+1.x, part-i+1.y, part-i+1.z], [part-i+1.x, part-i+1.y, part-i+1.z]],
-        #             ...
+        #           [[f1_bp1_x, f1_bp1_x, f1_bp1_x], [f1_bp2_x, f1_bp2_x, f1_bp2_x], ...],
+        #           [[f2_bp1_x, f2_bp1_x, f2_bp1_x], [f2_bp2_x, f2_bp2_x, f2_bp2_x], ...],
+        #           ...
         #          ]
         # shape: (num_body_parts, num_keypoints, xyz)
         self.positions = numpy.array(positions)
@@ -35,6 +36,9 @@ class Sequence:
         Returns the positions for all keypoints in 
         shape: (num_keypoints, num_bodyparts * xyz).
         """
+        print("2d seq positions")
+        print(numpy.ndarray.flatten(self.positions).reshape(
+            self.positions.shape[1], -1))
         return numpy.ndarray.flatten(self.positions).reshape(self.positions.shape[1], -1)
 
     def get_pcs(self, num_components: int = 3):
