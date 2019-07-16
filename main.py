@@ -73,6 +73,8 @@ with open('data/squat_false/complete-session.json', 'r') as myfile:
     mocap_seq3 = myfile.read()
 with open('data/no_squat/complete-session.json', 'r') as myfile:
     mocap_seq4 = myfile.read()
+with open('data/example/complete-session.json', 'r') as myfile:
+    example = myfile.read()
 
 # Get PoseMapper instance for MOCAP sequences in json
 mocap_opmpi_mapper = PoseMapper(PoseMappingEnum.MOCAP)
@@ -80,14 +82,12 @@ mocap_opmpi_mapper = PoseMapper(PoseMappingEnum.MOCAP)
 seq1 = mocap_opmpi_mapper.map(mocap_seq1, 'squat_1')
 seq2 = mocap_opmpi_mapper.map(mocap_seq2, 'squat_2')
 seq3 = mocap_opmpi_mapper.map(mocap_seq3, 'squat_false')
-seq4 = mocap_opmpi_mapper.map(mocap_seq3, 'no_squat')
-
+seq4 = mocap_opmpi_mapper.map(mocap_seq4, 'no_squat')
+example_seq = mocap_opmpi_mapper.map(example, 'example')
 
 # Calculate Hausdorff distance between two sequences' principal component graphs
 u = seq1.get_pcs()
 v = seq2.get_pcs()
-print(np.shape(seq1.positions))
-print(np.shape(u))
 # Cut sequence to same length -> 150 Keypoints in this case
 print(f"Hausdorff distance: {distance.hausdorff(u, v)[0]}")
 # TODO: Check how to prepare parametersfor dtw function
