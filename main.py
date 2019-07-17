@@ -9,6 +9,7 @@ import distance
 import tslearn.metrics as ts
 
 sns.set()
+sns.set_style(style='whitegrid')
 
 
 def plot_dtw_sin_cos():
@@ -34,7 +35,7 @@ def plot_dtw_sin_cos():
     print(f"dtw_distance: {dtw_distance}")
 
     ### Plotting ###
-    fig = plt.figure(figsize=plt.figaspect(1)*2)
+    fig = plt.figure(figsize=plt.figaspect(1)*2, edgecolor='black')
     ax = fig.add_subplot(2, 2, 1, projection='3d')
 
     path_x = np.zeros(len(dtw_path[0]))
