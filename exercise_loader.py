@@ -37,6 +37,3 @@ def validate_exercise(ex: dict):
         if opt_key not in ex:
             warnings.warn(f"The Exercise file does not contain the key '{opt_key}'. Using default value.")
     return is_valid
-
-
-exercise = load('data/exercises/squat.json')
