@@ -12,6 +12,44 @@ import tslearn.metrics as ts
 sns.set()
 
 
+def plot_dtw_sin_cos():
+    sin_x = np.arange(0, 10, 0.1)
+    sin_y = np.sin(sin_x)
+    sin_z = sin_y*np.sin(sin_x)
+    cos_x = np.arange(0, 10, 0.1)
+    cos_y = np.cos(cos_x)
+    cos_z = cos_y*np.cos(cos_x)
+    cos = np.zeros((len(cos_x), 3))
+    sin = np.zeros((len(sin_x), 3))
+
+    for i in range(len(cos)):
+        cos[i] = [cos_x[i], cos_y[i], cos_z[i]]
+    for i in range(len(sin)):
+        sin[i] = [sin_x[i], sin_y[i], sin_z[i]]
+
+    # dtw_distance, dtw_path = distance.fast_dtw(sin.any(), cos.any())
+    dtw_distance = ts.dtw(cos, sin)
+    dtw_path = ts.dtw_path(cos, sin)
+    print(f"dtw_distance: {dtw_distance}")
+    print(f"dtw_path: {dtw_path}")
+
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+
+    path_x = np.zeros(len(dtw_path[0]))
+    path_y = np.zeros(len(dtw_path[0]))
+    for i in range(len(dtw_path[0])):
+        path_x[i] = dtw_path[0][i][0]
+        path_y[i] = dtw_path[0][i][1]
+    ax.scatter(sin_x, sin_y, sin_z, c='red')
+    ax.scatter(cos_x, cos_y, cos_z, c='blue')
+
+    for i in range(len(dtw_path[0])):
+        ax.plot([cos[dtw_path[0][i][0]][0], sin[dtw_path[0][i][1]][0]], [cos[dtw_path[0][i][0]][1],
+                                                                         sin[dtw_path[0][i][1]][1]], [cos[dtw_path[0][i][0]][2], sin[dtw_path[0][i][1]][2]], c="green")
+    plt.show()
+
+
 def plot_pcas(seqs: list):
     """
     Plots all sequences of the given list.
@@ -69,39 +107,4 @@ print(f"Hausdorff distance: {distance.hausdorff(u, v)[0]}")
 
 plot_pcas([seq1, seq2])
 """
-
-sin_x = np.arange(0, 10, 0.1)
-sin_y = np.sin(sin_x)
-sin_z = sin_y*np.sin(sin_x)
-cos_x = np.arange(0, 10, 0.1)
-cos_y = np.cos(cos_x)
-cos_z = cos_y*np.cos(cos_x)
-cos = np.zeros((len(cos_x), 3))
-sin = np.zeros((len(sin_x), 3))
-
-for i in range(len(cos)):
-    cos[i] = [cos_x[i], cos_y[i], cos_z[i]]
-for i in range(len(sin)):
-    sin[i] = [sin_x[i], sin_y[i], sin_z[i]]
-
-# dtw_distance, dtw_path = distance.fast_dtw(sin.any(), cos.any())
-dtw_distance = ts.dtw(cos, sin)
-dtw_path = ts.dtw_path(cos, sin)
-print(dtw_distance)
-print(dtw_path)
-
-fig = plt.figure()
-ax = plt.axes(projection='3d')
-
-path_x = np.zeros(len(dtw_path[0]))
-path_y = np.zeros(len(dtw_path[0]))
-for i in range(len(dtw_path[0])):
-    path_x[i] = dtw_path[0][i][0]
-    path_y[i] = dtw_path[0][i][1]
-ax.scatter(sin_x, sin_y, sin_z, c='red')
-ax.scatter(cos_x, cos_y, cos_z, c='blue')
-
-for i in range(len(dtw_path[0])):
-    ax.plot([cos[dtw_path[0][i][0]][0], sin[dtw_path[0][i][1]][0]], [cos[dtw_path[0][i][0]][1],
-                                                                     sin[dtw_path[0][i][1]][1]], [cos[dtw_path[0][i][0]][2], sin[dtw_path[0][i][1]][2]], c="green")
-plt.show()
+plot_dtw_sin_cos()
