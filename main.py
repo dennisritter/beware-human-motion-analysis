@@ -70,7 +70,7 @@ print(f"Hausdorff distance: {distance.hausdorff(u, v)[0]}")
 plot_pcas([seq1, seq2])
 """
 
-sin_x = np.arange(0, 10, 0.25)
+sin_x = np.arange(0, 10, 0.1)
 sin_y = np.sin(sin_x)
 sin_z = sin_y*np.sin(sin_x)
 cos_x = np.arange(0, 10, 0.1)
