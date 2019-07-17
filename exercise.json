@@ -3,7 +3,7 @@
   "sets": 3,
   "duration": 30,
   "iterations": [20, 30],
-  "pause": 60,
+  "pause": 15,
   "angles": {
     "start": {
       "hip": {
