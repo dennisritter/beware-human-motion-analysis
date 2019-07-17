@@ -122,9 +122,9 @@ def plot_pcas(seqs: list):
 
 
 # Load Sequence json files
-with open('data/squat_1/complete-session.json', 'r') as myfile:
+with open('data/sequences/squat_1/complete-session.json', 'r') as myfile:
     mocap_seq1 = myfile.read()
-with open('data/squat_3/complete-session.json', 'r') as myfile:
+with open('data/sequences/squat_3/complete-session.json', 'r') as myfile:
     mocap_seq2 = myfile.read()
 # Get PoseMapper instance for MOCAP sequences in json
 mocap_opmpi_mapper = PoseMapper(PoseMappingEnum.MOCAP)

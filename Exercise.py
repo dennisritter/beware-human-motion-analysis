@@ -1,6 +1,6 @@
 class Exercise:
 
-    def __init__(self, name: str, angles: dict, sets: int = 3, duration: int = 30, iterations: tuple = (20, 30), pause: int = 15):
+    def __init__(self, name: str, angles: dict, sets: int = 3, duration: int = 30, iterations: list = [20, 30], pause: int = 15):
         # str - The name of this exercise
         self.name = name
         # dict - The angle restrictions for start/end state, for relevant bodyparts
