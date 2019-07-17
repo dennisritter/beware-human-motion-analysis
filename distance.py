@@ -6,5 +6,5 @@ def hausdorff(u, v):
     return directed_hausdorff(u, v)
 
 
-def fast_dtw(u, v):
+def dtw(u, v):
     return fastdtw.fastdtw(u, v)
