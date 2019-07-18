@@ -2,8 +2,8 @@ import warnings
 import json
 from Exercise import Exercise
 
-REQUIRED_KEYS = ["name", "angles"]
-OPTIONAL_KEYS = ["sets", "duration", "iterations", "pause"]
+REQUIRED_KEYS = ["name", "angles", "userId"]
+OPTIONAL_KEYS = ["description"]
 
 
 def load(path: str):
@@ -15,7 +15,7 @@ def load(path: str):
     # Validate loaded file
     is_valid = validate_exercise(ex)
     if is_valid:
-        return Exercise(ex["name"], ex["angles"])
+        return Exercise(ex["name"], ex["angles"], ex["userId"], ex["description"])
     else:
         warnings.warn(f"File '{path}' is not a valid exercise file.")
         return

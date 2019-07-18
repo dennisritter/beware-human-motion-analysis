@@ -1,14 +1,18 @@
 {
   "name": "Squat",
-  "sets": 3,
-  "duration": 30,
-  "iterations": [20, 30],
-  "pause": 15,
+  "userId": 0, 
+  "description": "A Squat for healthy people.",
   "angles": {
     "start": {
       "hip": {
-        "flexion_extension": [0, 0],
-        "innerrotation_outerrotation": [30, 30],
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 1.0
+        },
+        "innerrotation_outerrotation": {
+            "angle": [30, 30],
+            "priority": 0.5
+        },
         "abduction_adduction": [0, 0]
       },
       "knees": {
