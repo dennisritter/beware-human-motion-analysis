@@ -13,7 +13,10 @@
             "angle": [30, 30],
             "priority": 0.5
         },
-        "abduction_adduction": [0, 0]
+        "abduction_adduction": {
+            "angle": [0, 0],
+            "priority": 0.5
+        }
       },
       "hip_right": {
         "flexion_extension": {
@@ -24,67 +27,160 @@
             "angle": [30, 30],
             "priority": 0.5
         },
-        "abduction_adduction": [0, 0]
+        "abduction_adduction": {
+            "angle": [0, 0],
+            "priority": 0.5
+        }
       },
       "knee_left": {
-        "flexion_extension": [0, 0],
-        "innerrotation_outerrotation": [0, 0]
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 1.0
+        },
+        "innerrotation_outerrotation": {
+            "angle": [0, 0],
+            "priority": 0.5
+        }
       },
       "knee_right": {
-        "flexion_extension": [0, 0],
-        "innerrotation_outerrotation": [0, 0]
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 1.0
+        },
+        "innerrotation_outerrotation": {
+            "angle": [0, 0],
+            "priority": 0.5
+        }
       },
       "shoulder_left": {
-        "flexion_extension": [0, 0],
-        "innerrotation_outerrotation": [0, 0],
-        "abduction_adduction": [0, 0]
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 0.5
+        },
+        "innerrotation_outerrotation": {
+            "angle": [0, 0],
+            "priority": 0.5
+        },
+        "abduction_adduction": {
+            "angle": [0, 0],
+            "priority": 0.5
+        }
       },
       "shoulder_right": {
-        "flexion_extension": [0, 0],
-        "innerrotation_outerrotation": [0, 0],
-        "abduction_adduction": [0, 0]
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 0.5
+        },
+        "innerrotation_outerrotation": {
+            "angle": [0, 0],
+            "priority": 0.5
+        },
+        "abduction_adduction": {
+            "angle": [0, 0],
+            "priority": 0.5
+        }
       },
       "elbow_left": {
-        "flexion_extension": [0, 0]
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 0.5
+        }
       },
       "elbow_right": {
-        "flexion_extension": [0, 0]
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 0.5
+        }
       }
     },
     "end": {
       "hip_left": {
-        "flexion_extension": [45, 90],
-        "innerrotation_outerrotation": [30, 30],
-        "abduction_adduction": [-10, 10]
+        "flexion_extension": {
+            "angle": [45, 90],
+            "priority": 0.5
+        },
+        "innerrotation_outerrotation": {
+            "angle": [30, 30],
+            "priority": 0.5
+        },
+        "abduction_adduction": {
+            "angle": [0, 10],
+            "priority": 0.5
+        }
       },
       "hip_right": {
-        "flexion_extension": [45, 90],
-        "innerrotation_outerrotation": [30, 30],
-        "abduction_adduction": [-10, 10]
+        "flexion_extension": {
+            "angle": [45, 90],
+            "priority": 0.5
+        },
+        "innerrotation_outerrotation": {
+            "angle": [30, 30],
+            "priority": 0.5
+        },
+        "abduction_adduction": {
+            "angle": [0, 10],
+            "priority": 0.5
+        }
       },
       "knee_left": {
-        "flexion_extension": [45, 90],
-        "innerrotation_outerrotation": [0, 0]
+        "flexion_extension": {
+            "angle": [45, 90],
+            "priority": 1.0
+        },
+        "innerrotation_outerrotation": {
+            "angle": [0, 0],
+            "priority": 0.5
+        }
       },
       "knee_right": {
-        "flexion_extension": [45, 90],
-        "innerrotation_outerrotation": [0, 0]
+        "flexion_extension": {
+            "angle": [45, 90],
+            "priority": 1.0
+        },
+        "innerrotation_outerrotation": {
+            "angle": [0, 0],
+            "priority": 0.5
+        }
       },
       "shoulder_left": {
-        "flexion_extension": [40, 60],
-        "innerrotation_outerrotation": [0, 0],
-        "abduction_adduction": [0, 0]
+        "flexion_extension": {
+            "angle": [40, 60],
+            "priority": 0.5
+        },
+        "innerrotation_outerrotation": {
+            "angle": [0, 0],
+            "priority": 0.5
+        },
+        "abduction_adduction": {
+            "angle": [0, 0],
+            "priority": 0.5
+        }
       },
       "shoulder_right": {
-        "flexion_extension": [40, 60],
-        "innerrotation_outerrotation": [0, 0],
-        "abduction_adduction": [0, 0]
+        "flexion_extension": {
+            "angle": [45, 60],
+            "priority": 0.5
+        },
+        "innerrotation_outerrotation": {
+            "angle": [0, 0],
+            "priority": 0.5
+        },
+        "abduction_adduction": {
+            "angle": [0, 0],
+            "priority": 0.5
+        }
       },
       "elbow_left": {
-        "flexion_extension": [45, 90]
+        "flexion_extension": {
+            "angle": [45, 90],
+            "priority": 0.5
+        }
       },
       "elbow_right": {
-        "flexion_extension": [45, 90]
+        "flexion_extension": {
+            "angle": [45, 90],
+            "priority": 0.5
+        }
       }
     }
   }
