@@ -4,7 +4,7 @@
   "description": "A Squat for healthy people.",
   "angles": {
     "start": {
-      "hip": {
+      "hip_left": {
         "flexion_extension": {
             "angle": [0, 0],
             "priority": 1.0
@@ -15,35 +15,75 @@
         },
         "abduction_adduction": [0, 0]
       },
-      "knees": {
+      "hip_right": {
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 1.0
+        },
+        "innerrotation_outerrotation": {
+            "angle": [30, 30],
+            "priority": 0.5
+        },
+        "abduction_adduction": [0, 0]
+      },
+      "knee_left": {
         "flexion_extension": [0, 0],
         "innerrotation_outerrotation": [0, 0]
       },
-      "shoulders": {
+      "knee_right": {
+        "flexion_extension": [0, 0],
+        "innerrotation_outerrotation": [0, 0]
+      },
+      "shoulder_left": {
         "flexion_extension": [0, 0],
         "innerrotation_outerrotation": [0, 0],
         "abduction_adduction": [0, 0]
       },
-      "elbows": {
+      "shoulder_right": {
+        "flexion_extension": [0, 0],
+        "innerrotation_outerrotation": [0, 0],
+        "abduction_adduction": [0, 0]
+      },
+      "elbow_left": {
+        "flexion_extension": [0, 0]
+      },
+      "elbow_right": {
         "flexion_extension": [0, 0]
       }
     },
     "end": {
-      "hip": {
+      "hip_left": {
         "flexion_extension": [45, 90],
         "innerrotation_outerrotation": [30, 30],
         "abduction_adduction": [-10, 10]
       },
-      "knees": {
+      "hip_right": {
+        "flexion_extension": [45, 90],
+        "innerrotation_outerrotation": [30, 30],
+        "abduction_adduction": [-10, 10]
+      },
+      "knee_left": {
         "flexion_extension": [45, 90],
         "innerrotation_outerrotation": [0, 0]
       },
-      "shoulders": {
+      "knee_right": {
+        "flexion_extension": [45, 90],
+        "innerrotation_outerrotation": [0, 0]
+      },
+      "shoulder_left": {
         "flexion_extension": [40, 60],
         "innerrotation_outerrotation": [0, 0],
         "abduction_adduction": [0, 0]
       },
-      "elbows": {
+      "shoulder_right": {
+        "flexion_extension": [40, 60],
+        "innerrotation_outerrotation": [0, 0],
+        "abduction_adduction": [0, 0]
+      },
+      "elbow_left": {
+        "flexion_extension": [45, 90]
+      },
+      "elbow_right": {
         "flexion_extension": [45, 90]
       }
     }
