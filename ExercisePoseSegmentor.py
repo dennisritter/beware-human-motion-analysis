@@ -57,4 +57,11 @@ class ExercisePoseSegmentor:
         in the second dimension list of Sequence.positions.
         Example usage: Sequence.positions[num_frame][joint_index] -> will get you the [x, y, z] position for a frame and a specific joint.
         """
+        if (self.poseformat == PoseFormatEnum.MOCAP):
+            return self.getJointSetsMocap(exercise)
+
+    
+    def getJointSetsMocap(self, exercise: Exercise) -> dict:
+        """ See description of 'getJointSets' method. Returns the jointsets for the MOCAP poseformat.
+        """
         return {}
