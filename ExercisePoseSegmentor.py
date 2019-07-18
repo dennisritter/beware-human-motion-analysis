@@ -41,7 +41,7 @@ class ExercisePoseSegmentor:
                                         "Head": 15
                                     },
     
-    def getJointSets(self, exercise: Exercise) -> dict:
+    def addJointsToAngles(self, exercise: Exercise) -> dict:
         """ Returns a Dictionary of mapped sets of three joints for bodypart/joint names and the possible movements.
         Return Format Example
         --------------
@@ -58,10 +58,10 @@ class ExercisePoseSegmentor:
         Example usage: Sequence.positions[num_frame][joint_index] -> will get you the [x, y, z] position for a frame and a specific joint.
         """
         if (self.poseformat == PoseFormatEnum.MOCAP):
-            return self.getJointSetsMocap(exercise)
+            return self.addJointstoAnglesMocap(exercise)
 
     
-    def getJointSetsMocap(self, exercise: Exercise) -> dict:
+    def addJointstoAnglesMocap(self, exercise: Exercise):
         """ See description of 'getJointSets' method. Returns the jointsets for the MOCAP poseformat.
         """
-        return {}
+        exercise.addJointsToAngle("hip_left", "flexion_extension", { "angle_vertex": 0, "rays": [1, 2] })
