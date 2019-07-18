@@ -1,12 +1,12 @@
 from PoseFormatEnum import PoseFormatEnum
 from Exercise import Exercise 
 
-class ExercisePoseSegmentor:
+class JointsAngleMapper:
     """ Segments a set of joints of a pose of the specified poseformat into subsets of those joints.
     """
 
     def __init__(self, poseformat: PoseFormatEnum):
-        """ ExercisePoseSegmentor Constructor
+        """ JointsAngleMapper Constructor
         Parameters
         ----------
         poseformat : PoseFormatEnum
@@ -14,8 +14,8 @@ class ExercisePoseSegmentor:
 
         Returns
         ----------
-        ExercisePoseSegmentor
-            A ExercisePoseSegmentor instance.
+        JointsAngleMapper
+            A JointsAngleMapper instance.
         """
         if(not isinstance(poseformat, PoseFormatEnum)):
             raise ValueError(
