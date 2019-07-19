@@ -22,6 +22,7 @@ class JointsAngleMapper:
             raise ValueError(
                 "'poseformat' parameter must be a member of 'PoseFormatEnum'")
         self.poseformat = poseformat
+        self.poseformatjoints = {}
         if (poseformat == PoseFormatEnum.MOCAP):
             self.poseformatjoints = {
                 "RightWrist": 0,
@@ -40,7 +41,8 @@ class JointsAngleMapper:
                 "LeftElbow": 13,
                 "LeftShoulder": 14,
                 "Head": 15
-            },
+            }
+        print(type(self.poseformatjoints))
 
     def addJointsToAngles(self, exercise: Exercise) -> dict:
         """ Returns a Dictionary of mapped sets of three joints for bodypart/joint names and the possible movements.
@@ -64,42 +66,53 @@ class JointsAngleMapper:
     def addJointstoAnglesMocap(self, exercise: Exercise):
         """ See description of 'getJointSets' method. Returns the jointsets for the MOCAP poseformat.
         """
+        joints = self.poseformatjoints
+        """ Defines which joints must be used for angle calculations
+        NOTE:   The used rays for angle calculations might differ from the vectors used in medical angle definitions
+                because in some cases the medical vectors are hard to identify for example.
+        Find Medical definitions here:
+            documents/Messblatt_Obere_Extremität.pdf
+            documents/Messblatt_Untere_Extremität.pdf
+            ROM.pdf
+        """
         joints_angle_map = {
             "hip_left": {
-                "flexion_extension": {"angle_vertex": 0, "rays": [0, 0]},
-                "innerrotation_outerrotation": {"angle_vertex": 0, "rays": [0, 0]},
-                "abduction_adduction": {"angle_vertex": 0, "rays": [0, 0]}
+                # NOTE: Using Hip-Torso vector for angle calculation -> transfer to medical definition
+                "flexion_extension": {"angle_vertex": joints["LeftHip"], "rays": [joints["LeftKnee"], joints["Torso"]]},
+                "innerrotation_outerrotation": {"angle_vertex": joints["LeftHip"], "rays": [0, 0]},
+                "abduction_adduction": {"angle_vertex": joints["LeftHip"], "rays": [0, 0]}
             },
             "hip_right": {
-                "flexion_extension": {"angle_vertex": 0, "rays": [0, 0]},
-                "innerrotation_outerrotation": {"angle_vertex": 0, "rays": [0, 0]},
-                "abduction_adduction": {"angle_vertex": 0, "rays": [0, 0]}
+                "flexion_extension": {"angle_vertex": joints["RightHip"], "rays": [0, 0]},
+                "innerrotation_outerrotation": {"angle_vertex": joints["RightHip"], "rays": [0, 0]},
+                "abduction_adduction": {"angle_vertex": joints["RightHip"], "rays": [0, 0]}
             },
             "knee_left": {
-                "flexion_extension": {"angle_vertex": 0, "rays": [0, 0]},
-                "innerrotation_outerrotation": {"angle_vertex": 0, "rays": [0, 0]}
+                "flexion_extension": {"angle_vertex": joints["LeftKnee"], "rays": [0, 0]},
+                "innerrotation_outerrotation": {"angle_vertex": joints["LeftKnee"], "rays": [0, 0]}
             },
             "knee_right": {
-                "flexion_extension": {"angle_vertex": 0, "rays": [0, 0]},
-                "innerrotation_outerrotation": {"angle_vertex": 0, "rays": [0, 0]}
+                "flexion_extension": {"angle_vertex": joints["RightKnee"], "rays": [0, 0]},
+                "innerrotation_outerrotation": {"angle_vertex": joints["RightKnee"], "rays": [0, 0]}
             },
             "shoulder_left": {
-                "flexion_extension": {"angle_vertex": 0, "rays": [0, 0]},
-                "innerrotation_outerrotation": {"angle_vertex": 0, "rays": [0, 0]},
-                "abduction_adduction": {"angle_vertex": 0, "rays": [0, 0]}
+                "flexion_extension": {"angle_vertex": joints["LeftShoulder"], "rays": [0, 0]},
+                "innerrotation_outerrotation": {"angle_vertex": joints["LeftShoulder"], "rays": [0, 0]},
+                "abduction_adduction": {"angle_vertex": joints["LeftShoulder"], "rays": [0, 0]}
             },
             "shoulder_right": {
-                "flexion_extension": {"angle_vertex": 0, "rays": [0, 0]},
-                "innerrotation_outerrotation": {"angle_vertex": 0, "rays": [0, 0]},
-                "abduction_adduction": {"angle_vertex": 0, "rays": [0, 0]}
+                "flexion_extension": {"angle_vertex": joints["RightShoulder"], "rays": [0, 0]},
+                "innerrotation_outerrotation": {"angle_vertex": joints["RightShoulder"], "rays": [0, 0]},
+                "abduction_adduction": {"angle_vertex": joints["RightShoulder"], "rays": [0, 0]}
             },
             "elbow_left": {
-                "flexion_extension": {"angle_vertex": 0, "rays": [0, 0]}
+                "flexion_extension": {"angle_vertex": joints["LeftElbow"], "rays": [0, 0]}
             },
             "elbow_right": {
-                "flexion_extension": {"angle_vertex": 0, "rays": [0, 0]}
+                "flexion_extension": {"angle_vertex": joints["RightElbow"], "rays": [0, 0]}
             }
         }
+        print(self.poseformatjoints)
         # Add joints to all angles for all bodyparts
         for bodypart in joints_angle_map:
             for angle_name in joints_angle_map[bodypart]:

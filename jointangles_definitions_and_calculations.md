@@ -6,8 +6,26 @@ In some cases, the medical angles are using angle vectors that can't be used for
 
 ### Hip left/right
 
+#### Flexion/Extension
+
+#### Abduction/Adduction
+
+#### Inner rotation/Outer rotation
+
 ### Knees left/right
+
+#### Flexion/Extension
+
+#### Inner rotation/Outer rotation
 
 ### Shoulders left/right
 
+#### Flexion/Extension
+
+#### Abduction/Adduction
+
+#### Inner rotation/Outer rotation
+
 ### Elbow left/right
+
+#### Flexion/Extension
