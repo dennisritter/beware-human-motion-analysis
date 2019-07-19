@@ -18,7 +18,6 @@ seq = mocap_posemapper.load('data/sequences/squat_3/complete-session.json', 'Squ
 jam = JointsAngleMapper(PoseFormatEnum.MOCAP)
 jam.addJointsToAngles(ex)
 
-# Get
 joints = jam.jointsMap
 # Calculate angles for Sequence
 acm.calc_angles_lefthip_flexion_extension(seq, joints["hip_left"]["flexion_extension"])
