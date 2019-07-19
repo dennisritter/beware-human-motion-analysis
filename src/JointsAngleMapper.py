@@ -44,6 +44,59 @@ class JointsAngleMapper:
                 "LeftShoulder": 14,
                 "Head": 15
             }
+            """ Defines which joints must be used for angle calculations
+            NOTE:   The used rays for angle calculations might differ from the vectors used in medical angle definitions
+                    because in some cases the medical vectors are hard to identify for example.
+            Find Medical definitions here:
+                documents/Messblatt_Obere_Extremität.pdf
+                documents/Messblatt_Untere_Extremität.pdf
+                ROM.pdf
+            """
+            self.jointsMap = {
+                "hip_left": {
+                    # NOTE: Using Hip-Torso vector for Hip angle calculation -> transfer result to medical definition
+                    "flexion_extension": {"angle_vertex": self.poseformatjoints["LeftHip"], "rays": [self.poseformatjoints["LeftKnee"], self.poseformatjoints["Torso"]]},
+                    "innerrotation_outerrotation": {"angle_vertex": self.poseformatjoints["LeftHip"], "rays": [self.poseformatjoints["LeftKnee"], self.poseformatjoints["LeftAnkle"]]},
+                    # NOTE: Using Hip-Torso vector for Hip angle calculation -> transfer result to medical definition
+                    "abduction_adduction": {"angle_vertex": self.poseformatjoints["LeftHip"], "rays": [self.poseformatjoints["LeftKnee"], self.poseformatjoints["Torso"]]}
+                },
+                "hip_right": {
+                    # NOTE: Using Hip-Torso vector for Hip angle calculation -> transfer result to medical definition
+                    "flexion_extension": {"angle_vertex": self.poseformatjoints["RightHip"], "rays": [self.poseformatjoints["RightKnee"], self.poseformatjoints["Torso"]]},
+                    "innerrotation_outerrotation": {"angle_vertex": self.poseformatjoints["RightHip"], "rays": [self.poseformatjoints["RightKnee"], self.poseformatjoints["RightAnkle"]]},
+                    # NOTE: Using Hip-Torso vector for Hip angle calculation -> transfer result to medical definition
+                    "abduction_adduction": {"angle_vertex": self.poseformatjoints["RightHip"], "rays": [self.poseformatjoints["RightKnee"], self.poseformatjoints["Torso"]]}
+                },
+                "knee_left": {
+                    "flexion_extension": {"angle_vertex": self.poseformatjoints["LeftKnee"], "rays": [self.poseformatjoints["LeftHip"], self.poseformatjoints["LeftAnkle"]]},
+                    # NOTE: Is this even relevant? documents/Messblatt_Untere_Extremität.pdf does not mention this
+                    "innerrotation_outerrotation": {"angle_vertex": self.poseformatjoints["LeftKnee"], "rays": [0, 0]}
+                },
+                "knee_right": {
+                    "flexion_extension": {"angle_vertex": self.poseformatjoints["RightKnee"], "rays": [self.poseformatjoints["RightHip"], self.poseformatjoints["RightAnkle"]]},
+                    # NOTE: Is this even relevant? documents/Messblatt_Untere_Extremität.pdf does not mention this
+                    "innerrotation_outerrotation": {"angle_vertex": self.poseformatjoints["RightKnee"], "rays": [0, 0]}
+                },
+                "shoulder_left": {
+                    # NOTE: Using Shoulder-Hip Vector as 0° reference
+                    "flexion_extension": {"angle_vertex": self.poseformatjoints["LeftShoulder"], "rays": [self.poseformatjoints["LeftElbow"], self.poseformatjoints["LeftHip"]]},
+                    "innerrotation_outerrotation": {"angle_vertex": self.poseformatjoints["LeftShoulder"], "rays": [self.poseformatjoints["LeftElbow"], self.poseformatjoints["LeftHip"]]},
+                    # NOTE: Using Shoulder-Hip Vector as 0° reference
+                    "abduction_adduction": {"angle_vertex": self.poseformatjoints["LeftShoulder"], "rays": [self.poseformatjoints["LeftElbow"], self.poseformatjoints["LeftHip"]]}
+                },
+                "shoulder_right": {
+                    # NOTE: Using Shoulder-Hip Vector as 0° reference
+                    "flexion_extension": {"angle_vertex": self.poseformatjoints["RightShoulder"], "rays": [self.poseformatjoints["RightElbow"], self.poseformatjoints["RightHip"]]},
+                    "innerrotation_outerrotation": {"angle_vertex": self.poseformatjoints["RightShoulder"], "rays": [self.poseformatjoints["RightElbow"], self.poseformatjoints["RightHip"]]},
+                    "abduction_adduction": {"angle_vertex": self.poseformatjoints["RightShoulder"], "rays": [self.poseformatjoints["RightElbow"], self.poseformatjoints["RightHip"]]}
+                },
+                "elbow_left": {
+                    "flexion_extension": {"angle_vertex": self.poseformatjoints["LeftElbow"], "rays": [self.poseformatjoints["LeftWrist"], self.poseformatjoints["LeftShoulder"]]}
+                },
+                "elbow_right": {
+                    "flexion_extension": {"angle_vertex": self.poseformatjoints["RightElbow"], "rays": [self.poseformatjoints["RightWrist"], self.poseformatjoints["RightShoulder"]]}
+                }
+            }
 
     def addJointsToAngles(self, exercise: Exercise) -> dict:
         """ Returns a Dictionary of mapped sets of three joints for bodypart/joint names and the possible movements.
@@ -67,60 +120,7 @@ class JointsAngleMapper:
     def addJointstoAnglesMocap(self, exercise: Exercise):
         """ See description of 'getJointSets' method. Returns the jointsets for the MOCAP poseformat.
         """
-        joints = self.poseformatjoints
-        """ Defines which joints must be used for angle calculations
-        NOTE:   The used rays for angle calculations might differ from the vectors used in medical angle definitions
-                because in some cases the medical vectors are hard to identify for example.
-        Find Medical definitions here:
-            documents/Messblatt_Obere_Extremität.pdf
-            documents/Messblatt_Untere_Extremität.pdf
-            ROM.pdf
-        """
-        joints_angle_map = {
-            "hip_left": {
-                # NOTE: Using Hip-Torso vector for Hip angle calculation -> transfer result to medical definition
-                "flexion_extension": {"angle_vertex": joints["LeftHip"], "rays": [joints["LeftKnee"], joints["Torso"]]},
-                "innerrotation_outerrotation": {"angle_vertex": joints["LeftHip"], "rays": [joints["LeftKnee"], joints["LeftAnkle"]]},
-                # NOTE: Using Hip-Torso vector for Hip angle calculation -> transfer result to medical definition
-                "abduction_adduction": {"angle_vertex": joints["LeftHip"], "rays": [joints["LeftKnee"], joints["Torso"]]}
-            },
-            "hip_right": {
-                # NOTE: Using Hip-Torso vector for Hip angle calculation -> transfer result to medical definition
-                "flexion_extension": {"angle_vertex": joints["RightHip"], "rays": [joints["RightKnee"], joints["Torso"]]},
-                "innerrotation_outerrotation": {"angle_vertex": joints["RightHip"], "rays": [joints["RightKnee"], joints["RightAnkle"]]},
-                # NOTE: Using Hip-Torso vector for Hip angle calculation -> transfer result to medical definition
-                "abduction_adduction": {"angle_vertex": joints["RightHip"], "rays": [joints["RightKnee"], joints["Torso"]]}
-            },
-            "knee_left": {
-                "flexion_extension": {"angle_vertex": joints["LeftKnee"], "rays": [joints["LeftHip"], joints["LeftAnkle"]]},
-                # NOTE: Is this even relevant? documents/Messblatt_Untere_Extremität.pdf does not mention this
-                "innerrotation_outerrotation": {"angle_vertex": joints["LeftKnee"], "rays": [0, 0]}
-            },
-            "knee_right": {
-                "flexion_extension": {"angle_vertex": joints["RightKnee"], "rays": [joints["RightHip"], joints["RightAnkle"]]},
-                # NOTE: Is this even relevant? documents/Messblatt_Untere_Extremität.pdf does not mention this
-                "innerrotation_outerrotation": {"angle_vertex": joints["RightKnee"], "rays": [0, 0]}
-            },
-            "shoulder_left": {
-                # NOTE: Using Shoulder-Hip Vector as 0° reference
-                "flexion_extension": {"angle_vertex": joints["LeftShoulder"], "rays": [joints["LeftElbow"], joints["LeftHip"]]},
-                "innerrotation_outerrotation": {"angle_vertex": joints["LeftShoulder"], "rays": [joints["LeftElbow"], joints["LeftHip"]]},
-                # NOTE: Using Shoulder-Hip Vector as 0° reference
-                "abduction_adduction": {"angle_vertex": joints["LeftShoulder"], "rays": [joints["LeftElbow"], joints["LeftHip"]]}
-            },
-            "shoulder_right": {
-                # NOTE: Using Shoulder-Hip Vector as 0° reference
-                "flexion_extension": {"angle_vertex": joints["RightShoulder"], "rays": [joints["RightElbow"], joints["RightHip"]]},
-                "innerrotation_outerrotation": {"angle_vertex": joints["RightShoulder"], "rays": [joints["RightElbow"], joints["RightHip"]]},
-                "abduction_adduction": {"angle_vertex": joints["RightShoulder"], "rays": [joints["RightElbow"], joints["RightHip"]]}
-            },
-            "elbow_left": {
-                "flexion_extension": {"angle_vertex": joints["LeftElbow"], "rays": [joints["LeftWrist"], joints["LeftShoulder"]]}
-            },
-            "elbow_right": {
-                "flexion_extension": {"angle_vertex": joints["RightElbow"], "rays": [joints["RightWrist"], joints["RightShoulder"]]}
-            }
-        }
+        joints_angle_map = self.jointsMap
         # Add joints to all angles for all bodyparts
         for bodypart in joints_angle_map:
             for angle_name in joints_angle_map[bodypart]:
