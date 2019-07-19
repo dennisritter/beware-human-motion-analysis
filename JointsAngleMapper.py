@@ -101,14 +101,17 @@ class JointsAngleMapper:
                 "innerrotation_outerrotation": {"angle_vertex": joints["RightKnee"], "rays": [0, 0]}
             },
             "shoulder_left": {
-                "flexion_extension": {"angle_vertex": joints["LeftShoulder"], "rays": [0, 0]},
-                "innerrotation_outerrotation": {"angle_vertex": joints["LeftShoulder"], "rays": [0, 0]},
-                "abduction_adduction": {"angle_vertex": joints["LeftShoulder"], "rays": [0, 0]}
+                # NOTE: Using Shoulder-Hip Vector as 0° reference
+                "flexion_extension": {"angle_vertex": joints["LeftShoulder"], "rays": [joints["LeftElbow"], joints["LeftHip"]]},
+                "innerrotation_outerrotation": {"angle_vertex": joints["LeftShoulder"], "rays": [joints["LeftElbow"], joints["LeftHip"]]},
+                # NOTE: Using Shoulder-Hip Vector as 0° reference
+                "abduction_adduction": {"angle_vertex": joints["LeftShoulder"], "rays": [joints["LeftElbow"], joints["LeftHip"]}
             },
             "shoulder_right": {
-                "flexion_extension": {"angle_vertex": joints["RightShoulder"], "rays": [0, 0]},
-                "innerrotation_outerrotation": {"angle_vertex": joints["RightShoulder"], "rays": [0, 0]},
-                "abduction_adduction": {"angle_vertex": joints["RightShoulder"], "rays": [0, 0]}
+                # NOTE: Using Shoulder-Hip Vector as 0° reference
+                "flexion_extension": {"angle_vertex": joints["RightShoulder"], "rays": [joints["RightElbow"], joints["RightHip"]},
+                "innerrotation_outerrotation": {"angle_vertex": joints["RightShoulder"], "rays": [joints["RightElbow"], joints["RightHip"]]},
+                "abduction_adduction": {"angle_vertex": joints["RightShoulder"], "rays": [joints["RightElbow"], joints["RightHip"]]}
             },
             "elbow_left": {
                 "flexion_extension": {"angle_vertex": joints["LeftElbow"], "rays": [joints["LeftWrist"], joints["LeftShoulder"]]}
