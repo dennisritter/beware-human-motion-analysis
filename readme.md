@@ -10,7 +10,7 @@
 
 #### Exercise
 
-See [Exercise.md](docs/exercise.md)
+See [Exercise.md](docs/exercises.md)
 
 ### Contributing
 
