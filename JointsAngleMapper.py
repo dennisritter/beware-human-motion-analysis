@@ -42,7 +42,6 @@ class JointsAngleMapper:
                 "LeftShoulder": 14,
                 "Head": 15
             }
-        print(type(self.poseformatjoints))
 
     def addJointsToAngles(self, exercise: Exercise) -> dict:
         """ Returns a Dictionary of mapped sets of three joints for bodypart/joint names and the possible movements.
@@ -105,11 +104,11 @@ class JointsAngleMapper:
                 "flexion_extension": {"angle_vertex": joints["LeftShoulder"], "rays": [joints["LeftElbow"], joints["LeftHip"]]},
                 "innerrotation_outerrotation": {"angle_vertex": joints["LeftShoulder"], "rays": [joints["LeftElbow"], joints["LeftHip"]]},
                 # NOTE: Using Shoulder-Hip Vector as 0° reference
-                "abduction_adduction": {"angle_vertex": joints["LeftShoulder"], "rays": [joints["LeftElbow"], joints["LeftHip"]}
+                "abduction_adduction": {"angle_vertex": joints["LeftShoulder"], "rays": [joints["LeftElbow"], joints["LeftHip"]]}
             },
             "shoulder_right": {
                 # NOTE: Using Shoulder-Hip Vector as 0° reference
-                "flexion_extension": {"angle_vertex": joints["RightShoulder"], "rays": [joints["RightElbow"], joints["RightHip"]},
+                "flexion_extension": {"angle_vertex": joints["RightShoulder"], "rays": [joints["RightElbow"], joints["RightHip"]]},
                 "innerrotation_outerrotation": {"angle_vertex": joints["RightShoulder"], "rays": [joints["RightElbow"], joints["RightHip"]]},
                 "abduction_adduction": {"angle_vertex": joints["RightShoulder"], "rays": [joints["RightElbow"], joints["RightHip"]]}
             },
@@ -120,7 +119,6 @@ class JointsAngleMapper:
                 "flexion_extension": {"angle_vertex": joints["RightElbow"], "rays": [joints["RightWrist"], joints["RightShoulder"]]}
             }
         }
-        print(self.poseformatjoints)
         # Add joints to all angles for all bodyparts
         for bodypart in joints_angle_map:
             for angle_name in joints_angle_map[bodypart]:
