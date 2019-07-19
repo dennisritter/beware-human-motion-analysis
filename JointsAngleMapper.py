@@ -91,11 +91,13 @@ class JointsAngleMapper:
                 "abduction_adduction": {"angle_vertex": joints["RightHip"], "rays": [joints["RightKnee"], joints["Torso"]]}
             },
             "knee_left": {
-                "flexion_extension": {"angle_vertex": joints["LeftKnee"], "rays": [0, 0]},
+                "flexion_extension": {"angle_vertex": joints["LeftKnee"], "rays": [joints["LeftHip"], joints["LeftAnkle"]]},
+                # NOTE: Is this even relevant? documents/Messblatt_Untere_Extremität.pdf does not mention this
                 "innerrotation_outerrotation": {"angle_vertex": joints["LeftKnee"], "rays": [0, 0]}
             },
             "knee_right": {
-                "flexion_extension": {"angle_vertex": joints["RightKnee"], "rays": [0, 0]},
+                "flexion_extension": {"angle_vertex": joints["RightKnee"], "rays": [joints["RightHip"], joints["RightAnkle"]]},
+                # NOTE: Is this even relevant? documents/Messblatt_Untere_Extremität.pdf does not mention this
                 "innerrotation_outerrotation": {"angle_vertex": joints["RightKnee"], "rays": [0, 0]}
             },
             "shoulder_left": {
