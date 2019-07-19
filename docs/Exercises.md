@@ -7,7 +7,7 @@ A `Exercise` class instance will be created by loading those `exercise.json` fil
 
 #### Example file
 
-```json
+```javascript
 {
   // Name of the exercise
   "name": "Squat",
