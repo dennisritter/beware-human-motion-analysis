@@ -77,15 +77,18 @@ class JointsAngleMapper:
         """
         joints_angle_map = {
             "hip_left": {
-                # NOTE: Using Hip-Torso vector for angle calculation -> transfer to medical definition
+                # NOTE: Using Hip-Torso vector for Hip angle calculation -> transfer result to medical definition
                 "flexion_extension": {"angle_vertex": joints["LeftHip"], "rays": [joints["LeftKnee"], joints["Torso"]]},
-                "innerrotation_outerrotation": {"angle_vertex": joints["LeftHip"], "rays": [0, 0]},
-                "abduction_adduction": {"angle_vertex": joints["LeftHip"], "rays": [0, 0]}
+                "innerrotation_outerrotation": {"angle_vertex": joints["LeftHip"], "rays": [joints["LeftKnee"], joints["LeftAnkle"]]},
+                # NOTE: Using Hip-Torso vector for Hip angle calculation -> transfer result to medical definition
+                "abduction_adduction": {"angle_vertex": joints["LeftHip"], "rays": [joints["LeftKnee"], joints["Torso"]]}
             },
             "hip_right": {
-                "flexion_extension": {"angle_vertex": joints["RightHip"], "rays": [0, 0]},
-                "innerrotation_outerrotation": {"angle_vertex": joints["RightHip"], "rays": [0, 0]},
-                "abduction_adduction": {"angle_vertex": joints["RightHip"], "rays": [0, 0]}
+                # NOTE: Using Hip-Torso vector for Hip angle calculation -> transfer result to medical definition
+                "flexion_extension": {"angle_vertex": joints["RightHip"], "rays": [joints["RightKnee"], joints["Torso"]]},
+                "innerrotation_outerrotation": {"angle_vertex": joints["RightHip"], "rays": [joints["RightKnee"], joints["RightAnkle"]]},
+                # NOTE: Using Hip-Torso vector for Hip angle calculation -> transfer result to medical definition
+                "abduction_adduction": {"angle_vertex": joints["RightHip"], "rays": [joints["RightKnee"], joints["Torso"]]}
             },
             "knee_left": {
                 "flexion_extension": {"angle_vertex": joints["LeftKnee"], "rays": [0, 0]},
