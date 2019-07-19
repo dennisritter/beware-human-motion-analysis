@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import seaborn as sns
 from PoseMapper import PoseMapper
-from PoseMapper import PoseMappingEnum
+from PoseFormatEnum import PoseFormatEnum
 import numpy as np
 import Sequence
 import distance
@@ -127,7 +127,7 @@ with open('data/sequences/squat_1/complete-session.json', 'r') as myfile:
 with open('data/sequences/squat_3/complete-session.json', 'r') as myfile:
     mocap_seq2 = myfile.read()
 # Get PoseMapper instance for MOCAP sequences in json
-mocap_opmpi_mapper = PoseMapper(PoseMappingEnum.MOCAP)
+mocap_opmpi_mapper = PoseMapper(PoseFormatEnum.MOCAP)
 # Convert mocap json string Positions to Sequence Object
 seq1 = mocap_opmpi_mapper.map(mocap_seq1, 'squat_1')
 seq2 = mocap_opmpi_mapper.map(mocap_seq2, 'squat_2')

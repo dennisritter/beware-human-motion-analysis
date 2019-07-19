@@ -1,10 +1,11 @@
 import numpy as np
+from PoseFormatEnum import PoseFormatEnum
 from sklearn.decomposition import PCA
 
 
 class Sequence:
 
-    def __init__(self, body_parts: list, positions: list, timestamps: list, name: str = 'sequence'):
+    def __init__(self, body_parts: list, positions: list, timestamps: list, poseformat: PoseFormatEnum, name: str = 'sequence'):
         self.name = name
         # Number, order and label of tracked body parts
         # Example: ["Head", "Neck", "RShoulder", "RElbow", ...]

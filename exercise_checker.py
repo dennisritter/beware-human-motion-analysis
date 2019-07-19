@@ -1,9 +1,15 @@
 from Exercise import Exercise
+from JointsAngleMapper import JointsAngleMapper
+from PoseFormatEnum import PoseFormatEnum
 from exercise_loader import load
 
+# Get Exercise Object from json file
 ex = load('data/exercises/squat.json')
-print(ex.__dict__)
 
+jam = JointsAngleMapper(PoseFormatEnum.MOCAP)
+jam.addJointsToAngles(ex)
+
+print(ex.angles)
 # TODO: Analyse motion sequence angles
 # -> Define Angles:Human_Joints mapping to validate correct angles
 # -> Get motion sequence

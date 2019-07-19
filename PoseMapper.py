@@ -1,12 +1,7 @@
-from enum import Enum
+from PoseFormatEnum import PoseFormatEnum
 import json
 import numpy as np
 from Sequence import Sequence
-
-
-class PoseMappingEnum(Enum):
-    MOCAP = 1
-
 
 class PoseMapper:
     # TODO: Remove?
@@ -30,22 +25,22 @@ class PoseMapper:
                           ["LHip", "LKnee"],
                           ["LKnee", "LAnkle"]]
 
-    def __init__(self, mapping: PoseMappingEnum):
+    def __init__(self, poseformat: PoseFormatEnum):
         """ PoseMapper Constructor
         Parameters
         ----------
-        mapping : PoseMappingEnum
-            A PoseMapping Enumeration member defining input format of the PoseMapper instance.
+        poseformat : PoseFormatEnum
+            A PoseFormat Enumeration member defining input format of the PoseMapper instance.
 
         Returns
         ----------
         PoseMapper
             A PoseMapper instance.
         """
-        if(not isinstance(mapping, PoseMappingEnum)):
+        if(not isinstance(poseformat, PoseFormatEnum)):
             raise ValueError(
-                "'mapping' parameter must be a member of 'PoseMapping' enumeration.")
-        self.mapping = mapping
+                "'poseformat' parameter must be a member of 'PoseFormat' enumeration.")
+        self.poseformat = poseformat
 
     def map(self, input: str, name: str = 'sequence') -> Sequence:
         """
@@ -58,7 +53,7 @@ class PoseMapper:
         Sequence
            The Sequence Object instance representing the motion sequence of the input string.
         """
-        if (self.mapping == PoseMappingEnum.MOCAP):
+        if (self.poseformat == PoseFormatEnum.MOCAP):
             return self.map_sequence_mocap(input, name=name)
 
     def map_sequence_mocap(self, input: str, name='sequence') -> Sequence:
@@ -91,4 +86,4 @@ class PoseMapper:
                   1] -= np.mean(positions[:, :, 1])
         positions[:, :,
                   2] -= np.mean(positions[:, :, 2])
-        return Sequence(body_parts, positions, timestamps, name=name)
+        return Sequence(body_parts, positions, timestamps, self.poseformat, name=name)
