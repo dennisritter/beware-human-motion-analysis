@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import tslearn.metrics as ts
 import seaborn as sns
 from PoseMapper import PoseMapper
 from PoseFormatEnum import PoseFormatEnum
 import numpy as np
 import Sequence
 import distance
-import tslearn.metrics as ts
+
 
 sns.set()
 sns.set_style(style='whitegrid')
