@@ -1,5 +1,6 @@
 import warnings
 
+
 class Exercise:
 
     def __init__(self, name: str, angles: dict, userId: int, description: str = "Sorry, there is no description"):
@@ -14,7 +15,7 @@ class Exercise:
     def addJointsToAngle(self, bodypart: str, anglename: str, joints: dict):
         """ Adds a 'joints' key:value pair to self.angles for the 
             specified bodypart key and inner anglename key
-            
+
             Example for a joints key:value pair
             ----------
             "joints": { angle_vertex: 1, rays: [0, 2] }
@@ -25,6 +26,6 @@ class Exercise:
         # Try to add given joints dict to specified angle
         try:
             self.angles["start"][bodypart][anglename]["joints"] = joints
-            self.angles["start"][bodypart][anglename]["joints"] = joints
+            self.angles["end"][bodypart][anglename]["joints"] = joints
         except KeyError as e:
             print(e)
