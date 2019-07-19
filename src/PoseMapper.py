@@ -3,6 +3,7 @@ import json
 import numpy as np
 from Sequence import Sequence
 
+
 class PoseMapper:
     # TODO: Remove?
     OPENPOSE_MPI_BODY_PARTS = {"Head": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
@@ -42,7 +43,14 @@ class PoseMapper:
                 "'poseformat' parameter must be a member of 'PoseFormat' enumeration.")
         self.poseformat = poseformat
 
-    def map(self, input: str, name: str = 'sequence') -> Sequence:
+    def load(self, path: str, name: str = 'Some Sequence') -> Sequence:
+        """ Loads a Sequence from path and maps it to the specified poseformat.
+        """
+        with open('data/sequences/squat_4/complete-session.json', 'r') as myfile:
+            seq = myfile.read()
+        return self.map(seq, name)
+
+    def map(self, input: str, name: str = 'Some Sequence') -> Sequence:
         """
         Parameters
         ----------
