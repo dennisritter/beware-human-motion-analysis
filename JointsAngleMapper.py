@@ -111,10 +111,10 @@ class JointsAngleMapper:
                 "abduction_adduction": {"angle_vertex": joints["RightShoulder"], "rays": [0, 0]}
             },
             "elbow_left": {
-                "flexion_extension": {"angle_vertex": joints["LeftElbow"], "rays": [0, 0]}
+                "flexion_extension": {"angle_vertex": joints["LeftElbow"], "rays": [joints["LeftWrist"], joints["LeftShoulder"]]}
             },
             "elbow_right": {
-                "flexion_extension": {"angle_vertex": joints["RightElbow"], "rays": [0, 0]}
+                "flexion_extension": {"angle_vertex": joints["RightElbow"], "rays": [joints["RightWrist"], joints["RightShoulder"]]}
             }
         }
         print(self.poseformatjoints)
