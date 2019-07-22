@@ -28,5 +28,5 @@ def calc_angles_lefthip_flexion_extension(seq: Sequence, joints: dict) -> list:
         angle = np.arccos(cos_angle)
         angles.append(180 - np.degrees(angle))
 
-    print(angles[50])
+    print(angles[0])
     return angles

@@ -23,7 +23,7 @@ joints = jam.jointsMap
 # Calculate angles for Sequence
 acm.calc_angles_lefthip_flexion_extension(seq, joints["hip_left"]["flexion_extension"])
 # Visualize angle
-visualize.vis_angle_for_frame(seq, joints["hip_left"]["flexion_extension"], 50)
+visualize.vis_angle(seq, joints["hip_left"]["flexion_extension"], 0)
 
 # TODO: Analyse motion sequence angles
 # -> Get angle for all(?) frames of the sequence
