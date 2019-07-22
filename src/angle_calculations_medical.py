@@ -2,7 +2,10 @@ from Sequence import Sequence
 import numpy as np
 
 
-def calc_angles_lefthip_flexion_extension(seq: Sequence, joints: dict) -> list:
+def calc_angle_hip_flexion_extension(seq: Sequence, joints: dict) -> list:
+    # NOTE: Observations and Potential Problems:
+    #       * Start angle is always about 10° -> Might be Tracking problem since the knee usually not Z-Aligned with the Torso (especially for 'well fed' people)
+    #           => Possible solution: Calibration to calculate a bias? [Tell user to Stand (start) -> Track pose -> calculate bias]
     """ Calculates the hips flexion/extension angles for each frame of the Sequence.
     Parameters
     ----------
@@ -15,18 +18,17 @@ def calc_angles_lefthip_flexion_extension(seq: Sequence, joints: dict) -> list:
             rays : list<int>
         Example: { "angle_vertex": 1, "rays": [0, 2] }
     """
-    # print(seq.positions[:, 6, :])
-    left_hip = seq.positions[:, joints["angle_vertex"], :]
-    left_knee = seq.positions[:, joints["rays"][0], :]
-    torso = seq.positions[:, joints["rays"][1], :]
+    hip = seq.positions[:, joints["angle_vertex"], 1:]
+    knee = seq.positions[:, joints["rays"][0], 1:]
+    torso = seq.positions[:, joints["rays"][1], 1:]
     angles = []
-    for i in range(len(left_hip)):
-        l_hip_l_knee = left_knee[i] - left_hip[i]
-        l_hip_torso = torso[i] - left_hip[i]
+    for i in range(len(hip)):
+        hip_knee = knee[i] - hip[i]
+        hip_torso = torso[i] - hip[i]
         # TODO: Understand
-        cos_angle = np.dot(l_hip_l_knee, l_hip_torso) / (np.linalg.norm(l_hip_l_knee) * np.linalg.norm(l_hip_torso))
+        cos_angle = np.dot(hip_knee, hip_torso) / (np.linalg.norm(hip_knee) * np.linalg.norm(hip_torso))
         angle = np.arccos(cos_angle)
         angles.append(180 - np.degrees(angle))
 
-    print(angles[0])
+    print(angles)
     return angles
