@@ -4,7 +4,7 @@ import numpy as np
 
 def calc_angle_hip_flexion_extension(seq: Sequence, joints: dict) -> list:
     # NOTE: Observations and Potential Problems:
-    #       * Start angle is always about 10° -> Might be Tracking problem since the knee usually not Z-Aligned with the Torso (especially for 'well fed' people)
+    #       * Torso position might be incorrect for heavy people with big upper body
     #           => Possible solution: Calibration to calculate a bias? [Tell user to Stand (start) -> Track pose -> calculate bias]
     """ Calculates the hips flexion/extension angles for each frame of the Sequence.
     Parameters
@@ -25,7 +25,6 @@ def calc_angle_hip_flexion_extension(seq: Sequence, joints: dict) -> list:
     for i in range(len(hip)):
         hip_knee = knee[i] - hip[i]
         hip_torso = torso[i] - hip[i]
-        # TODO: Understand
         cos_angle = np.dot(hip_knee, hip_torso) / (np.linalg.norm(hip_knee) * np.linalg.norm(hip_torso))
         angle = np.arccos(cos_angle)
         angles.append(180 - np.degrees(angle))

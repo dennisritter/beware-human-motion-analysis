@@ -107,7 +107,3 @@ def vis_angle(seq: Sequence, angle: dict, frame: int):
 
     plt.tight_layout()
     plt.show()
-
-    print(f"Position angle_vertex: {angle_x[0]},{angle_y[0]},{angle_z[0]}")
-    print(f"Position ray_a: {angle_x[1]},{angle_y[1]},{angle_z[1]}")
-    print(f"Position ray_b: {angle_x[2]},{angle_y[2]},{angle_z[2]}")
