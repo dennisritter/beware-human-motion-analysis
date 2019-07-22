@@ -46,7 +46,7 @@ class PoseMapper:
     def load(self, path: str, name: str = 'Some Sequence') -> Sequence:
         """ Loads a Sequence from path and maps it to the specified poseformat.
         """
-        with open('data/sequences/squat_4/complete-session.json', 'r') as myfile:
+        with open(path, 'r') as myfile:
             seq = myfile.read()
         return self.map(seq, name)
 

@@ -4,6 +4,7 @@ from PoseFormatEnum import PoseFormatEnum
 from exercise_loader import load
 from Sequence import Sequence
 from PoseMapper import PoseMapper
+import visualize
 import angle_calculations_medical as acm
 
 # Get Exercise Object from json file
@@ -21,6 +22,8 @@ jam.addJointsToAngles(ex)
 joints = jam.jointsMap
 # Calculate angles for Sequence
 acm.calc_angles_lefthip_flexion_extension(seq, joints["hip_left"]["flexion_extension"])
+# Visualize angle
+visualize.vis_angle_for_frame(seq, joints["hip_left"]["flexion_extension"], 50)
 
 # TODO: Analyse motion sequence angles
 # -> Get angle for all(?) frames of the sequence
