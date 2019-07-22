@@ -53,7 +53,7 @@ def calc_angle_knee_flexion_extension(seq: Sequence, joints: dict) -> list:
     hip = seq.positions[:, joints["rays"][0], :]
     ankle = seq.positions[:, joints["rays"][1], :]
     angles = []
-    for i in range(len(hip)):
+    for i in range(len(knee)):
         knee_hip = hip[i] - knee[i]
         knee_ankle = ankle[i] - knee[i]
         cos_angle = np.dot(knee_hip, knee_ankle) / (np.linalg.norm(knee_hip) * np.linalg.norm(knee_ankle))
