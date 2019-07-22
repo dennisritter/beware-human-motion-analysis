@@ -96,15 +96,18 @@ def vis_angle_for_frame(seq: Sequence, angle: dict, frame: int):
     fig = plt.figure(figsize=plt.figaspect(1)*2)
 
     # 3d
-    ax = fig.add_subplot(2, 2, 1)
-    ax.set_aspect('equal')
-    ax.scatter(angle_z, angle_y, c='r')
-    ax.plot([angle_z[0], angle_z[1]], [angle_y[0], angle_y[1]], color='r')
-    ax.plot([angle_z[0], angle_z[2]], [angle_y[0], angle_y[2]], color='r')
-    ax.text(angle_z[0], angle_y[0], inv_body_parts[angle_vertex], color="r")
-    ax.text(angle_z[1], angle_y[1], inv_body_parts[angle_ray_a], color="r")
-    ax.text(angle_z[2], angle_y[2], inv_body_parts[angle_ray_b], color="r")
-    ax.scatter(noangle_z, noangle_y, color="blue")
+    ax = fig.add_subplot(2, 2, 1, projection="3d")
+    ax.scatter(angle_x, angle_y, angle_z, c='r')
+    ax.plot([angle_x[0], angle_x[1]], [angle_y[0], angle_y[1]], [angle_z[0], angle_z[1]], color='r')
+    ax.plot([angle_x[0], angle_x[2]], [angle_y[0], angle_y[2]], [angle_z[0], angle_z[2]], color='r')
+    ax.text(angle_x[0], angle_y[0], angle_z[0], inv_body_parts[angle_vertex], color="r")
+    ax.text(angle_x[1], angle_y[1], angle_z[1], inv_body_parts[angle_ray_a], color="r")
+    ax.text(angle_x[2], angle_y[2], angle_z[2], inv_body_parts[angle_ray_b], color="r")
+    ax.scatter(noangle_x, noangle_y, noangle_z, color="blue")
+    for i in range(len(seq.positions[frame])):
+        if (i == angle_vertex or i == angle_ray_a or i == angle_ray_b):
+            continue
+        ax.text(seq.positions[frame][i][0], seq.positions[frame][i][1], seq.positions[frame][i][2], inv_body_parts[i], color="blue", size="small", alpha=0.3)
 
     # x = 0
     ax = fig.add_subplot(2, 2, 2)
