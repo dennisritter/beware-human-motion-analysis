@@ -1,6 +1,17 @@
 from Sequence import Sequence
 import numpy as np
 
+def calc_angle_2d(angle_vertex_2d: list, ray_vertex_a: list, ray_vertex_b: list) -> float:
+    """ Calculates the angle between angle_vertex_2d-ray_vertex_a and angle_vertex_2d-ray_vertex_b in 2D space.
+    Returns
+    ----------
+    float
+        Angle between angle_vertex_2d-ray_vertex_a and angle_vertex_2d-ray_vertex_b in degrees
+    """
+    ray_a = ray_vertex_a - angle_vertex_2d
+    ray_b = ray_vertex_b - angle_vertex_2d
+    cos_angle = np.dot(ray_a, ray_b) / (np.linalg.norm(ray_a) * np.linalg.norm(ray_b))
+    return np.degrees(np.arccos(cos_angle))
 
 def calc_angle_hip_flexion_extension(seq: Sequence, joints: dict) -> list:
     # NOTE: Observations and Potential Problems:
@@ -23,20 +34,13 @@ def calc_angle_hip_flexion_extension(seq: Sequence, joints: dict) -> list:
     torso = seq.positions[:, joints["rays"][1], 1:]
     angles = []
     for i in range(len(hip)):
-        hip_knee = knee[i] - hip[i]
-        hip_torso = torso[i] - hip[i]
-        cos_angle = np.dot(hip_knee, hip_torso) / (np.linalg.norm(hip_knee) * np.linalg.norm(hip_torso))
-        angle = np.arccos(cos_angle)
-        angles.append(180 - np.degrees(angle))
+        angles.append(180 - calc_angle_2d(hip[i], knee[i], torso[i]))
 
-    print(angles)
     return angles
 
 
 def calc_angle_knee_flexion_extension(seq: Sequence, joints: dict) -> list:
     # NOTE: Observations and Potential Problems:
-    #       * Torso position might be incorrect for heavy people with big upper body
-    #           => Possible solution: Calibration to calculate a bias? [Tell user to Stand (start) -> Track pose -> calculate bias]
     """ Calculates the Knees flexion/extension angles for each frame of the Sequence.
     Parameters
     ----------
@@ -54,11 +58,6 @@ def calc_angle_knee_flexion_extension(seq: Sequence, joints: dict) -> list:
     ankle = seq.positions[:, joints["rays"][1], :]
     angles = []
     for i in range(len(knee)):
-        knee_hip = hip[i] - knee[i]
-        knee_ankle = ankle[i] - knee[i]
-        cos_angle = np.dot(knee_hip, knee_ankle) / (np.linalg.norm(knee_hip) * np.linalg.norm(knee_ankle))
-        angle = np.arccos(cos_angle)
-        angles.append(180 - np.degrees(angle))
+        angles.append(calc_angle_2d(knee[i], hip[i], ankle[i]))
 
-    print(angles)
     return angles
