@@ -58,6 +58,6 @@ def calc_angle_knee_flexion_extension(seq: Sequence, joints: dict) -> list:
     ankle = seq.positions[:, joints["rays"][1], :]
     angles = []
     for i in range(len(knee)):
-        angles.append(calc_angle_2d(knee[i], hip[i], ankle[i]))
+        angles.append(180 - calc_angle_2d(knee[i], hip[i], ankle[i]))
 
     return angles
