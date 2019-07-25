@@ -44,7 +44,7 @@ def calc_angle_hip_flexion_extension(seq: Sequence, joints: dict) -> list:
 
 def calc_angle_hip_abduction_adduction(seq: Sequence, joints: dict) -> list:
     # NOTE: Observations and Potential Problems:
-    #   * 'Normal Standing' angle will never be 0° because using left/right shoulder-hip ray for calculation.
+    #   * 'Normal Standing' angle will never be 0° because using left/right hip-torso ray for calculation.
     #       Possible solution:  -> Use a bias of 5-10°
     #                           -> Don't use shoulder-hip ray but direct shoulder-floor ray for calculation
     """ Calculates the hips abduction/adduction angles for each frame of the Sequence.
@@ -108,12 +108,12 @@ def calc_angle_shoulder_flexion_extension(seq: Sequence, joints: dict) -> list:
             rays : list<int>
         Example: { "angle_vertex": 1, "rays": [0, 2] }
     """
+    # Ignore X-Axis for Shoulder Flexion/Extension
     shoulder = seq.positions[:, joints["angle_vertex"], 1:]
     elbow = seq.positions[:, joints["rays"][0], 1:]
     hip = seq.positions[:, joints["rays"][1], 1:]
     angles = []
     for i in range(len(shoulder)):
-        # Substract angle from 180 because 'Normal Standing' (hanging arm) is defined as 0°
         angles.append(calc_angle(shoulder[i], elbow[i], hip[i]))
 
     return angles
@@ -124,7 +124,7 @@ def calc_angle_shoulder_abduction_adduction(seq: Sequence, joints: dict) -> list
     #   * 'Normal Standing' angle will never be 0° because using left/right shoulder-hip ray for calculation.
     #       Possible solution:  -> Use a bias of 5-10°
     #                           -> Don't use shoulder-hip ray but direct shoulder-floor ray for calculation
-    """ Calculates the hips abduction/adduction angles for each frame of the Sequence.
+    """ Calculates the shoulders abduction/adduction angles for each frame of the Sequence.
     Parameters
     ----------
     seq : Sequence
@@ -136,7 +136,7 @@ def calc_angle_shoulder_abduction_adduction(seq: Sequence, joints: dict) -> list
             rays : list<int>
         Example: { "angle_vertex": 1, "rays": [0, 2] }
     """
-    # Ignore Z Axis for abduction/adduction
+    # Ignore Z Axis for shoulder abduction/adduction
     shoulder = seq.positions[:, joints["angle_vertex"], :2]
     elbow = seq.positions[:, joints["rays"][0], :2]
     hip = seq.positions[:, joints["rays"][1], :2]

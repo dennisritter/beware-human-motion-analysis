@@ -11,7 +11,6 @@ import visualize
 import angle_calculations_medical as acm
 import numpy as np
 
-
 # Get Exercise Object from json file
 ex = exercise_loader.load('data/exercises/squat.json')
 # Get PoseMapper instance for MOCAP sequences
@@ -56,6 +55,20 @@ trans_dir_y = np.matmul(M, np.append(start_dir_y, 1))[:3]
 trans_dir_z = np.matmul(M, np.append(start_dir_z, 1))[:3]
 # Find Y-rotation angle
 
+# Beispiel Schulter Winkelberechnung Schritte:
+# -> Koordinatensystem in Punkt verschieben (keypoint Schulter)
+# -> X-Achse bestimmen (Schulter-Schulter)
+# -> Z-Achse bestimmen (Schulter-Nacken-Schulter Dreieck Normale)
+# -> Y-Achse orthogonal zu XZ Ebene
+##
+# -> Transformationsmatrix bauen
+# -> Translation zu Schulter
+# -> Rotationen der Achsen
+##
+# -> Alle für den Winkel benötigten Punkte transformieren
+# -> Winkel in Kugelkoordinaten ausrechnen
+# -> Medizinische Winkel ableiten
+
 # TODO:
 # 1. Calc perpendicular vector for start_dir_x and target_dir_x
 # 2. Calc Angle between start_dir_x and target_dir_x
@@ -85,39 +98,40 @@ plt.show()
 
 
 """ LEGACY CODE
+
 # Add joints to angles property of exercise
-jam = JointsAngleMapper(PoseFormatEnum.MOCAP)
-jam.addJointsToAngles(ex)
+# jam = JointsAngleMapper(PoseFormatEnum.MOCAP)
+# jam.addJointsToAngles(ex)
 
-joints = jam.jointsMap
-# Calculate angles for Sequence
-# Left Hip Flexion/Extension
-hip_left_flexion_extension_angles = acm.calc_angle_hip_flexion_extension(seq, joints["hip_left"]["flexion_extension"])
-# Right Hip Flexion/Extension
-hip_right_flexion_extension_angles = acm.calc_angle_hip_flexion_extension(seq, joints["hip_right"]["flexion_extension"])
-# Left Hip Abduction/Adduction
-hip_left_abduction_adduction_angles = acm.calc_angle_hip_abduction_adduction(seq, joints["hip_left"]["abduction_adduction"])
-# Right Hip Abduction/Adduction
-hip_right_abduction_adduction_angles = acm.calc_angle_hip_abduction_adduction(seq, joints["hip_right"]["abduction_adduction"])
+# joints = jam.jointsMap
+# # Calculate angles for Sequence
+# # Left Hip Flexion/Extension
+# hip_left_flexion_extension_angles = acm.calc_angle_hip_flexion_extension(seq, joints["hip_left"]["flexion_extension"])
+# # Right Hip Flexion/Extension
+# hip_right_flexion_extension_angles = acm.calc_angle_hip_flexion_extension(seq, joints["hip_right"]["flexion_extension"])
+# # Left Hip Abduction/Adduction
+# hip_left_abduction_adduction_angles = acm.calc_angle_hip_abduction_adduction(seq, joints["hip_left"]["abduction_adduction"])
+# # Right Hip Abduction/Adduction
+# hip_right_abduction_adduction_angles = acm.calc_angle_hip_abduction_adduction(seq, joints["hip_right"]["abduction_adduction"])
 
-# Left Knee Flexion/Extension
-knee_left_flexion_extension_angles = acm.calc_angle_knee_flexion_extension(seq, joints["knee_left"]["flexion_extension"])
-# Right Knee Flexion/Extension
-knee_right_flexion_extension_angles = acm.calc_angle_knee_flexion_extension(seq, joints["knee_right"]["flexion_extension"])
+# # Left Knee Flexion/Extension
+# knee_left_flexion_extension_angles = acm.calc_angle_knee_flexion_extension(seq, joints["knee_left"]["flexion_extension"])
+# # Right Knee Flexion/Extension
+# knee_right_flexion_extension_angles = acm.calc_angle_knee_flexion_extension(seq, joints["knee_right"]["flexion_extension"])
 
-# Left Elbow Flexion/Extension
-shoulder_left_flexion_extension_angles = acm.calc_angle_shoulder_flexion_extension(seq, joints["shoulder_left"]["flexion_extension"])
-# Right Elbow Flexion/Extension
-shoulder_right_flexion_extension_angles = acm.calc_angle_shoulder_flexion_extension(seq, joints["shoulder_right"]["flexion_extension"])
-# Left Elbow Abduction/Adduction
-shoulder_left_abduction_adduction_angles = acm.calc_angle_shoulder_abduction_adduction(seq, joints["shoulder_left"]["abduction_adduction"])
-# Right Elbow Abduction/Adduction
-shoulder_right_abduction_adduction_angles = acm.calc_angle_shoulder_abduction_adduction(seq, joints["shoulder_right"]["abduction_adduction"])
+# # Left Elbow Flexion/Extension
+# shoulder_left_flexion_extension_angles = acm.calc_angle_shoulder_flexion_extension(seq, joints["shoulder_left"]["flexion_extension"])
+# # Right Elbow Flexion/Extension
+# shoulder_right_flexion_extension_angles = acm.calc_angle_shoulder_flexion_extension(seq, joints["shoulder_right"]["flexion_extension"])
+# # Left Elbow Abduction/Adduction
+# shoulder_left_abduction_adduction_angles = acm.calc_angle_shoulder_abduction_adduction(seq, joints["shoulder_left"]["abduction_adduction"])
+# # Right Elbow Abduction/Adduction
+# shoulder_right_abduction_adduction_angles = acm.calc_angle_shoulder_abduction_adduction(seq, joints["shoulder_right"]["abduction_adduction"])
 
-# Left Elbow Flexion/Extension
-elbow_left_flexion_extension_angles = acm.calc_angle_elbow_flexion_extension(seq, joints["elbow_left"]["flexion_extension"])
-# Right Elbow Flexion/Extension
-elbow_right_flexion_extension_angles = acm.calc_angle_elbow_flexion_extension(seq, joints["elbow_right"]["flexion_extension"])
+# # Left Elbow Flexion/Extension
+# elbow_left_flexion_extension_angles = acm.calc_angle_elbow_flexion_extension(seq, joints["elbow_left"]["flexion_extension"])
+# # Right Elbow Flexion/Extension
+# elbow_right_flexion_extension_angles = acm.calc_angle_elbow_flexion_extension(seq, joints["elbow_right"]["flexion_extension"])
 
 FRAME = 0
 print(f"Hip Left Flexion/Extension angle [{FRAME}]: {hip_left_flexion_extension_angles[FRAME]}")
