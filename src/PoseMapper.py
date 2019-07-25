@@ -87,6 +87,8 @@ class PoseMapper:
         # reshape positions to 3d array
         positions = np.reshape(positions, (np.shape(positions)[0], int(np.shape(positions)[1]/3), 3))
 
+        # Find b 
+
         # Center Positions by subtracting the mean of each coordinate
         positions[:, :,
                   0] -= np.mean(positions[:, :, 0])
