@@ -62,4 +62,4 @@ print(f"Elbow Left Flexion/Extension angle [{FRAME}]: {elbow_left_flexion_extens
 print(f"Elbow Right Flexion/Extension angle [{FRAME}]: {elbow_right_flexion_extension_angles[FRAME]}")
 
 # Visualize angle
-visualize.vis_angle(seq, joints["shoulder_right"]["abduction_adduction"], FRAME)
+visualize.vis_angle(seq, joints["shoulder_right"]["flexion_extension"], FRAME)
