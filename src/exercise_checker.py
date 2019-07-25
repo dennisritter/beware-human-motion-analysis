@@ -27,7 +27,7 @@ target_cs_origin = np.array([1, 1, 1])
 target_dir_x = np.array([-1, 0, 0])
 target_dir_y = np.array([0, -1, 0])
 # find vector perpendicular to xy-plane
-target_dir_z = np.cross(target_dir_x, target_dir_y)
+target_dir_z = -np.cross(target_dir_x, target_dir_y)
 # translate
 target_dir_x = target_dir_x+target_cs_origin
 target_dir_y = target_dir_y+target_cs_origin
@@ -51,8 +51,21 @@ M[:3, 3] = target_cs_origin
 print(f"M': \n{M}")
 # Multiply  M with start origin to translate it to target origin
 trans_cs_origin = np.matmul(M, np.append(start_cs_origin, 1))[:3]
-print(trans_cs_origin)
+trans_dir_x = np.matmul(M, np.append(start_dir_x, 1))[:3]
+trans_dir_y = np.matmul(M, np.append(start_dir_y, 1))[:3]
+trans_dir_z = np.matmul(M, np.append(start_dir_z, 1))[:3]
+# Find Y-rotation angle
 
+# TODO:
+# 1. Calc perpendicular vector for start_dir_x and target_dir_x
+# 2. Calc Angle between start_dir_x and target_dir_x
+# 3. Build R0 Matrix for that rotation
+# 4. Multiply R0 with T
+# 5. R0 dot T = M -> MatMul with all Start vectors
+# 6. Calc Angle between start_dir_y and target_dir_y
+# 7. Build R1 Matrix (Rotation around X-Axis)
+# 8. M' = M MatMul R1 = R1*R0*T
+# 9. Transform all points with M'
 
 fig = plt.figure(figsize=plt.figaspect(1)*2)
 ax = fig.add_subplot(1, 1, 1, projection='3d')
