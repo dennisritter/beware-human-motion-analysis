@@ -32,28 +32,64 @@ target_dir_x = target_dir_x+target_cs_origin
 target_dir_y = target_dir_y+target_cs_origin
 target_dir_z = target_dir_z+target_cs_origin
 
-trans_cs_origin = start_cs_origin
-trans_dir_x = start_dir_x
-trans_dir_y = start_dir_y
-trans_dir_z = start_dir_z
-
-M = np.array([
+I = np.array([
+    [1, 0, 0],
+    [0, 1, 0],
+    [0, 0, 1]
+])
+# TRANSLATION
+T = np.array([
     [1, 0, 0, 0],
     [0, 1, 0, 0],
     [0, 0, 1, 0],
     [0, 0, 0, 1]
 ])
 # Translation to target origin
-print(f"M: \n{M}")
 # Add translation values to M
-M[:3, 3] = target_cs_origin
-print(f"M': \n{M}")
-# Multiply  M with start origin to translate it to target origin
-trans_cs_origin = np.matmul(M, np.append(start_cs_origin, 1))[:3]
-trans_dir_x = np.matmul(M, np.append(start_dir_x, 1))[:3]
-trans_dir_y = np.matmul(M, np.append(start_dir_y, 1))[:3]
-trans_dir_z = np.matmul(M, np.append(start_dir_z, 1))[:3]
-# Find Y-rotation angle
+T[:3, 3] = target_cs_origin
+# Multiply M with start origin to translate it to target origin
+trans_cs_origin = np.matmul(T, np.append(start_cs_origin, 1))[:3]
+trans_dir_x = np.matmul(T, np.append(start_dir_x, 1))[:3]
+trans_dir_y = np.matmul(T, np.append(start_dir_y, 1))[:3]
+trans_dir_z = np.matmul(T, np.append(start_dir_z, 1))[:3]
+# Find X-rotation angle
+# Source http: // www.euclideanspace.com/maths/algebra/vectors/angleBetween/index.htm
+v1 = trans_dir_x - target_cs_origin
+v2 = target_dir_x - target_cs_origin
+# If theta 180° (dot product = -1 just switch directions
+if np.dot(v1, v2):
+    trans_dir_x = v1 * -1 + target_cs_origin
+else:
+    theta = np.degrees(np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))))
+    trans_target_dir_rot_axis = np.cross(v1, v2) / np.linalg.norm(np.cross(v1, v2))
+    print(np.dot(v1, v2))
+
+    # Build Rotation Matrix for rotation about arbitrary axis (Rodrigues formula)
+    # Source https: // en.wikipedia.org/wiki/Rodrigues % 27_rotation_formula
+    k = trans_target_dir_rot_axis
+    K = np.array([
+        [0, -k[2], k[1]],
+        [k[2], 0, -k[0]],
+        [-k[1], k[0], 0]
+    ])
+    # print(f"K: \n{K}")
+    # print(f"K.eig: \n{np.linalg.eig(K)}")
+    print(f"Theta: {theta}")
+    R0 = I + np.sin(theta)*K + (1-np.cos(theta))*K**2
+    # print(f"trans dir x: \n{R0}")
+    trans_dir_x = np.matmul(R0, trans_dir_x / np.linalg.norm(trans_dir_x))
+
+# TODO:
+# 1. Calc perpendicular vector for start_dir_x and target_dir_x
+# 2. Calc Angle between start_dir_x and target_dir_x
+# 3. Build R0 Matrix for that rotation
+# 4. Multiply R0 with T
+# 5. R0 dot T = M -> MatMul with all Start vectors
+# 6. Calc Angle between start_dir_y and target_dir_y
+# 7. Build R1 Matrix (Rotation around X-Axis)
+# 8. M' = M MatMul R1 = R1*R0*T
+# 9. Transform all points with M'
+
 
 # Beispiel Schulter Winkelberechnung Schritte:
 # -> Koordinatensystem in Punkt verschieben (keypoint Schulter)
@@ -69,28 +105,18 @@ trans_dir_z = np.matmul(M, np.append(start_dir_z, 1))[:3]
 # -> Winkel in Kugelkoordinaten ausrechnen
 # -> Medizinische Winkel ableiten
 
-# TODO:
-# 1. Calc perpendicular vector for start_dir_x and target_dir_x
-# 2. Calc Angle between start_dir_x and target_dir_x
-# 3. Build R0 Matrix for that rotation
-# 4. Multiply R0 with T
-# 5. R0 dot T = M -> MatMul with all Start vectors
-# 6. Calc Angle between start_dir_y and target_dir_y
-# 7. Build R1 Matrix (Rotation around X-Axis)
-# 8. M' = M MatMul R1 = R1*R0*T
-# 9. Transform all points with M'
 
 fig = plt.figure(figsize=plt.figaspect(1)*2)
 ax = fig.add_subplot(1, 1, 1, projection='3d')
 ax.scatter(start_cs_origin[0], start_cs_origin[1], start_cs_origin[2], c='blue')
 ax.scatter(target_cs_origin[0], target_cs_origin[1], target_cs_origin[2], c='red')
-ax.plot([start_cs_origin[0], start_dir_x[0]], [start_cs_origin[1], start_dir_x[1]], [start_cs_origin[2], start_dir_x[2]], color="blue")
+ax.plot([start_cs_origin[0], start_dir_x[0]], [start_cs_origin[1], start_dir_x[1]], [start_cs_origin[2], start_dir_x[2]], color="black")
 ax.plot([start_cs_origin[0], start_dir_y[0]], [start_cs_origin[1], start_dir_y[1]], [start_cs_origin[2], start_dir_y[2]], color="blue")
 ax.plot([start_cs_origin[0], start_dir_z[0]], [start_cs_origin[1], start_dir_z[1]], [start_cs_origin[2], start_dir_z[2]], color="blue")
-ax.plot([target_cs_origin[0], target_dir_x[0]], [target_cs_origin[1], target_dir_x[1]], [target_cs_origin[2], target_dir_x[2]], color="red")
+ax.plot([target_cs_origin[0], target_dir_x[0]], [target_cs_origin[1], target_dir_x[1]], [target_cs_origin[2], target_dir_x[2]], color="pink")
 ax.plot([target_cs_origin[0], target_dir_y[0]], [target_cs_origin[1], target_dir_y[1]], [target_cs_origin[2], target_dir_y[2]], color="red")
 ax.plot([target_cs_origin[0], target_dir_z[0]], [target_cs_origin[1], target_dir_z[1]], [target_cs_origin[2], target_dir_z[2]], color="red")
-ax.plot([trans_cs_origin[0], trans_dir_x[0]], [trans_cs_origin[1], trans_dir_x[1]], [trans_cs_origin[2], trans_dir_x[2]], color="green")
+ax.plot([trans_cs_origin[0], trans_dir_x[0]], [trans_cs_origin[1], trans_dir_x[1]], [trans_cs_origin[2], trans_dir_x[2]], color="black")
 ax.plot([trans_cs_origin[0], trans_dir_y[0]], [trans_cs_origin[1], trans_dir_y[1]], [trans_cs_origin[2], trans_dir_y[2]], color="green")
 ax.plot([trans_cs_origin[0], trans_dir_z[0]], [trans_cs_origin[1], trans_dir_z[1]], [trans_cs_origin[2], trans_dir_z[2]], color="green")
 # ax.plot(target_cs_origin[0], target_dir_x, color="red")
