@@ -12,13 +12,12 @@ import angle_calculations_medical as acm
 import numpy as np
 import math
 
-# Source: https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
 
-
-def rotation_matrix(axis, theta):
+def rotation_matrix4x4(axis, theta):
+    # Source: https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
     """
     Return the rotation matrix associated with counterclockwise rotation about
-    the given axis by theta radians.
+    the given axis by theta radians as 4x4 Transformation Matrix
     """
     axis = np.asarray(axis)
     axis = axis / math.sqrt(np.dot(axis, axis))
@@ -26,9 +25,10 @@ def rotation_matrix(axis, theta):
     b, c, d = -axis * math.sin(theta / 2.0)
     aa, bb, cc, dd = a * a, b * b, c * c, d * d
     bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
-    return np.array([[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
-                     [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
-                     [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
+    return np.array([[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac), 0],
+                     [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab), 0],
+                     [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc, 0],
+                     [0, 0, 0, 1]])
 
 
 # Get Exercise Object from json file
@@ -39,7 +39,7 @@ mocap_posemapper = PoseMapper(PoseFormatEnum.MOCAP)
 seq = mocap_posemapper.load('data/sequences/squat_3/complete-session.json', 'Squat')
 
 start_cs_origin = np.array([0, 0, 0])
-start_dir_x = np.array([.5, 1, 0])
+start_dir_x = np.array([1, 0, 0])
 start_dir_y = np.array([0, 1, 0])
 start_dir_z = np.array([0, 0, 1])
 target_cs_origin = np.array([1, 1, 1])
@@ -48,11 +48,6 @@ target_dir_y = np.array([0, -1, 0])
 # find vector perpendicular to xy-plane
 target_dir_z = np.cross(target_dir_x, target_dir_y)
 
-I = np.array([
-    [1, 0, 0],
-    [0, 1, 0],
-    [0, 0, 1]
-])
 # TRANSLATION
 T = np.array([
     [1, 0, 0, 0],
@@ -60,45 +55,44 @@ T = np.array([
     [0, 0, 1, 0],
     [0, 0, 0, 1]
 ])
-# Translation to target origin
-# Add translation values to M
-T[:3, 3] = target_cs_origin
 # Multiply M with start origin to translate it to target origin
-trans_cs_origin = np.matmul(T, np.append(start_cs_origin, 1))[:3]
-trans_dir_x = np.matmul(T, np.append(start_dir_x, 1))[:3]
-trans_dir_y = np.matmul(T, np.append(start_dir_y, 1))[:3]
-trans_dir_z = np.matmul(T, np.append(start_dir_z, 1))[:3]
+# trans_cs_origin = np.matmul(T, np.append(start_cs_origin, 1))[:3]
+# trans_dir_x = np.matmul(T, np.append(start_dir_x, 1))[:3]
+# trans_dir_y = np.matmul(T, np.append(start_dir_y, 1))[:3]
+# trans_dir_z = np.matmul(T, np.append(start_dir_z, 1))[:3]
 # Find X-rotation angle
 # Source http: // www.euclideanspace.com/maths/algebra/vectors/angleBetween/index.htm
-v1 = (trans_dir_x - trans_cs_origin) / math.sqrt(np.dot(trans_dir_x - trans_cs_origin, trans_dir_x - trans_cs_origin))
+v1 = (start_dir_x - start_cs_origin) / math.sqrt(np.dot(start_dir_x - start_cs_origin, start_dir_x - start_cs_origin))
 v2 = (target_dir_x - target_cs_origin) / math.sqrt(np.dot(target_dir_x - target_cs_origin, target_dir_x - target_cs_origin))
+print(f"v1 norm: {np.linalg.norm(v1)}")
+print(f"v2 norm: {np.linalg.norm(v2)}")
 v1_dot_v2 = np.dot(v1, v2)
-v1_cross_v2 = np.cross(v1, v2)
-# print(f"theta_cross v1: {np.degrees(np.arccos(np.dot(v1, v1_cross_v2)))}")
-# print(f"theta_cross v2: {np.degrees(np.arccos(np.dot(v2, v1_cross_v2)))}")
+print(f"v1 dot v2: {v1_dot_v2}")
+axis = np.cross(v1, v2)
+axis = axis / math.sqrt(np.dot(axis, axis))
+print(f"axis norm: {np.linalg.norm(axis)}")
 # If theta 180° (dot product = -1 just switch directions
-if (v1_dot_v2 == -1):
-    print("v1_dot_v2 = 0")
-    v1 = v1 * -1 + target_cs_origin
-else:
-    theta = np.arccos(v1_dot_v2)
-    print(f"Theta: {theta}")
-    # Build Rotation Matrix for rotation about arbitrary axis (Rodrigues formula)
-    # Source https: // en.wikipedia.org/wiki/Rodrigues % 27_rotation_formula
-    axis = v1_cross_v2
-    R0 = rotation_matrix(axis, theta)
-    v1_new = np.dot(R0, v1)
+# if (v1_dot_v2 == -1):
+#     print("v1_dot_v2 = 0")
+#     v1 = v1 * -1 + target_cs_origin
+# else:
+theta = np.arccos(v1_dot_v2)
+print(f"Theta: {theta} ({np.degrees(theta)}°)")
 
-print(v1)
-print(v1_new)
-print(np.dot(v1, v1_new))
-print(np.degrees(np.arccos(np.dot(v1, v1_new))))
+# Use these matrices on all points..
+R = rotation_matrix4x4(axis, theta)
+T[:3, 3] = target_cs_origin
+
+v1_new = start_dir_x
+v1_new = np.matmul(R, np.append(v1_new, 1))[:3]
+v1_new = np.matmul(T, np.append(v1_new, 1))[:3]
 
 v1 += target_cs_origin
-v1_new += target_cs_origin
 v2 += target_cs_origin
-v1_cross_v2 += target_cs_origin
+axis += target_cs_origin
 
+check_angle = np.arccos(np.dot(v1_new / np.linalg.norm(v1_new), v2 / np.linalg.norm(v2)))
+print(f"{check_angle} ({np.degrees(check_angle)}°)")
 # TODO:
 # 1. Calc perpendicular vector for start_dir_x and target_dir_x
 # 2. Calc Angle between start_dir_x and target_dir_x
@@ -133,9 +127,9 @@ ax.set_ylim3d(-2, 2)
 ax.set_zlim3d(-2, 2)
 # ax.scatter(start_cs_origin[0], start_cs_origin[1], start_cs_origin[2], c='blue')
 # ax.scatter(target_cs_origin[0], target_cs_origin[1], target_cs_origin[2], c='red')
-# ax.plot([start_cs_origin[0], start_dir_x[0]], [start_cs_origin[1], start_dir_x[1]], [start_cs_origin[2], start_dir_x[2]], color="black")
-# ax.plot([start_cs_origin[0], start_dir_y[0]], [start_cs_origin[1], start_dir_y[1]], [start_cs_origin[2], start_dir_y[2]], color="blue")
-# ax.plot([start_cs_origin[0], start_dir_z[0]], [start_cs_origin[1], start_dir_z[1]], [start_cs_origin[2], start_dir_z[2]], color="blue")
+ax.plot([start_cs_origin[0], start_dir_x[0]], [start_cs_origin[1], start_dir_x[1]], [start_cs_origin[2], start_dir_x[2]], color="black")
+ax.plot([start_cs_origin[0], start_dir_y[0]], [start_cs_origin[1], start_dir_y[1]], [start_cs_origin[2], start_dir_y[2]], color="blue")
+ax.plot([start_cs_origin[0], start_dir_z[0]], [start_cs_origin[1], start_dir_z[1]], [start_cs_origin[2], start_dir_z[2]], color="blue")
 # ax.plot([target_cs_origin[0], target_dir_x[0]], [target_cs_origin[1], target_dir_x[1]], [target_cs_origin[2], target_dir_x[2]], color="pink")
 # ax.plot([target_cs_origin[0], target_dir_y[0]], [target_cs_origin[1], target_dir_y[1]], [target_cs_origin[2], target_dir_y[2]], color="red")
 # ax.plot([target_cs_origin[0], target_dir_z[0]], [target_cs_origin[1], target_dir_z[1]], [target_cs_origin[2], target_dir_z[2]], color="red")
@@ -147,7 +141,7 @@ ax.set_zlim3d(-2, 2)
 ax.plot([target_cs_origin[0], v1[0]], [target_cs_origin[1], v1[1]], [target_cs_origin[2], v1[2]], color="blue")
 ax.plot([target_cs_origin[0], v1_new[0]], [target_cs_origin[1], v1_new[1]], [target_cs_origin[2], v1_new[2]], color="green")
 ax.plot([target_cs_origin[0], v2[0]], [target_cs_origin[1], v2[1]], [target_cs_origin[2], v2[2]], color="red", alpha=.5)
-ax.plot([target_cs_origin[0], v1_cross_v2[0]], [target_cs_origin[1], v1_cross_v2[1]], [target_cs_origin[2], v1_cross_v2[2]], color="black", linestyle="dotted")
+ax.plot([target_cs_origin[0], axis[0]], [target_cs_origin[1], axis[1]], [target_cs_origin[2], axis[2]], color="black", linestyle="dotted")
 plt.show()
 
 
