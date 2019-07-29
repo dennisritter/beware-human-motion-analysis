@@ -40,7 +40,7 @@ def get_perpendicular_vector(v1, v2):
         # TODO: Arbitrary Vector.. Find method to ensure its not parallel to vsx
         return np.cross(np.array([3, 2, 1]), v2)
     else:
-        return np.cross(v1, v2)
+        return norm(np.cross(v1, v2))
 
 
 def norm(v):
@@ -67,14 +67,16 @@ def rotation_matrix4x4(axis, theta):
 
 def tranlation_matrix4x4(v):
     T = np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]
+        [1.0, 0, 0, 0],
+        [0, 1.0, 0, 0],
+        [0, 0, 1.0, 0],
+        [0, 0, 0, 1.0]
     ])
     T[:3, 3] = v
     return T
 
+
+FRAME = 50
 
 # Get Exercise Object from json file
 ex = exercise_loader.load('data/exercises/squat.json')
@@ -84,16 +86,16 @@ mocap_posemapper = PoseMapper(PoseFormatEnum.MOCAP)
 seq = mocap_posemapper.load('data/sequences/squat_3/complete-session.json', 'Squat')
 
 # Start origin at shoulder keypoint
-start_cs_origin = seq.positions[0][2]
+start_cs_origin = seq.positions[FRAME][2]
 # Axesdirection as tracked
-vsx = norm(np.array([1, 0, 0]) - start_cs_origin)
-vsy = norm(np.array([0, 1, 0]) - start_cs_origin)
-vsz = norm(np.array([0, 0, 1]) - start_cs_origin)
+vsx = norm(np.array([1, 0, 0]))
+vsy = norm(np.array([0, 1, 0]))
+vsz = norm(np.array([0, 0, 1]))
 # Target origin (0,0,0) so shoulder is at (0,0,0)
 target_cs_origin = np.array([0, 0, 0])
 # x is vector direction to other shoulder
-vtx = norm(seq.positions[0][5] - start_cs_origin)
-vtz = norm(np.cross(vtx, norm(seq.positions[0][1] - start_cs_origin)))
+vtx = norm(seq.positions[FRAME][5] - start_cs_origin)
+vtz = norm(np.cross(vtx, norm(start_cs_origin-seq.positions[FRAME][1])))
 # find vector perpendicular to xy-plane
 vty = norm(np.cross(vtx, vtz))
 
@@ -101,31 +103,51 @@ axis = get_perpendicular_vector(vsx, vtx)
 theta = get_angle(vsx, vtx)
 print(f"Theta: {theta} ({np.degrees(theta)}°)")
 R = rotation_matrix4x4(axis, theta)
+
+# Rotate X to use it as axis for y rotation
+temp_x_rot = np.matmul(R, np.append(vsx, 1))[:3]
+# Rotate y direction vector to check for Y-Angle
+temp_y_rot = np.matmul(R, np.append(vsy, 1))[:3]
+
 # start_dir_x_transformed = np.matmul(R, np.append(start_dir_x_transformed, 1))[:3]
 # start_dir_y_transformed = np.matmul(R, np.append(start_dir_y_transformed, 1))[:3]
 # start_dir_z_transformed = np.matmul(R, np.append(start_dir_z_transformed, 1))[:3]
 ###########################################
-# axis2 = get_perpendicular_vector(start_dir_y_transformed, vty)
-# theta2 = get_angle(start_dir_y_transformed, vty)
-# print(f"Theta2: {theta2} ({np.degrees(theta2)}°)")
-# R2 = rotation_matrix4x4(norm(start_dir_x_transformed), theta2)
+# axis2 = get_perpendicular_vector(temp_y_rot, vty)
+theta2 = get_angle(temp_y_rot, vty)
+print(f"Theta2: {theta2} ({np.degrees(theta2)}°)")
+R2 = rotation_matrix4x4(norm(temp_x_rot), theta2)
 # start_dir_x_transformed = np.matmul(R2, np.append(start_dir_x_transformed, 1))[:3]
 # start_dir_y_transformed = np.matmul(R2, np.append(start_dir_y_transformed, 1))[:3]
 # start_dir_z_transformed = np.matmul(R2, np.append(start_dir_z_transformed, 1))[:3]
 ###########################################
-T = tranlation_matrix4x4(target_cs_origin)
+T = tranlation_matrix4x4(-start_cs_origin)
+# print(target_cs_origin - start_cs_origin)
+# print(f"T: \n {T}")
 # start_dir_x_transformed = np.matmul(T, np.append(start_dir_x_transformed, 1))[:3]
 # start_dir_y_transformed = np.matmul(T, np.append(start_dir_y_transformed, 1))[:3]
 # start_dir_z_transformed = np.matmul(T, np.append(start_dir_z_transformed, 1))[:3]
+positions = []
+for bp_pos in seq.positions[FRAME]:
+    pos = bp_pos
+    pos = np.matmul(T, np.append(pos, 1))[:3]
+    pos = np.matmul(R2, np.append(pos, 1))[:3]
+    pos = np.matmul(R, np.append(pos, 1))[:3]
+    positions.append(pos)
+
 
 fig = plt.figure(figsize=plt.figaspect(1)*2)
 ax = fig.add_subplot(1, 1, 1, projection='3d')
-ax.set_xlim3d(-2, 2)
-ax.set_ylim3d(-2, 2)
-ax.set_zlim3d(-2, 2)
-ax.plot([target_cs_origin[0], vtx[0]], [target_cs_origin[1], vtx[1]], [target_cs_origin[2], vtx[2]], color="pink", linewidth=3)
-ax.plot([target_cs_origin[0], vty[0]], [target_cs_origin[1], vty[1]], [target_cs_origin[2], vty[2]], color="maroon", linewidth=3)
-ax.plot([target_cs_origin[0], vtz[0]], [target_cs_origin[1], vtz[1]], [target_cs_origin[2], vtz[2]], color="red", linewidth=3)
+for p in positions:
+    ax.scatter(p[0], p[1], p[2], c="blue")
+for p in seq.positions[FRAME]:
+    ax.scatter(p[0], p[1], p[2], c="red", alpha=0.5)
+# ax.plot([target_cs_origin[0], vtx[0]], [target_cs_origin[1], vtx[1]], [target_cs_origin[2], vtx[2]], color="pink", linewidth=3)
+# ax.plot([target_cs_origin[0], vty[0]], [target_cs_origin[1], vty[1]], [target_cs_origin[2], vty[2]], color="maroon", linewidth=3)
+# ax.plot([target_cs_origin[0], vtz[0]], [target_cs_origin[1], vtz[1]], [target_cs_origin[2], vtz[2]], color="red", linewidth=3)
+ax.plot([target_cs_origin[0], 1], [target_cs_origin[1], 0], [target_cs_origin[2], 0], color="pink", linewidth=1)
+ax.plot([target_cs_origin[0], 0], [target_cs_origin[1], 1], [target_cs_origin[2], 0], color="maroon", linewidth=1)
+ax.plot([target_cs_origin[0], 0], [target_cs_origin[1], 0], [target_cs_origin[2], 1], color="red", linewidth=1)
 plt.show()
 
 """ LEGACY CODE
