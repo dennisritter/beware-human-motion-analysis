@@ -13,6 +13,10 @@ import numpy as np
 import math
 
 
+def norm(vector):
+    return vector / math.sqrt(np.dot(vector, vector))
+
+
 def rotation_matrix4x4(axis, theta):
     # Source: https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
     """
@@ -43,10 +47,11 @@ start_dir_x = np.array([1, 0, 0])
 start_dir_y = np.array([0, 1, 0])
 start_dir_z = np.array([0, 0, 1])
 target_cs_origin = np.array([1, 1, 1])
-target_dir_x = np.array([-1, 0, 0])
-target_dir_y = np.array([0, -1, 0])
+target_dir_x = np.array([1, 0, 1])
+target_dir_y = np.array([0, 1, 1])
 # find vector perpendicular to xy-plane
-target_dir_z = np.cross(target_dir_x, target_dir_y)
+target_dir_z = np.cross(target_dir_y, target_dir_x)
+print(target_dir_z)
 
 # TRANSLATION
 T = np.array([
@@ -55,44 +60,52 @@ T = np.array([
     [0, 0, 1, 0],
     [0, 0, 0, 1]
 ])
-# Multiply M with start origin to translate it to target origin
-# trans_cs_origin = np.matmul(T, np.append(start_cs_origin, 1))[:3]
-# trans_dir_x = np.matmul(T, np.append(start_dir_x, 1))[:3]
-# trans_dir_y = np.matmul(T, np.append(start_dir_y, 1))[:3]
-# trans_dir_z = np.matmul(T, np.append(start_dir_z, 1))[:3]
-# Find X-rotation angle
-# Source http: // www.euclideanspace.com/maths/algebra/vectors/angleBetween/index.htm
-v1 = (start_dir_x - start_cs_origin) / math.sqrt(np.dot(start_dir_x - start_cs_origin, start_dir_x - start_cs_origin))
-v2 = (target_dir_x - target_cs_origin) / math.sqrt(np.dot(target_dir_x - target_cs_origin, target_dir_x - target_cs_origin))
-print(f"v1 norm: {np.linalg.norm(v1)}")
-print(f"v2 norm: {np.linalg.norm(v2)}")
-v1_dot_v2 = np.dot(v1, v2)
-print(f"v1 dot v2: {v1_dot_v2}")
-axis = np.cross(v1, v2)
-axis = axis / math.sqrt(np.dot(axis, axis))
-print(f"axis norm: {np.linalg.norm(axis)}")
+vsx = norm(start_dir_x - start_cs_origin)
+vsy = norm(start_dir_y - start_cs_origin)
+vsz = norm(start_dir_z - start_cs_origin)
+vtx = norm(target_dir_x - target_cs_origin)
+vty = norm(target_dir_y - target_cs_origin)
+vtz = norm(target_dir_z - target_cs_origin)
+print(f"vsx norm: {norm(vsx)}")
+print(f"vtx norm: {norm(vtx)}")
+vsx_dot_vtx = np.dot(vsx, vtx)
+print(f"vsx dot vtx: {vsx_dot_vtx}")
 # If theta 180° (dot product = -1 just switch directions
-# if (v1_dot_v2 == -1):
-#     print("v1_dot_v2 = 0")
-#     v1 = v1 * -1 + target_cs_origin
-# else:
-theta = np.arccos(v1_dot_v2)
+if (vsx_dot_vtx == -1):
+    print("vsx_dot_vtx = -1")
+    axis = np.cross(np.array([3, 2, 1]), vsx)
+    # check_axis = np.cross(np.array([1, 0, 0]), vtx)
+else:
+    axis = np.cross(vsx, vtx)
+
+axis = norm(axis)
+print(f"axis norm: {norm(axis)}")
+theta = np.arccos(vsx_dot_vtx)
 print(f"Theta: {theta} ({np.degrees(theta)}°)")
 
 # Use these matrices on all points..
 R = rotation_matrix4x4(axis, theta)
 T[:3, 3] = target_cs_origin
 
-v1_new = start_dir_x
-v1_new = np.matmul(R, np.append(v1_new, 1))[:3]
-v1_new = np.matmul(T, np.append(v1_new, 1))[:3]
+start_dir_x_transformed = start_dir_x
+start_dir_x_transformed = np.matmul(R, np.append(start_dir_x_transformed, 1))[:3]
+start_dir_x_transformed = np.matmul(T, np.append(start_dir_x_transformed, 1))[:3]
 
-v1 += target_cs_origin
-v2 += target_cs_origin
+vtx += target_cs_origin
+vty += target_cs_origin
+vtz += target_cs_origin
 axis += target_cs_origin
 
-check_angle = np.arccos(np.dot(v1_new / np.linalg.norm(v1_new), v2 / np.linalg.norm(v2)))
+check_angle = np.arccos(np.dot(norm(start_dir_x_transformed), norm(vtx)))
 print(f"{check_angle} ({np.degrees(check_angle)}°)")
+###########################################
+start_dir_y_transformed = start_dir_y
+start_dir_z_transformed = start_dir_z
+start_dir_y_transformed = np.matmul(R, np.append(start_dir_y_transformed, 1))[:3]
+start_dir_y_transformed = np.matmul(T, np.append(start_dir_y_transformed, 1))[:3]
+start_dir_z_transformed = np.matmul(R, np.append(start_dir_z_transformed, 1))[:3]
+start_dir_z_transformed = np.matmul(T, np.append(start_dir_z_transformed, 1))[:3]
+
 # TODO:
 # 1. Calc perpendicular vector for start_dir_x and target_dir_x
 # 2. Calc Angle between start_dir_x and target_dir_x
@@ -125,22 +138,27 @@ ax = fig.add_subplot(1, 1, 1, projection='3d')
 ax.set_xlim3d(-2, 2)
 ax.set_ylim3d(-2, 2)
 ax.set_zlim3d(-2, 2)
-# ax.scatter(start_cs_origin[0], start_cs_origin[1], start_cs_origin[2], c='blue')
+ax.scatter(start_cs_origin[0], start_cs_origin[1], start_cs_origin[2], c='blue')
 # ax.scatter(target_cs_origin[0], target_cs_origin[1], target_cs_origin[2], c='red')
 ax.plot([start_cs_origin[0], start_dir_x[0]], [start_cs_origin[1], start_dir_x[1]], [start_cs_origin[2], start_dir_x[2]], color="black")
-ax.plot([start_cs_origin[0], start_dir_y[0]], [start_cs_origin[1], start_dir_y[1]], [start_cs_origin[2], start_dir_y[2]], color="blue")
-ax.plot([start_cs_origin[0], start_dir_z[0]], [start_cs_origin[1], start_dir_z[1]], [start_cs_origin[2], start_dir_z[2]], color="blue")
-# ax.plot([target_cs_origin[0], target_dir_x[0]], [target_cs_origin[1], target_dir_x[1]], [target_cs_origin[2], target_dir_x[2]], color="pink")
-# ax.plot([target_cs_origin[0], target_dir_y[0]], [target_cs_origin[1], target_dir_y[1]], [target_cs_origin[2], target_dir_y[2]], color="red")
-# ax.plot([target_cs_origin[0], target_dir_z[0]], [target_cs_origin[1], target_dir_z[1]], [target_cs_origin[2], target_dir_z[2]], color="red")
+ax.plot([start_cs_origin[0], start_dir_y[0]], [start_cs_origin[1], start_dir_y[1]], [start_cs_origin[2], start_dir_y[2]], color="gray")
+ax.plot([start_cs_origin[0], start_dir_z[0]], [start_cs_origin[1], start_dir_z[1]], [start_cs_origin[2], start_dir_z[2]], color="silver")
+# ax.plot([target_cs_origin[0], vtx[0]], [target_cs_origin[1], vtx[1]], [target_cs_origin[2], vtx[2]], color="red", linewidth=3)
+# ax.plot([target_cs_origin[0], vty[0]], [target_cs_origin[1], vty[1]], [target_cs_origin[2], vty[2]], color="red", linewidth=3)
+# ax.plot([target_cs_origin[0], vtz[0]], [target_cs_origin[1], vtz[1]], [target_cs_origin[2], vtz[2]], color="red", linewidth=3)
+ax.plot([target_cs_origin[0], target_dir_x[0]], [target_cs_origin[1], target_dir_x[1]], [target_cs_origin[2], target_dir_x[2]], color="pink", linewidth=3)
+ax.plot([target_cs_origin[0], target_dir_y[0]], [target_cs_origin[1], target_dir_y[1]], [target_cs_origin[2], target_dir_y[2]], color="maroon", linewidth=3)
+ax.plot([target_cs_origin[0], target_dir_z[0]], [target_cs_origin[1], target_dir_z[1]], [target_cs_origin[2], target_dir_z[2]], color="red", linewidth=3)
 # ax.plot([trans_cs_origin[0], trans_dir_x[0]], [trans_cs_origin[1], trans_dir_x[1]], [trans_cs_origin[2], trans_dir_x[2]], color="black")
 # ax.plot([trans_cs_origin[0], trans_dir_y[0]], [trans_cs_origin[1], trans_dir_y[1]], [trans_cs_origin[2], trans_dir_y[2]], color="green")
 # ax.plot([trans_cs_origin[0], trans_dir_z[0]], [trans_cs_origin[1], trans_dir_z[1]], [trans_cs_origin[2], trans_dir_z[2]], color="green")
 # ax.plot([trans_cs_origin[0], k[0]], [trans_cs_origin[1], k[1]], [trans_cs_origin[2], k[2]], color="red", linestyle="dotted")
 
-ax.plot([target_cs_origin[0], v1[0]], [target_cs_origin[1], v1[1]], [target_cs_origin[2], v1[2]], color="blue")
-ax.plot([target_cs_origin[0], v1_new[0]], [target_cs_origin[1], v1_new[1]], [target_cs_origin[2], v1_new[2]], color="green")
-ax.plot([target_cs_origin[0], v2[0]], [target_cs_origin[1], v2[1]], [target_cs_origin[2], v2[2]], color="red", alpha=.5)
+# ax.plot([target_cs_origin[0], vsx[0]], [target_cs_origin[1], vsx[1]], [target_cs_origin[2], vsx[2]], color="blue")
+ax.plot([target_cs_origin[0], start_dir_x_transformed[0]], [target_cs_origin[1], start_dir_x_transformed[1]], [target_cs_origin[2], start_dir_x_transformed[2]], color="olive")
+ax.plot([target_cs_origin[0], start_dir_y_transformed[0]], [target_cs_origin[1], start_dir_y_transformed[1]], [target_cs_origin[2], start_dir_y_transformed[2]], color="springgreen")
+ax.plot([target_cs_origin[0], start_dir_z_transformed[0]], [target_cs_origin[1], start_dir_z_transformed[1]], [target_cs_origin[2], start_dir_z_transformed[2]], color="green")
+# ax.plot([target_cs_origin[0], vtx[0]], [target_cs_origin[1], vtx[1]], [target_cs_origin[2], vtx[2]], color="red", alpha=.5)
 ax.plot([target_cs_origin[0], axis[0]], [target_cs_origin[1], axis[1]], [target_cs_origin[2], axis[2]], color="black", linestyle="dotted")
 plt.show()
 
