@@ -13,99 +13,6 @@ import numpy as np
 import math
 
 
-def norm(vector):
-    return vector / math.sqrt(np.dot(vector, vector))
-
-
-def rotation_matrix4x4(axis, theta):
-    # Source: https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
-    """
-    Return the rotation matrix associated with counterclockwise rotation about
-    the given axis by theta radians as 4x4 Transformation Matrix
-    """
-    axis = np.asarray(axis)
-    axis = axis / math.sqrt(np.dot(axis, axis))
-    a = math.cos(theta / 2.0)
-    b, c, d = -axis * math.sin(theta / 2.0)
-    aa, bb, cc, dd = a * a, b * b, c * c, d * d
-    bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
-    return np.array([[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac), 0],
-                     [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab), 0],
-                     [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc, 0],
-                     [0, 0, 0, 1]])
-
-
-# Get Exercise Object from json file
-ex = exercise_loader.load('data/exercises/squat.json')
-# Get PoseMapper instance for MOCAP sequences
-mocap_posemapper = PoseMapper(PoseFormatEnum.MOCAP)
-# Convert mocap json string Positions to Sequence Object
-seq = mocap_posemapper.load('data/sequences/squat_3/complete-session.json', 'Squat')
-
-start_cs_origin = np.array([0, 0, 0])
-start_dir_x = np.array([1, 0, 0])
-start_dir_y = np.array([0, 1, 0])
-start_dir_z = np.array([0, 0, 1])
-target_cs_origin = np.array([1, 1, 1])
-target_dir_x = np.array([1, 0, 1])
-target_dir_y = np.array([0, 1, 1])
-# find vector perpendicular to xy-plane
-target_dir_z = np.cross(target_dir_y, target_dir_x)
-print(target_dir_z)
-
-# TRANSLATION
-T = np.array([
-    [1, 0, 0, 0],
-    [0, 1, 0, 0],
-    [0, 0, 1, 0],
-    [0, 0, 0, 1]
-])
-vsx = norm(start_dir_x - start_cs_origin)
-vsy = norm(start_dir_y - start_cs_origin)
-vsz = norm(start_dir_z - start_cs_origin)
-vtx = norm(target_dir_x - target_cs_origin)
-vty = norm(target_dir_y - target_cs_origin)
-vtz = norm(target_dir_z - target_cs_origin)
-print(f"vsx norm: {norm(vsx)}")
-print(f"vtx norm: {norm(vtx)}")
-vsx_dot_vtx = np.dot(vsx, vtx)
-print(f"vsx dot vtx: {vsx_dot_vtx}")
-# If theta 180° (dot product = -1 just switch directions
-if (vsx_dot_vtx == -1):
-    print("vsx_dot_vtx = -1")
-    axis = np.cross(np.array([3, 2, 1]), vsx)
-    # check_axis = np.cross(np.array([1, 0, 0]), vtx)
-else:
-    axis = np.cross(vsx, vtx)
-
-axis = norm(axis)
-print(f"axis norm: {norm(axis)}")
-theta = np.arccos(vsx_dot_vtx)
-print(f"Theta: {theta} ({np.degrees(theta)}°)")
-
-# Use these matrices on all points..
-R = rotation_matrix4x4(axis, theta)
-T[:3, 3] = target_cs_origin
-
-start_dir_x_transformed = start_dir_x
-start_dir_x_transformed = np.matmul(R, np.append(start_dir_x_transformed, 1))[:3]
-start_dir_x_transformed = np.matmul(T, np.append(start_dir_x_transformed, 1))[:3]
-
-vtx += target_cs_origin
-vty += target_cs_origin
-vtz += target_cs_origin
-axis += target_cs_origin
-
-check_angle = np.arccos(np.dot(norm(start_dir_x_transformed), norm(vtx)))
-print(f"{check_angle} ({np.degrees(check_angle)}°)")
-###########################################
-start_dir_y_transformed = start_dir_y
-start_dir_z_transformed = start_dir_z
-start_dir_y_transformed = np.matmul(R, np.append(start_dir_y_transformed, 1))[:3]
-start_dir_y_transformed = np.matmul(T, np.append(start_dir_y_transformed, 1))[:3]
-start_dir_z_transformed = np.matmul(R, np.append(start_dir_z_transformed, 1))[:3]
-start_dir_z_transformed = np.matmul(T, np.append(start_dir_z_transformed, 1))[:3]
-
 # TODO:
 # 1. Calc perpendicular vector for start_dir_x and target_dir_x
 # 2. Calc Angle between start_dir_x and target_dir_x
@@ -131,6 +38,121 @@ start_dir_z_transformed = np.matmul(T, np.append(start_dir_z_transformed, 1))[:3
 # -> Alle für den Winkel benötigten Punkte transformieren
 # -> Winkel in Kugelkoordinaten ausrechnen
 # -> Medizinische Winkel ableiten
+
+def get_angle(v1, v2):
+    return np.arccos(np.dot(norm(v1), norm(v2)))
+
+
+def get_perpendicular_vector(v1, v2):
+    # If theta 180° (dot product = -1 just switch directions
+    v1 = norm(v1)
+    v2 = norm(v2)
+
+    if (np.dot(v1, v2) == -1):
+        # TODO: Arbitrary Vector.. Find method to ensure its not parallel to vsx
+        return np.cross(np.array([3, 2, 1]), v2)
+    else:
+        return np.cross(v1, v2)
+
+
+def norm(v):
+    return v / math.sqrt(np.dot(v, v))
+
+
+def rotation_matrix4x4(axis, theta):
+    # Source: https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
+    """
+    Return the rotation matrix associated with counterclockwise rotation about
+    the given axis by theta radians as 4x4 Transformation Matrix
+    """
+    axis = np.asarray(axis)
+    axis = axis / math.sqrt(np.dot(axis, axis))
+    a = math.cos(theta / 2.0)
+    b, c, d = -axis * math.sin(theta / 2.0)
+    aa, bb, cc, dd = a * a, b * b, c * c, d * d
+    bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
+    return np.array([[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac), 0],
+                     [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab), 0],
+                     [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc, 0],
+                     [0, 0, 0, 1]])
+
+
+def tranlation_matrix4x4(v):
+    T = np.array([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+    ])
+    T[:3, 3] = v
+    return T
+
+
+# Get Exercise Object from json file
+ex = exercise_loader.load('data/exercises/squat.json')
+# Get PoseMapper instance for MOCAP sequences
+mocap_posemapper = PoseMapper(PoseFormatEnum.MOCAP)
+# Convert mocap json string Positions to Sequence Object
+seq = mocap_posemapper.load('data/sequences/squat_3/complete-session.json', 'Squat')
+
+start_cs_origin = np.array([0, 0, 0])
+start_dir_x = np.array([1, 0, 0])
+start_dir_y = np.array([0, 1, 0])
+start_dir_z = np.array([0, 0, 1])
+target_cs_origin = np.array([1, 1, 1])
+target_dir_x = np.array([1, 0, 1])
+target_dir_y = np.array([0, 1, 1])
+# find vector perpendicular to xy-plane
+target_dir_z = np.cross(target_dir_y, target_dir_x)
+print(target_dir_z)
+
+vsx = norm(start_dir_x - start_cs_origin)
+vsy = norm(start_dir_y - start_cs_origin)
+vsz = norm(start_dir_z - start_cs_origin)
+vtx = norm(target_dir_x - target_cs_origin)
+vty = norm(target_dir_y - target_cs_origin)
+vtz = norm(target_dir_z - target_cs_origin)
+
+start_dir_x_transformed = start_dir_x
+start_dir_y_transformed = start_dir_y
+start_dir_z_transformed = start_dir_z
+
+axis = get_perpendicular_vector(vsx, vtx)
+theta = get_angle(vsx, vtx)
+print(f"Theta: {theta} ({np.degrees(theta)}°)")
+R = rotation_matrix4x4(axis, theta)
+start_dir_x_transformed = np.matmul(R, np.append(start_dir_x_transformed, 1))[:3]
+start_dir_y_transformed = np.matmul(R, np.append(start_dir_y_transformed, 1))[:3]
+start_dir_z_transformed = np.matmul(R, np.append(start_dir_z_transformed, 1))[:3]
+###########################################
+axis2 = get_perpendicular_vector(start_dir_y_transformed, vty)
+theta2 = get_angle(start_dir_y_transformed, vty)
+print(f"Theta2: {theta2} ({np.degrees(theta2)}°)")
+R2 = rotation_matrix4x4(norm(start_dir_x_transformed), theta2)
+start_dir_x_transformed = np.matmul(R2, np.append(start_dir_x_transformed, 1))[:3]
+start_dir_y_transformed = np.matmul(R2, np.append(start_dir_y_transformed, 1))[:3]
+start_dir_z_transformed = np.matmul(R2, np.append(start_dir_z_transformed, 1))[:3]
+###########################################
+# axis3 = get_perpendicular_vector(start_dir_z_transformed, vtz)
+# theta3 = get_angle(start_dir_z_transformed, vtz)
+# print(f"Theta3: {theta3} ({np.degrees(theta3)}°)")
+# R3 = rotation_matrix4x4(start_dir_x_transformed, theta3)
+# start_dir_x_transformed = np.matmul(R3, np.append(start_dir_x_transformed, 1))[:3]
+# start_dir_y_transformed = np.matmul(R3, np.append(start_dir_y_transformed, 1))[:3]
+# start_dir_z_transformed = np.matmul(R3, np.append(start_dir_z_transformed, 1))[:3]
+###########################################
+T = tranlation_matrix4x4(target_cs_origin)
+start_dir_x_transformed = np.matmul(T, np.append(start_dir_x_transformed, 1))[:3]
+start_dir_y_transformed = np.matmul(T, np.append(start_dir_y_transformed, 1))[:3]
+start_dir_z_transformed = np.matmul(T, np.append(start_dir_z_transformed, 1))[:3]
+
+vtx += target_cs_origin
+vty += target_cs_origin
+vtz += target_cs_origin
+axis += target_cs_origin
+
+# Check angle from transformed start to target
+print(f"{get_angle(start_dir_x_transformed, vtx)} ({np.degrees(get_angle(start_dir_x_transformed, vtx))}°)")
 
 
 fig = plt.figure(figsize=plt.figaspect(1)*2)
