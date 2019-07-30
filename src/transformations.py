@@ -114,11 +114,17 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     ax = fig.add_subplot(1, 1, 1, projection='3d')
 
     for i, p in enumerate(transformed_positions):
-        ax.scatter(p[0], p[1], p[2], c="blue")
-    for j in range(len(seq.positions[frame])):
-        ax.scatter(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], c="red", alpha=0.5)
-        ax.text(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], j)
-        ax.annotate(f"{j}", (seq.positions[frame][j][0], seq.positions[frame][j][1]))
+        if i == 1:
+            ax.scatter(p[0], p[1], p[2], c="blue")
+        else:
+            ax.scatter(p[0], p[1], p[2], c="blue")
+    # ax.plot([zero_position[0], -0.06271505754938689], [zero_position[1], -0.2933918624237914], [zero_position[2], 0.022070646037552197], color="pink", linewidth=1)
+    ax.plot([zero_position[0], 0.04382785392053286], [zero_position[1], 0.0914563860141735], [zero_position[2], -0.2903965198128813], color="pink", linewidth=1)
+
+    # for j in range(len(seq.positions[frame])):
+    #     ax.scatter(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], c="red", alpha=0.5)
+    #     ax.text(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], j)
+    # ax.annotate(f"{j}", (seq.positions[frame][j][0], seq.positions[frame][j][1]))
     ax.plot([zero_position[0], vx[0]], [zero_position[1], vx[1]], [zero_position[2], vx[2]], color="pink", linewidth=1)
     ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]], [zero_position[2], vy[2]], color="maroon", linewidth=1)
     ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]], color="red", linewidth=1)

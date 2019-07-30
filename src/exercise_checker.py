@@ -6,6 +6,7 @@ from PoseMapper import PoseMapper
 import angle_calculations_medical as acm
 import numpy as np
 import transformations
+import math
 
 # Beispiel Schulter Winkelberechnung Schritte:
 # -> Koordinatensystem in Punkt verschieben (keypoint Schulter)
@@ -28,7 +29,43 @@ ex = exercise_loader.load('data/exercises/squat.json')
 mocap_posemapper = PoseMapper(PoseFormatEnum.MOCAP)
 # Convert mocap json string Positions to Sequence Object
 seq = mocap_posemapper.load('data/sequences/squat_3/complete-session.json', 'Squat')
-left_shoulder_aligned_positions = transformations.align_coordinates_to(2, 14, 3, seq, 20)
+
+# Move coordinate system to left shoulder for frame 20
+# align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_direction_bp_idx: int, seq: Sequence, frame: int)
+left_shoulder_aligned_positions = transformations.align_coordinates_to(2, 14, 3, seq, frame=20)
+
+# Transform postitions from Cartesian coordinates to Spherical coordinates
+# Example for left shoulder using left elbow to check angles
+x = left_shoulder_aligned_positions[1][0]
+y = left_shoulder_aligned_positions[1][1]
+z = left_shoulder_aligned_positions[1][2]
+print(f"Joint Pos for Angle Calculation: \n{x,y,z}")
+# x = 1
+# y = 1
+# z = 1
+# r = 0.3
+# theta = np.radians(0)
+# phi = np.radians(10)
+r = math.sqrt(x**2 + y**2 + z**2)
+theta = math.acos(z/r)
+phi = math.atan2(y, x)
+theta_med = -(math.acos(z/r) - np.radians(270))
+phi_med = math.atan2(y, x) - np.radians(90)
+print(f"r: {r}")
+print(f"theta: {theta} ({np.degrees(theta)})")
+print(f"phi: {phi} ({np.degrees(phi)})")
+# Flexion(+)/Extension(-) --> y < Flexion / y > 0 Extension
+print(f"theta_med: {theta_med} ({np.degrees(theta_med)})")
+# x < 0 = Abduction / x > 0 Adduction
+print(f"phi_med: {phi_med} ({np.degrees(phi_med)})")
+print(f"x: {r*math.sin(theta)*math.cos(phi)}")
+print(f"y: {r*math.sin(theta)*math.sin(phi)}")
+print(f"z: {r*math.cos(theta)}")
+
+# x = r*cos(phi)*cos(theta)
+# y = r*sin(phi)*cos(theta)
+# z = r*sin(theta)
+
 
 """ LEGACY CODE
 
