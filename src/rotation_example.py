@@ -13,6 +13,18 @@ import numpy as np
 import math
 
 
+# TODO:
+# 1. Calc perpendicular vector for start_dir_x and target_dir_x
+# 2. Calc Angle between start_dir_x and target_dir_x
+# 3. Build R0 Matrix for that rotation
+# 4. Multiply R0 with T
+# 5. R0 dot T = M -> MatMul with all Start vectors
+# 6. Calc Angle between start_dir_y and target_dir_y
+# 7. Build R1 Matrix (Rotation around X-Axis)
+# 8. M' = M MatMul R1 = R1*R0*T
+# 9. Transform all points with M'
+
+
 # Beispiel Schulter Winkelberechnung Schritte:
 # -> Koordinatensystem in Punkt verschieben (keypoint Schulter)
 # -> X-Achse bestimmen (Schulter-Schulter)
@@ -40,7 +52,7 @@ def get_perpendicular_vector(v1, v2):
         # TODO: Arbitrary Vector.. Find method to ensure its not parallel to vsx
         return np.cross(np.array([3, 2, 1]), v2)
     else:
-        return norm(np.cross(v1, v2))
+        return np.cross(v1, v2)
 
 
 def norm(v):
@@ -67,108 +79,104 @@ def rotation_matrix4x4(axis, theta):
 
 def tranlation_matrix4x4(v):
     T = np.array([
-        [1.0, 0, 0, 0],
-        [0, 1.0, 0, 0],
-        [0, 0, 1.0, 0],
-        [0, 0, 0, 1.0]
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
     ])
     T[:3, 3] = v
     return T
 
 
-FRAME = 20
-
-# Get Exercise Object from json file
-ex = exercise_loader.load('data/exercises/squat.json')
-# Get PoseMapper instance for MOCAP sequences
-mocap_posemapper = PoseMapper(PoseFormatEnum.MOCAP)
-# Convert mocap json string Positions to Sequence Object
-seq = mocap_posemapper.load('data/sequences/squat_3/complete-session.json', 'Squat')
-
-
-# Target origin (0,0,0) so shoulder is at (0,0,0) after transforming
-target_cs_origin = np.array([0, 0, 0])
-# Axesdirection as tracked
-vtx = norm(np.array([1, 0, 0]))
-vty = norm(np.array([0, 1, 0]))
-vtz = norm(np.array([0, 0, 1]))
-print(vtx, vty, vtz)
-
-# Start origin at shoulder keypoint
-start_cs_origin = seq.positions[FRAME][2]
-# x is vector direction to other shoulder
-vsx = seq.positions[FRAME][14] - start_cs_origin
-vneck = seq.positions[FRAME][3] - start_cs_origin
-vsz = get_perpendicular_vector(vneck, vsx)
+start_cs_origin = np.array([0, 0, 0])
+start_dir_x = np.array([1, 0, 0])
+start_dir_y = np.array([0, 1, 0])
+start_dir_z = np.array([0, 0, 1])
+target_cs_origin = np.array([1, 1, 1])
+target_dir_x = np.array([1, 0, 1])
+target_dir_y = np.array([0, 1, 1])
 # find vector perpendicular to xy-plane
-vsy = get_perpendicular_vector(vsx, vsz)
+target_dir_z = np.cross(target_dir_y, target_dir_x)
+print(target_dir_z)
 
-print(vsx, vsy, vsz)
-print(np.dot(vsx, vsz), np.dot(vsx, vsy), np.dot(vsy, vsz))
+vsx = norm(start_dir_x - start_cs_origin)
+vsy = norm(start_dir_y - start_cs_origin)
+vsz = norm(start_dir_z - start_cs_origin)
+vtx = norm(target_dir_x - target_cs_origin)
+vty = norm(target_dir_y - target_cs_origin)
+vtz = norm(target_dir_z - target_cs_origin)
+
+start_dir_x_transformed = start_dir_x
+start_dir_y_transformed = start_dir_y
+start_dir_z_transformed = start_dir_z
+
 axis = get_perpendicular_vector(vsx, vtx)
 theta = get_angle(vsx, vtx)
 print(f"Theta: {theta} ({np.degrees(theta)}°)")
 R = rotation_matrix4x4(axis, theta)
-
-# Rotate X to use it as axis for y rotation
-temp_x_rot = np.matmul(R, np.append(vsx, 1))[:3]
-# Rotate y direction vector to check for Y-Angle
-temp_y_rot = np.matmul(R, np.append(vsy, 1))[:3]
-
-# start_dir_x_transformed = np.matmul(R, np.append(start_dir_x_transformed, 1))[:3]
-# start_dir_y_transformed = np.matmul(R, np.append(start_dir_y_transformed, 1))[:3]
-# start_dir_z_transformed = np.matmul(R, np.append(start_dir_z_transformed, 1))[:3]
+start_dir_x_transformed = np.matmul(R, np.append(start_dir_x_transformed, 1))[:3]
+start_dir_y_transformed = np.matmul(R, np.append(start_dir_y_transformed, 1))[:3]
+start_dir_z_transformed = np.matmul(R, np.append(start_dir_z_transformed, 1))[:3]
 ###########################################
-# axis2 = get_perpendicular_vector(temp_y_rot, vty)
-theta2 = get_angle(temp_y_rot, vty)
+axis2 = get_perpendicular_vector(start_dir_y_transformed, vty)
+theta2 = get_angle(start_dir_y_transformed, vty)
 print(f"Theta2: {theta2} ({np.degrees(theta2)}°)")
-R2 = rotation_matrix4x4(norm(temp_x_rot), theta2)
-# start_dir_x_transformed = np.matmul(R2, np.append(start_dir_x_transformed, 1))[:3]
-# start_dir_y_transformed = np.matmul(R2, np.append(start_dir_y_transformed, 1))[:3]
-# start_dir_z_transformed = np.matmul(R2, np.append(start_dir_z_transformed, 1))[:3]
+R2 = rotation_matrix4x4(norm(start_dir_x_transformed), theta2)
+start_dir_x_transformed = np.matmul(R2, np.append(start_dir_x_transformed, 1))[:3]
+start_dir_y_transformed = np.matmul(R2, np.append(start_dir_y_transformed, 1))[:3]
+start_dir_z_transformed = np.matmul(R2, np.append(start_dir_z_transformed, 1))[:3]
 ###########################################
-T = tranlation_matrix4x4(target_cs_origin-start_cs_origin)
-# print(target_cs_origin - start_cs_origin)
-# print(f"T: \n {T}")
-# start_dir_x_transformed = np.matmul(T, np.append(start_dir_x_transformed, 1))[:3]
-# start_dir_y_transformed = np.matmul(T, np.append(start_dir_y_transformed, 1))[:3]
-# start_dir_z_transformed = np.matmul(T, np.append(start_dir_z_transformed, 1))[:3]
-positions = []
-for bp_pos in seq.positions[FRAME]:
-    pos = bp_pos
-    pos = np.matmul(T, np.append(pos, 1))[:3]
-    pos = np.matmul(R2, np.append(pos, 1))[:3]
-    pos = np.matmul(R, np.append(pos, 1))[:3]
+# axis3 = get_perpendicular_vector(start_dir_z_transformed, vtz)
+# theta3 = get_angle(start_dir_z_transformed, vtz)
+# print(f"Theta3: {theta3} ({np.degrees(theta3)}°)")
+# R3 = rotation_matrix4x4(start_dir_x_transformed, theta3)
+# start_dir_x_transformed = np.matmul(R3, np.append(start_dir_x_transformed, 1))[:3]
+# start_dir_y_transformed = np.matmul(R3, np.append(start_dir_y_transformed, 1))[:3]
+# start_dir_z_transformed = np.matmul(R3, np.append(start_dir_z_transformed, 1))[:3]
+###########################################
+T = tranlation_matrix4x4(target_cs_origin)
+start_dir_x_transformed = np.matmul(T, np.append(start_dir_x_transformed, 1))[:3]
+start_dir_y_transformed = np.matmul(T, np.append(start_dir_y_transformed, 1))[:3]
+start_dir_z_transformed = np.matmul(T, np.append(start_dir_z_transformed, 1))[:3]
 
-    positions.append(pos)
+vtx += target_cs_origin
+vty += target_cs_origin
+vtz += target_cs_origin
+axis += target_cs_origin
+
+# Check angle from transformed start to target
+print(f"{get_angle(start_dir_x_transformed, vtx)} ({np.degrees(get_angle(start_dir_x_transformed, vtx))}°)")
+
 
 fig = plt.figure(figsize=plt.figaspect(1)*2)
 ax = fig.add_subplot(1, 1, 1, projection='3d')
-# ax.scatter(5, 3, 2, c="black")
-# ax.scatter(1, 2, 3, c="black")
-# ax.plot([5, 1], [3, 2], [2, 3], c="black")
-for i, p in enumerate(positions):
-    ax.scatter(p[0], p[1], p[2], c="blue")
-    print(f"{i, p}")
-for j in range(len(seq.positions[FRAME])):
-    ax.scatter(seq.positions[FRAME][j][0], seq.positions[FRAME][j][1], seq.positions[FRAME][j][2], c="red", alpha=0.5)
-    ax.text(seq.positions[FRAME][j][0], seq.positions[FRAME][j][1], seq.positions[FRAME][j][2], j)
-    ax.annotate(f"{j}", (seq.positions[FRAME][j][0], seq.positions[FRAME][j][1]))
-ax.plot([target_cs_origin[0], vtx[0]], [target_cs_origin[1], vtx[1]], [target_cs_origin[2], vtx[2]], color="pink", linewidth=1)
-ax.plot([target_cs_origin[0], vty[0]], [target_cs_origin[1], vty[1]], [target_cs_origin[2], vty[2]], color="maroon", linewidth=1)
-ax.plot([target_cs_origin[0], vtz[0]], [target_cs_origin[1], vtz[1]], [target_cs_origin[2], vtz[2]], color="red", linewidth=1)
-# ax.plot([target_cs_origin[0], 1], [target_cs_origin[1], 0], [target_cs_origin[2], 0], color="pink", linewidth=1)
-# ax.plot([target_cs_origin[0], 0], [target_cs_origin[1], 1], [target_cs_origin[2], 0], color="maroon", linewidth=1)
-# ax.plot([target_cs_origin[0], 0], [target_cs_origin[1], 0], [target_cs_origin[2], 1], color="red", linewidth=1)
-# ax.plot([start_cs_origin[0], 1+start_cs_origin[0]], [start_cs_origin[1], start_cs_origin[1]], [start_cs_origin[2], start_cs_origin[2]], color="pink", linewidth=1)
-# ax.plot([start_cs_origin[0], start_cs_origin[0]], [start_cs_origin[1], 1+start_cs_origin[1]], [start_cs_origin[2], start_cs_origin[2]], color="maroon", linewidth=1)
-# ax.plot([start_cs_origin[0], start_cs_origin[0]], [start_cs_origin[1], start_cs_origin[1]], [start_cs_origin[2], 1+start_cs_origin[2]], color="red", linewidth=1)
-# ax.plot([start_cs_origin[0], vsx[0]+start_cs_origin[0]], [start_cs_origin[1], vsx[1]+start_cs_origin[1]], [start_cs_origin[2], vsx[2]+start_cs_origin[2]], color="green", linewidth=1)
-# ax.plot([start_cs_origin[0], vsy[0]+start_cs_origin[0]], [start_cs_origin[1], vsy[1]+start_cs_origin[1]], [start_cs_origin[2], vsy[2]+start_cs_origin[2]], color="springgreen", linewidth=1)
-# ax.plot([start_cs_origin[0], vsz[0]+start_cs_origin[0]], [start_cs_origin[1], vsz[1]+start_cs_origin[1]], [start_cs_origin[2], vsz[2]+start_cs_origin[2]], color="springgreen", linewidth=1)
+ax.set_xlim3d(-2, 2)
+ax.set_ylim3d(-2, 2)
+ax.set_zlim3d(-2, 2)
+ax.scatter(start_cs_origin[0], start_cs_origin[1], start_cs_origin[2], c='blue')
+# ax.scatter(target_cs_origin[0], target_cs_origin[1], target_cs_origin[2], c='red')
+ax.plot([start_cs_origin[0], start_dir_x[0]], [start_cs_origin[1], start_dir_x[1]], [start_cs_origin[2], start_dir_x[2]], color="black")
+ax.plot([start_cs_origin[0], start_dir_y[0]], [start_cs_origin[1], start_dir_y[1]], [start_cs_origin[2], start_dir_y[2]], color="gray")
+ax.plot([start_cs_origin[0], start_dir_z[0]], [start_cs_origin[1], start_dir_z[1]], [start_cs_origin[2], start_dir_z[2]], color="silver")
+# ax.plot([target_cs_origin[0], vtx[0]], [target_cs_origin[1], vtx[1]], [target_cs_origin[2], vtx[2]], color="red", linewidth=3)
+# ax.plot([target_cs_origin[0], vty[0]], [target_cs_origin[1], vty[1]], [target_cs_origin[2], vty[2]], color="red", linewidth=3)
+# ax.plot([target_cs_origin[0], vtz[0]], [target_cs_origin[1], vtz[1]], [target_cs_origin[2], vtz[2]], color="red", linewidth=3)
+ax.plot([target_cs_origin[0], target_dir_x[0]], [target_cs_origin[1], target_dir_x[1]], [target_cs_origin[2], target_dir_x[2]], color="pink", linewidth=3)
+ax.plot([target_cs_origin[0], target_dir_y[0]], [target_cs_origin[1], target_dir_y[1]], [target_cs_origin[2], target_dir_y[2]], color="maroon", linewidth=3)
+ax.plot([target_cs_origin[0], target_dir_z[0]], [target_cs_origin[1], target_dir_z[1]], [target_cs_origin[2], target_dir_z[2]], color="red", linewidth=3)
+# ax.plot([trans_cs_origin[0], trans_dir_x[0]], [trans_cs_origin[1], trans_dir_x[1]], [trans_cs_origin[2], trans_dir_x[2]], color="black")
+# ax.plot([trans_cs_origin[0], trans_dir_y[0]], [trans_cs_origin[1], trans_dir_y[1]], [trans_cs_origin[2], trans_dir_y[2]], color="green")
+# ax.plot([trans_cs_origin[0], trans_dir_z[0]], [trans_cs_origin[1], trans_dir_z[1]], [trans_cs_origin[2], trans_dir_z[2]], color="green")
+# ax.plot([trans_cs_origin[0], k[0]], [trans_cs_origin[1], k[1]], [trans_cs_origin[2], k[2]], color="red", linestyle="dotted")
 
-# ax.plot([start_cs_origin[0], vneck[0]+start_cs_origin[0]], [start_cs_origin[1], vneck[1]+start_cs_origin[1]], [start_cs_origin[2], vneck[2]+start_cs_origin[2]], color="green", linewidth=1)
+# ax.plot([target_cs_origin[0], vsx[0]], [target_cs_origin[1], vsx[1]], [target_cs_origin[2], vsx[2]], color="blue")
+ax.plot([target_cs_origin[0], start_dir_x_transformed[0]], [target_cs_origin[1], start_dir_x_transformed[1]], [target_cs_origin[2], start_dir_x_transformed[2]], color="olive")
+ax.plot([target_cs_origin[0], start_dir_y_transformed[0]], [target_cs_origin[1], start_dir_y_transformed[1]], [target_cs_origin[2], start_dir_y_transformed[2]], color="springgreen")
+ax.plot([target_cs_origin[0], start_dir_z_transformed[0]], [target_cs_origin[1], start_dir_z_transformed[1]], [target_cs_origin[2], start_dir_z_transformed[2]], color="green")
+# ax.plot([target_cs_origin[0], vtx[0]], [target_cs_origin[1], vtx[1]], [target_cs_origin[2], vtx[2]], color="red", alpha=.5)
+ax.plot([target_cs_origin[0], axis[0]], [target_cs_origin[1], axis[1]], [target_cs_origin[2], axis[2]], color="black", linestyle="dotted")
 plt.show()
+
 
 """ LEGACY CODE
 
@@ -223,5 +231,3 @@ print(f"Elbow Right Flexion/Extension angle [{FRAME}]: {elbow_right_flexion_exte
 # Visualize angle
 visualize.vis_angle(seq, joints["shoulder_right"]["abduction_adduction"], FRAME)
 """
-# Visualize angle
-# visualize.vis_angle(seq, joints["shoulder_right"]["abduction_adduction"], FRAME)
