@@ -37,7 +37,7 @@ def get_perpendicular_vector(v1, v2):
     v2 = norm(v2)
 
     if (np.dot(v1, v2) == -1):
-        # TODO: Arbitrary Vector.. Find method to ensure its not parallel to vsx
+        # TODO: Arbitrary Vector.. Find method to ensure its not parallel to vx_new
         return np.cross(np.array([3, 2, 1]), v2)
     else:
         return norm(np.cross(v1, v2))
@@ -76,7 +76,73 @@ def translation_matrix_4x4(v):
     return T
 
 
-FRAME = 20
+def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_direction_bp_idx: int, sequence: Sequence, frame: int):
+    """
+    Aligns the coordinate system to the given origin point.
+    The X-Axis will be in direction of x_direction-origin.
+    The Y-Axis will be in direction of y_direction-origin, without crossing the y_direction point but perpendicular to the new X-Axis.
+    The Z-Axis will be perpendicular to the XY-Plane.
+    """
+
+    # We want to move new_origin position to 0,0,0
+    zero_position = np.array([0, 0, 0])
+    # We want the alignment of x,y,z direction
+    vx = norm(np.array([1, 0, 0]))
+    vy = norm(np.array([0, 1, 0]))
+    vz = norm(np.array([0, 0, 1]))
+
+    # TODO: Ensure correct directions of perpendicular vectors: Z-Axis to front or back? Y-Axis up or down?
+    origin = seq.positions[frame][origin_bp_idx]
+    # New X-Axis from origin to x_direction
+    vx_new = seq.positions[frame][x_direction_bp_idx] - origin
+    # New Z-Axis is perpendicular to the origin to x_direction and origin to y_direction vectors
+    vz_new = get_perpendicular_vector(seq.positions[frame][y_direction_bp_idx] - origin, vx_new)
+    # New Y-Axis is perpendicular to new X-Axis and Z-Axis
+    vy_new = get_perpendicular_vector(vx_new, vz_new)
+
+    # Construct rotation matrix for X-Alignment to rotate about x_rot_axis for the angle theta
+    x_rot_axis = get_perpendicular_vector(vx_new, vx)
+    theta_x = get_angle(vx_new, vx)
+    Rx = rotation_matrix_4x4(x_rot_axis, theta_x)
+    # print(vx_new, vy_new, vz_new)
+    # print(np.dot(vx_new, vz_new), np.dot(vx_new, vy_new), np.dot(vy_new, vz_new))
+    # print(f"Theta: {theta_y} ({np.degrees(theta_y)}°)")
+
+    # Rotate X to use it as axis for y rotation and Rotate Y-direction vector to get rotation angle for Y-Alignment
+    y_rot_axis = np.matmul(Rx, np.append(vx_new, 1))[:3]
+    vy_new_rx = np.matmul(Rx, np.append(vy_new, 1))[:3]
+    theta_y = get_angle(vy_new_rx, vy)
+    Ry = rotation_matrix_4x4(norm(y_rot_axis), theta_y)
+    print(f"Theta_y: {theta_y} ({np.degrees(theta_y)}°)")
+
+    # Construct translation Matrix to move given origin to zero-position
+    T = translation_matrix_4x4(zero_position-origin)
+
+    # Actually transform all keypoints of the given frame
+    transformed_positions = []
+    for pos in seq.positions[frame]:
+        # TODO: Construct one Transformation Matrix M from T-Ry-Rx
+        pos = np.matmul(T, np.append(pos, 1))[:3]
+        pos = np.matmul(Ry, np.append(pos, 1))[:3]
+        pos = np.matmul(Rx, np.append(pos, 1))[:3]
+        transformed_positions.append(pos)
+
+    ################### PLOTTING #####################
+    fig = plt.figure(figsize=plt.figaspect(1)*2)
+    ax = fig.add_subplot(1, 1, 1, projection='3d')
+
+    for i, p in enumerate(transformed_positions):
+        ax.scatter(p[0], p[1], p[2], c="blue")
+        print(f"{i, p}")
+    for j in range(len(seq.positions[frame])):
+        ax.scatter(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], c="red", alpha=0.5)
+        ax.text(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], j)
+        ax.annotate(f"{j}", (seq.positions[frame][j][0], seq.positions[frame][j][1]))
+    ax.plot([zero_position[0], vx[0]], [zero_position[1], vx[1]], [zero_position[2], vx[2]], color="pink", linewidth=1)
+    ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]], [zero_position[2], vy[2]], color="maroon", linewidth=1)
+    ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]], color="red", linewidth=1)
+    plt.show()
+
 
 # Get Exercise Object from json file
 ex = exercise_loader.load('data/exercises/squat.json')
@@ -84,88 +150,7 @@ ex = exercise_loader.load('data/exercises/squat.json')
 mocap_posemapper = PoseMapper(PoseFormatEnum.MOCAP)
 # Convert mocap json string Positions to Sequence Object
 seq = mocap_posemapper.load('data/sequences/squat_3/complete-session.json', 'Squat')
-
-
-# Target origin (0,0,0) so shoulder is at (0,0,0) after transforming
-target_cs_origin = np.array([0, 0, 0])
-# Axesdirection as tracked
-vtx = norm(np.array([1, 0, 0]))
-vty = norm(np.array([0, 1, 0]))
-vtz = norm(np.array([0, 0, 1]))
-
-# Start origin at shoulder keypoint
-start_cs_origin = seq.positions[FRAME][2]
-# x is vector direction to other shoulder
-vsx = seq.positions[FRAME][14] - start_cs_origin
-vneck = seq.positions[FRAME][3] - start_cs_origin
-vsz = get_perpendicular_vector(vneck, vsx)
-# find vector perpendicular to xy-plane
-vsy = get_perpendicular_vector(vsx, vsz)
-
-print(vsx, vsy, vsz)
-print(np.dot(vsx, vsz), np.dot(vsx, vsy), np.dot(vsy, vsz))
-axis = get_perpendicular_vector(vsx, vtx)
-theta = get_angle(vsx, vtx)
-print(f"Theta: {theta} ({np.degrees(theta)}°)")
-R = rotation_matrix_4x4(axis, theta)
-
-# Rotate X to use it as axis for y rotation
-temp_x_rot = np.matmul(R, np.append(vsx, 1))[:3]
-# Rotate y direction vector to check for Y-Angle
-temp_y_rot = np.matmul(R, np.append(vsy, 1))[:3]
-
-# start_dir_x_transformed = np.matmul(R, np.append(start_dir_x_transformed, 1))[:3]
-# start_dir_y_transformed = np.matmul(R, np.append(start_dir_y_transformed, 1))[:3]
-# start_dir_z_transformed = np.matmul(R, np.append(start_dir_z_transformed, 1))[:3]
-###########################################
-# axis2 = get_perpendicular_vector(temp_y_rot, vty)
-theta2 = get_angle(temp_y_rot, vty)
-print(f"Theta2: {theta2} ({np.degrees(theta2)}°)")
-R2 = rotation_matrix_4x4(norm(temp_x_rot), theta2)
-# start_dir_x_transformed = np.matmul(R2, np.append(start_dir_x_transformed, 1))[:3]
-# start_dir_y_transformed = np.matmul(R2, np.append(start_dir_y_transformed, 1))[:3]
-# start_dir_z_transformed = np.matmul(R2, np.append(start_dir_z_transformed, 1))[:3]
-###########################################
-T = translation_matrix_4x4(target_cs_origin-start_cs_origin)
-# print(target_cs_origin - start_cs_origin)
-# print(f"T: \n {T}")
-# start_dir_x_transformed = np.matmul(T, np.append(start_dir_x_transformed, 1))[:3]
-# start_dir_y_transformed = np.matmul(T, np.append(start_dir_y_transformed, 1))[:3]
-# start_dir_z_transformed = np.matmul(T, np.append(start_dir_z_transformed, 1))[:3]
-transformed_positions = []
-for bp_pos in seq.positions[FRAME]:
-    pos = bp_pos
-    pos = np.matmul(T, np.append(pos, 1))[:3]
-    pos = np.matmul(R2, np.append(pos, 1))[:3]
-    pos = np.matmul(R, np.append(pos, 1))[:3]
-    transformed_positions.append(pos)
-
-
-fig = plt.figure(figsize=plt.figaspect(1)*2)
-ax = fig.add_subplot(1, 1, 1, projection='3d')
-
-for i, p in enumerate(transformed_positions):
-    ax.scatter(p[0], p[1], p[2], c="blue")
-    print(f"{i, p}")
-for j in range(len(seq.positions[FRAME])):
-    ax.scatter(seq.positions[FRAME][j][0], seq.positions[FRAME][j][1], seq.positions[FRAME][j][2], c="red", alpha=0.5)
-    ax.text(seq.positions[FRAME][j][0], seq.positions[FRAME][j][1], seq.positions[FRAME][j][2], j)
-    ax.annotate(f"{j}", (seq.positions[FRAME][j][0], seq.positions[FRAME][j][1]))
-ax.plot([target_cs_origin[0], vtx[0]], [target_cs_origin[1], vtx[1]], [target_cs_origin[2], vtx[2]], color="pink", linewidth=1)
-ax.plot([target_cs_origin[0], vty[0]], [target_cs_origin[1], vty[1]], [target_cs_origin[2], vty[2]], color="maroon", linewidth=1)
-ax.plot([target_cs_origin[0], vtz[0]], [target_cs_origin[1], vtz[1]], [target_cs_origin[2], vtz[2]], color="red", linewidth=1)
-# ax.plot([target_cs_origin[0], 1], [target_cs_origin[1], 0], [target_cs_origin[2], 0], color="pink", linewidth=1)
-# ax.plot([target_cs_origin[0], 0], [target_cs_origin[1], 1], [target_cs_origin[2], 0], color="maroon", linewidth=1)
-# ax.plot([target_cs_origin[0], 0], [target_cs_origin[1], 0], [target_cs_origin[2], 1], color="red", linewidth=1)
-# ax.plot([start_cs_origin[0], 1+start_cs_origin[0]], [start_cs_origin[1], start_cs_origin[1]], [start_cs_origin[2], start_cs_origin[2]], color="pink", linewidth=1)
-# ax.plot([start_cs_origin[0], start_cs_origin[0]], [start_cs_origin[1], 1+start_cs_origin[1]], [start_cs_origin[2], start_cs_origin[2]], color="maroon", linewidth=1)
-# ax.plot([start_cs_origin[0], start_cs_origin[0]], [start_cs_origin[1], start_cs_origin[1]], [start_cs_origin[2], 1+start_cs_origin[2]], color="red", linewidth=1)
-# ax.plot([start_cs_origin[0], vsx[0]+start_cs_origin[0]], [start_cs_origin[1], vsx[1]+start_cs_origin[1]], [start_cs_origin[2], vsx[2]+start_cs_origin[2]], color="green", linewidth=1)
-# ax.plot([start_cs_origin[0], vsy[0]+start_cs_origin[0]], [start_cs_origin[1], vsy[1]+start_cs_origin[1]], [start_cs_origin[2], vsy[2]+start_cs_origin[2]], color="springgreen", linewidth=1)
-# ax.plot([start_cs_origin[0], vsz[0]+start_cs_origin[0]], [start_cs_origin[1], vsz[1]+start_cs_origin[1]], [start_cs_origin[2], vsz[2]+start_cs_origin[2]], color="springgreen", linewidth=1)
-
-# ax.plot([start_cs_origin[0], vneck[0]+start_cs_origin[0]], [start_cs_origin[1], vneck[1]+start_cs_origin[1]], [start_cs_origin[2], vneck[2]+start_cs_origin[2]], color="green", linewidth=1)
-plt.show()
+align_coordinates_to(2, 14, 3, seq, 20)
 
 """ LEGACY CODE
 
@@ -203,22 +188,22 @@ plt.show()
 # # Right Elbow Flexion/Extension
 # elbow_right_flexion_extension_angles = acm.calc_angle_elbow_flexion_extension(seq, joints["elbow_right"]["flexion_extension"])
 
-FRAME = 0
-print(f"Hip Left Flexion/Extension angle [{FRAME}]: {hip_left_flexion_extension_angles[FRAME]}")
-print(f"Hip Right Flexion/Extension angle [{FRAME}]: {hip_right_flexion_extension_angles[FRAME]}")
-print(f"Hip Left Abduction/Adduction angle [{FRAME}]: {hip_left_abduction_adduction_angles[FRAME]}")
-print(f"Hip Right Abduction/Adduction angle [{FRAME}]: {hip_right_abduction_adduction_angles[FRAME]}")
-print(f"Knee Left Flexion/Extension angle [{FRAME}]: {knee_left_flexion_extension_angles[FRAME]}")
-print(f"Knee Right Flexion/Extension angle [{FRAME}]: {knee_right_flexion_extension_angles[FRAME]}")
-print(f"Shoulder Left Flexion/Extension angle [{FRAME}]: {shoulder_left_flexion_extension_angles[FRAME]}")
-print(f"Shoulder Right Flexion/Extension angle [{FRAME}]: {shoulder_right_flexion_extension_angles[FRAME]}")
-print(f"Shoulder Left Abduction/Adduction angle [{FRAME}]: {shoulder_left_abduction_adduction_angles[FRAME]}")
-print(f"Shoulder Right Abduction/Adduction angle [{FRAME}]: {shoulder_right_abduction_adduction_angles[FRAME]}")
-print(f"Elbow Left Flexion/Extension angle [{FRAME}]: {elbow_left_flexion_extension_angles[FRAME]}")
-print(f"Elbow Right Flexion/Extension angle [{FRAME}]: {elbow_right_flexion_extension_angles[FRAME]}")
+frame = 0
+print(f"Hip Left Flexion/Extension angle [{frame}]: {hip_left_flexion_extension_angles[frame]}")
+print(f"Hip Right Flexion/Extension angle [{frame}]: {hip_right_flexion_extension_angles[frame]}")
+print(f"Hip Left Abduction/Adduction angle [{frame}]: {hip_left_abduction_adduction_angles[frame]}")
+print(f"Hip Right Abduction/Adduction angle [{frame}]: {hip_right_abduction_adduction_angles[frame]}")
+print(f"Knee Left Flexion/Extension angle [{frame}]: {knee_left_flexion_extension_angles[frame]}")
+print(f"Knee Right Flexion/Extension angle [{frame}]: {knee_right_flexion_extension_angles[frame]}")
+print(f"Shoulder Left Flexion/Extension angle [{frame}]: {shoulder_left_flexion_extension_angles[frame]}")
+print(f"Shoulder Right Flexion/Extension angle [{frame}]: {shoulder_right_flexion_extension_angles[frame]}")
+print(f"Shoulder Left Abduction/Adduction angle [{frame}]: {shoulder_left_abduction_adduction_angles[frame]}")
+print(f"Shoulder Right Abduction/Adduction angle [{frame}]: {shoulder_right_abduction_adduction_angles[frame]}")
+print(f"Elbow Left Flexion/Extension angle [{frame}]: {elbow_left_flexion_extension_angles[frame]}")
+print(f"Elbow Right Flexion/Extension angle [{frame}]: {elbow_right_flexion_extension_angles[frame]}")
 
 # Visualize angle
-visualize.vis_angle(seq, joints["shoulder_right"]["abduction_adduction"], FRAME)
+visualize.vis_angle(seq, joints["shoulder_right"]["abduction_adduction"], frame)
 """
 # Visualize angle
-# visualize.vis_angle(seq, joints["shoulder_right"]["abduction_adduction"], FRAME)
+# visualize.vis_angle(seq, joints["shoulder_right"]["abduction_adduction"], frame)
