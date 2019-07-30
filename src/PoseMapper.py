@@ -77,20 +77,20 @@ class PoseMapper:
         """
         MOCAP_BODY_PARTS = {
             "RightWrist": 0,
-            "RightElbow": 1,
-            "RightShoulder": 14,
+            "LeftElbow": 1,
+            "LeftShoulder": 2,
             "Neck": 3,
             "Torso": 4,
             "Waist": 5,
-            "RightAnkle": 6,
-            "RightKnee": 7,
-            "RightHip": 8,
-            "LeftAnkle": 9,
-            "LeftKnee": 10,
-            "LeftHip": 11,
-            "LeftWrist": 12,
-            "LeftElbow": 13,
-            "LeftShoulder": 2,
+            "LeftAnkle": 6,
+            "LeftKnee": 7,
+            "LeftHip": 8,
+            "RightAnkle": 9,
+            "RightKnee": 10,
+            "RightHip": 11,
+            "RightWrist": 12,
+            "RightElbow": 13,
+            "RightShoulder": 14,
             "Head": 15
         }
         mocap_sequence = json.loads(input)
