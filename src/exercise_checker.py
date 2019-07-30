@@ -32,7 +32,7 @@ def get_angle(v1, v2):
 
 
 def get_perpendicular_vector(v1, v2):
-    # If theta 180° (dot product = -1 just switch directions
+    # If theta 180° (dot product = -1)
     v1 = norm(v1)
     v2 = norm(v2)
 
@@ -47,11 +47,11 @@ def norm(v):
     return v / math.sqrt(np.dot(v, v))
 
 
-def rotation_matrix4x4(axis, theta):
+def rotation_matrix_4x4(axis, theta):
     # Source: https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
     """
     Return the rotation matrix associated with counterclockwise rotation about
-    the given axis by theta radians as 4x4 Transformation Matrix
+    the given axis by theta in radians as 4x4 Transformation Matrix
     """
     axis = np.asarray(axis)
     axis = axis / math.sqrt(np.dot(axis, axis))
@@ -65,7 +65,7 @@ def rotation_matrix4x4(axis, theta):
                      [0, 0, 0, 1]])
 
 
-def tranlation_matrix4x4(v):
+def translation_matrix_4x4(v):
     T = np.array([
         [1.0, 0, 0, 0],
         [0, 1.0, 0, 0],
@@ -92,7 +92,6 @@ target_cs_origin = np.array([0, 0, 0])
 vtx = norm(np.array([1, 0, 0]))
 vty = norm(np.array([0, 1, 0]))
 vtz = norm(np.array([0, 0, 1]))
-print(vtx, vty, vtz)
 
 # Start origin at shoulder keypoint
 start_cs_origin = seq.positions[FRAME][2]
@@ -108,7 +107,7 @@ print(np.dot(vsx, vsz), np.dot(vsx, vsy), np.dot(vsy, vsz))
 axis = get_perpendicular_vector(vsx, vtx)
 theta = get_angle(vsx, vtx)
 print(f"Theta: {theta} ({np.degrees(theta)}°)")
-R = rotation_matrix4x4(axis, theta)
+R = rotation_matrix_4x4(axis, theta)
 
 # Rotate X to use it as axis for y rotation
 temp_x_rot = np.matmul(R, np.append(vsx, 1))[:3]
@@ -122,32 +121,30 @@ temp_y_rot = np.matmul(R, np.append(vsy, 1))[:3]
 # axis2 = get_perpendicular_vector(temp_y_rot, vty)
 theta2 = get_angle(temp_y_rot, vty)
 print(f"Theta2: {theta2} ({np.degrees(theta2)}°)")
-R2 = rotation_matrix4x4(norm(temp_x_rot), theta2)
+R2 = rotation_matrix_4x4(norm(temp_x_rot), theta2)
 # start_dir_x_transformed = np.matmul(R2, np.append(start_dir_x_transformed, 1))[:3]
 # start_dir_y_transformed = np.matmul(R2, np.append(start_dir_y_transformed, 1))[:3]
 # start_dir_z_transformed = np.matmul(R2, np.append(start_dir_z_transformed, 1))[:3]
 ###########################################
-T = tranlation_matrix4x4(target_cs_origin-start_cs_origin)
+T = translation_matrix_4x4(target_cs_origin-start_cs_origin)
 # print(target_cs_origin - start_cs_origin)
 # print(f"T: \n {T}")
 # start_dir_x_transformed = np.matmul(T, np.append(start_dir_x_transformed, 1))[:3]
 # start_dir_y_transformed = np.matmul(T, np.append(start_dir_y_transformed, 1))[:3]
 # start_dir_z_transformed = np.matmul(T, np.append(start_dir_z_transformed, 1))[:3]
-positions = []
+transformed_positions = []
 for bp_pos in seq.positions[FRAME]:
     pos = bp_pos
     pos = np.matmul(T, np.append(pos, 1))[:3]
     pos = np.matmul(R2, np.append(pos, 1))[:3]
     pos = np.matmul(R, np.append(pos, 1))[:3]
+    transformed_positions.append(pos)
 
-    positions.append(pos)
 
 fig = plt.figure(figsize=plt.figaspect(1)*2)
 ax = fig.add_subplot(1, 1, 1, projection='3d')
-# ax.scatter(5, 3, 2, c="black")
-# ax.scatter(1, 2, 3, c="black")
-# ax.plot([5, 1], [3, 2], [2, 3], c="black")
-for i, p in enumerate(positions):
+
+for i, p in enumerate(transformed_positions):
     ax.scatter(p[0], p[1], p[2], c="blue")
     print(f"{i, p}")
 for j in range(len(seq.positions[FRAME])):
