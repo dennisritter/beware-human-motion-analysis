@@ -86,6 +86,22 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     # New Y-Axis is perpendicular to new X-Axis and Z-Axis
     vy_new = get_perpendicular_vector(vx_new, vz_new)
 
+    ##### TODO: CLEANUP
+    # # FLEXION
+    # a = seq.positions[frame][1] - origin
+    # b = vz_new
+    # # a_dot_b = np.dot(a, b) / (transformations.norm(a) * transformatiorns.norm(b))
+    # a_dot_b = np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+    # print(f"theta_flex_no_transformation: {np.degrees(np.arcsin(a_dot_b))}")
+
+    # # ABDUCTION
+    # a = seq.positions[frame][1] - origin
+    # b = vx_new
+    # # a_dot_b = np.dot(a, b) / (transformations.norm(a) * transformatiorns.norm(b))
+    # a_dot_b = np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+    # print(f"theta_abd_no_transformation: {np.degrees(np.arcsin(a_dot_b))}")
+    # ##########
+
     # Construct rotation matrix for X-Alignment to rotate about x_rot_axis for the angle theta
     x_rot_axis = get_perpendicular_vector(vx_new, vx)
     theta_x = get_angle(vx_new, vx)
@@ -119,14 +135,17 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
         else:
             ax.scatter(p[0], p[1], p[2], c="blue")
     # ax.plot([zero_position[0], -0.06271505754938689], [zero_position[1], -0.2933918624237914], [zero_position[2], 0.022070646037552197], color="pink", linewidth=1)
-    ax.plot([zero_position[0], 0.04382785392053286], [zero_position[1], 0.0914563860141735], [zero_position[2], -0.2903965198128813], color="pink", linewidth=1)
+    ax.plot([zero_position[0], transformed_positions[1][0]], [zero_position[1], transformed_positions[1][1]], [zero_position[2], transformed_positions[1][2]], color="pink", linewidth=1)
 
     # for j in range(len(seq.positions[frame])):
     #     ax.scatter(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], c="red", alpha=0.5)
     #     ax.text(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], j)
     # ax.annotate(f"{j}", (seq.positions[frame][j][0], seq.positions[frame][j][1]))
-    ax.plot([zero_position[0], vx[0]], [zero_position[1], vx[1]], [zero_position[2], vx[2]], color="pink", linewidth=1)
-    ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]], [zero_position[2], vy[2]], color="maroon", linewidth=1)
-    ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]], color="red", linewidth=1)
+    ax.plot([zero_position[0], vx[0]/5], [zero_position[1], vx[1]], [zero_position[2], vx[2]], color="pink", linewidth=1)
+    ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]/5], [zero_position[2], vy[2]], color="maroon", linewidth=1)
+    ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]/5], color="red", linewidth=1)
+    # ax.plot([zero_position[0], vx[0]], [zero_position[1], vx[1]], [zero_position[2], vx[2]], color="pink", linewidth=1)
+    # ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]], [zero_position[2], vy[2]], color="maroon", linewidth=1)
+    # ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]], color="red", linewidth=1)
     plt.show()
     return transformed_positions

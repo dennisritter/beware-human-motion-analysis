@@ -32,41 +32,74 @@ seq = mocap_posemapper.load('data/sequences/squat_3/complete-session.json', 'Squ
 
 # Move coordinate system to left shoulder for frame 20
 # align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_direction_bp_idx: int, seq: Sequence, frame: int)
-left_shoulder_aligned_positions = transformations.align_coordinates_to(2, 14, 3, seq, frame=20)
+left_shoulder_aligned_positions = transformations.align_coordinates_to(2, 14, 3, seq, frame=50)
 
 # Transform postitions from Cartesian coordinates to Spherical coordinates
 # Example for left shoulder using left elbow to check angles
+# x = -0.1
+# y = 0.05
+# z = -0.1
 x = left_shoulder_aligned_positions[1][0]
 y = left_shoulder_aligned_positions[1][1]
 z = left_shoulder_aligned_positions[1][2]
-print(f"Joint Pos for Angle Calculation: \n{x,y,z}")
-# x = 1
-# y = 1
-# z = 1
-# r = 0.3
-# theta = np.radians(0)
-# phi = np.radians(10)
-r = math.sqrt(x**2 + y**2 + z**2)
-theta = math.acos(z/r)
-phi = math.atan2(y, x)
-theta_med = -(math.acos(z/r) - np.radians(270))
-phi_med = math.atan2(y, x) - np.radians(90)
-print(f"r: {r}")
-print(f"theta: {theta} ({np.degrees(theta)})")
-print(f"phi: {phi} ({np.degrees(phi)})")
-# Flexion(+)/Extension(-) --> y < Flexion / y > 0 Extension
-print(f"theta_med: {theta_med} ({np.degrees(theta_med)})")
-# x < 0 = Abduction / x > 0 Adduction
-print(f"phi_med: {phi_med} ({np.degrees(phi_med)})")
-print(f"x: {r*math.sin(theta)*math.cos(phi)}")
-print(f"y: {r*math.sin(theta)*math.sin(phi)}")
-print(f"z: {r*math.cos(theta)}")
+# print(f"Joint Pos for Angle Calculation: \n{x,y,z}")
 
-# x = r*cos(phi)*cos(theta)
-# y = r*sin(phi)*cos(theta)
-# z = r*sin(theta)
+# r = math.sqrt(x**2 + y**2 + z**2)
+# theta_flex = math.acos(z/r)
+# theta_abd = math.acos(x/r)
+# # 90° rotation to get angle to downward axis (-Y) -> medical 0°
+# theta_flex_med = theta_flex - np.radians(90)
+# theta_abd_med = theta_abd - np.radians(90)
+# if y > 0:
+#     theta_flex_med = np.radians(180) - theta_flex_med
+# if x > 0:
+#     theta_abd_med = np.radians(180) - theta_abd_med
 
+# print(f"theta_flex: {theta_flex} ({np.degrees(theta_flex)})")
+# print(f"theta_abd: {theta_abd} ({np.degrees(theta_abd)})")
+# print(f"theta_flex_med: {theta_flex_med} ({np.degrees(theta_flex_med)})")
+# print(f"theta_abd_med: {theta_abd_med} ({np.degrees(theta_abd_med)})")
 
+# No Transformations needed because no spherical coords needed??
+# FLEXION
+# Theta < 0 : Flexion
+# Theta > 0 : Extension
+# Y > 0 : Theta' = 180 - Theta
+# Y < 0 : Theta' = Theta
+a = np.array([x, y, z])
+b = np.array([0, 0, 1])
+# a_dot_b = np.dot(a, b) / (transformations.norm(a) * transformatiorns.norm(b))
+a_dot_b = np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+theta = np.degrees(np.arccos(a_dot_b) - np.radians(90))
+theta = abs(theta)
+# if y > 0:
+#     theta = 180 - theta
+if z < 0:
+    print(f"Flexion: {theta}°")
+elif z > 0:
+    print(f"Extension: {theta}°")
+elif z == 0:
+    print(f"Flexion/Extension: {0}°")
+
+# ABDUCTION
+# Theta < 0 : Abduction
+# Theta > 0 : Adduction
+# Y > 0 : Theta' = 180 - Theta
+# Y < 0 : Theta' = Theta
+a = np.array([x, y, z])
+b = np.array([1, 0, 0])
+# a_dot_b = np.dot(a, b) / (transformations.norm(a) * transformatiorns.norm(b))
+a_dot_b = np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+theta = np.degrees(np.arccos(a_dot_b) - np.radians(90))
+theta = abs(theta)
+# if y > 0:
+#     theta = 180 - theta
+if x < 0:
+    print(f"Abduction: {theta}°")
+elif x > 0:
+    print(f"Adduction: {theta}°")
+elif x == 0:
+    print(f"Abduction/Adduction: {0}°")
 """ LEGACY CODE
 
 # Add joints to angles property of exercise
