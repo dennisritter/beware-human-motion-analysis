@@ -37,14 +37,14 @@ left_shoulder_aligned_positions = transformations.align_coordinates_to(2, 14, 3,
 # Transform postitions from Cartesian coordinates to Spherical coordinates
 # Example for left shoulder using left elbow to check angles
 # x = -0.1
-# y = 0.05
+# y = 0.0
 # z = -0.1
 x = left_shoulder_aligned_positions[1][0]
 y = left_shoulder_aligned_positions[1][1]
 z = left_shoulder_aligned_positions[1][2]
 # print(f"Joint Pos for Angle Calculation: \n{x,y,z}")
 
-# r = math.sqrt(x**2 + y**2 + z**2)
+r = math.sqrt(x**2 + y**2 + z**2)
 # theta_flex = math.acos(z/r)
 # theta_abd = math.acos(x/r)
 # # 90° rotation to get angle to downward axis (-Y) -> medical 0°
@@ -100,6 +100,29 @@ elif x > 0:
     print(f"Adduction: {theta}°")
 elif x == 0:
     print(f"Abduction/Adduction: {0}°")
+
+# atan2 Flex
+theta = np.degrees(math.acos(-y/r))
+# if y > 0:
+#     theta = 180 - theta
+print(f"theta spherical: {theta}")
+# atan2 Abd
+phi = np.degrees(math.atan2(-z, -x))
+print(f"phi spherical: {phi}")
+
+phi = phi/90
+if phi <= 1:
+    f = theta*phi
+    print(f"f: {f} (phi ratio: {phi})")
+elif phi > 1:
+    f = theta*(1-phi+1)
+    print(f"f: {f} (phi ratio: {(1-phi+1)})")
+
+phi = 1-abs(phi)
+a = theta*phi
+print(f"a: {a} (phi ratio: {phi})")
+
+
 """ LEGACY CODE
 
 # Add joints to angles property of exercise

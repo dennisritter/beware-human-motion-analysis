@@ -128,13 +128,15 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     ################### PLOTTING #####################
     fig = plt.figure(figsize=plt.figaspect(1)*2)
     ax = fig.add_subplot(1, 1, 1, projection='3d')
-
+    ax.set_xlim3d(-0.5, 0.5)
+    ax.set_ylim3d(-0.5, 0.5)
+    ax.set_zlim3d(-0.5, 0.5)
     for i, p in enumerate(transformed_positions):
         if i == 1:
             ax.scatter(p[0], p[1], p[2], c="blue")
         else:
             ax.scatter(p[0], p[1], p[2], c="blue")
-    # ax.plot([zero_position[0], -0.06271505754938689], [zero_position[1], -0.2933918624237914], [zero_position[2], 0.022070646037552197], color="pink", linewidth=1)
+    # ax.plot([zero_position[0], -0.1], [zero_position[1], 0.05], [zero_position[2], -0.1], color="pink", linewidth=1)
     ax.plot([zero_position[0], transformed_positions[1][0]], [zero_position[1], transformed_positions[1][1]], [zero_position[2], transformed_positions[1][2]], color="pink", linewidth=1)
 
     # for j in range(len(seq.positions[frame])):
