@@ -32,16 +32,16 @@ seq = mocap_posemapper.load('data/sequences/squat_3/complete-session.json', 'Squ
 
 # Move coordinate system to left shoulder for frame 20
 # align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_direction_bp_idx: int, seq: Sequence, frame: int)
-left_shoulder_aligned_positions = transformations.align_coordinates_to(2, 14, 3, seq, frame=50)
+left_shoulder_aligned_positions = transformations.align_coordinates_to(14, 2, 3, seq, frame=60)
 
 # Transform postitions from Cartesian coordinates to Spherical coordinates
 # Example for left shoulder using left elbow to check angles
 # x = -0.1
 # y = 0.0
 # z = -0.1
-x = left_shoulder_aligned_positions[1][0]
-y = left_shoulder_aligned_positions[1][1]
-z = left_shoulder_aligned_positions[1][2]
+x = left_shoulder_aligned_positions[13][0]
+y = left_shoulder_aligned_positions[13][1]
+z = left_shoulder_aligned_positions[13][2]
 # print(f"Joint Pos for Angle Calculation: \n{x,y,z}")
 
 r = math.sqrt(x**2 + y**2 + z**2)
@@ -101,12 +101,9 @@ elif x > 0:
 elif x == 0:
     print(f"Abduction/Adduction: {0}°")
 
-# atan2 Flex
+
 theta = np.degrees(math.acos(-y/r))
-# if y > 0:
-#     theta = 180 - theta
 print(f"theta spherical: {theta}")
-# atan2 Abd
 phi = np.degrees(math.atan2(-z, -x))
 print(f"phi spherical: {phi}")
 
