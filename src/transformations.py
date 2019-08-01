@@ -137,7 +137,8 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
         else:
             ax.scatter(p[0], p[1], p[2], c="blue")
     # ax.plot([zero_position[0], -0.1], [zero_position[1], 0.05], [zero_position[2], -0.1], color="pink", linewidth=1)
-    ax.plot([zero_position[0], transformed_positions[13][0]], [zero_position[1], transformed_positions[13][1]], [zero_position[2], transformed_positions[13][2]], color="pink", linewidth=1)
+    ax.plot([transformed_positions[14][0], transformed_positions[13][0]], [transformed_positions[14][1], transformed_positions[13][1]], [transformed_positions[14][2], transformed_positions[13][2]], color="pink", linewidth=1)
+    ax.plot([transformed_positions[2][0], transformed_positions[1][0]], [transformed_positions[2][1], transformed_positions[1][1]], [transformed_positions[2][2], transformed_positions[1][2]], color="pink", linewidth=1)
 
     # for j in range(len(seq.positions[frame])):
     #     ax.scatter(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], c="red", alpha=0.5)

@@ -151,7 +151,8 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
     abduction_adduction = theta*phi_ratio_abd_add
 
     if log:
-        print(f"r spherical: {theta}")
+        print("\n##### SHOULDER LEFT ANGLES #####")
+        print(f"r spherical: {r}")
         print(f"theta spherical: {theta}")
         print(f"phi spherical: {phi}")
         print(f"flexion_extension angle: {flexion_extension} (phi ratio: {phi_ratio_flex_ex})")
@@ -163,7 +164,7 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
     }
 
 
-def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_left_idx: int, neck_idx: int, elbow_right_idx: int) -> dict:
+def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_left_idx: int, neck_idx: int, elbow_right_idx: int, log: bool = False) -> dict:
     """ Calculates Right Shoulder angles 
     Parameters
     ----------
@@ -171,9 +172,63 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
         A Motion Sequence
     """
 
+    # Move coordinate system to left shoulder for frame 20
+    # align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_direction_bp_idx: int, seq: Sequence, frame: int)
+    right_shoulder_aligned_positions = transformations.align_coordinates_to(shoulder_right_idx, shoulder_left_idx, neck_idx, seq, frame=60)
+    # x,y,z coordinates for left elbow
+    x = right_shoulder_aligned_positions[elbow_right_idx][0]
+    y = right_shoulder_aligned_positions[elbow_right_idx][1]
+    z = right_shoulder_aligned_positions[elbow_right_idx][2]
+
+    # Convert to spherical coordinates
+    r = math.sqrt(x**2 + y**2 + z**2)
+    # Y-Axis points upwards
+    # Theta should be the angle between downwards vector and r
+    # So we mirror Y-Axis
+    theta = math.degrees(math.acos(-y/r))
     # Phi is the anti-clockwise angle between Z and X
-    # For Right shoulder, Z-Axis points to camera after transformations.
-    # So for Right shoulder, we only mirror the X-Axis
+    # For Right shoulder, Z-Axis points to the camera and X-Axis is aligned to the left shoulder after transformations.
+    # So for Right shoulder, we mirror ONLY the X Axes to get a positive angle for flexion and negative angle for extension
+    phi = math.degrees(math.atan2(z, -x))
+
+    # The phi_ratio will determine how much of the theta angle is flexion_extension and abduction_adduction
+    # phi_ratio == -1 -> 0% Abduction_Adduction / 100% Extension
+    # phi_ratio == 0(-2) -> 100% Abduction / 0% Flexion_Extension
+    # phi_ratio == 1 -> 0% Abduction_Adduction / 100% Flexion
+    # phi_ratio == 2 -> 100% Adduction / 0% Flexion_Extension
+    phi_ratio = phi/90
+
+    # Ensure phi_ratio_flex_ex alters between -1 and 1
+    # flexion_extension > 0 -> Flexion
+    # flexion_extension < 0 -> Extension
+    phi_ratio_flex_ex = phi_ratio
+    if phi_ratio_flex_ex <= 1 and phi_ratio_flex_ex >= -1:
+        flexion_extension = theta*phi_ratio_flex_ex
+    elif phi_ratio > 1:
+        phi_ratio_flex_ex = 2-phi_ratio_flex_ex
+        flexion_extension = theta*phi_ratio_flex_ex
+    elif phi_ratio < -1:
+        phi_ratio_flex_ex = -2-phi_ratio_flex_ex
+        flexion_extension = theta*phi_ratio_flex_ex
+
+    # Ensure phi_ratio_abd_add is between -1 and 1
+    phi_ratio_abd_add = 1-abs(phi_ratio)
+    # abduction_adduction > 0 -> Abduction
+    # abduction_adduction < 0 -> Adduction
+    abduction_adduction = theta*phi_ratio_abd_add
+
+    if log:
+        print("\n##### SHOULDER RIGHT ANGLES #####")
+        print(f"r spherical: {r}")
+        print(f"theta spherical: {theta}")
+        print(f"phi spherical: {phi}")
+        print(f"flexion_extension angle: {flexion_extension} (phi ratio: {phi_ratio_flex_ex})")
+        print(f"abduction_adduction angle: {abduction_adduction} (phi ratio: {phi_ratio_abd_add})")
+
+    return {
+        "flexion_extension": flexion_extension,
+        "abduction_adduction": abduction_adduction
+    }
 
 
 def calc_angle_elbow_flexion_extension(seq: Sequence, joints: dict) -> list:
