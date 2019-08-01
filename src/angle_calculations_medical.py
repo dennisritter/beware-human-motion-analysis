@@ -107,11 +107,12 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
 
     # Move coordinate system to left shoulder for frame 20
     # align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_direction_bp_idx: int, seq: Sequence, frame: int)
-    left_shoulder_aligned_positions = transformations.align_coordinates_to(14, 2, 3, seq, frame=60)
+    left_shoulder_aligned_positions = transformations.align_coordinates_to(shoulder_left_idx, shoulder_right_idx, neck_idx, seq, frame=60)
     # x,y,z coordinates for left elbow
-    x = left_shoulder_aligned_positions[1][0]
-    y = left_shoulder_aligned_positions[1][1]
-    z = left_shoulder_aligned_positions[1][2]
+    x = left_shoulder_aligned_positions[elbow_left_idx][0]
+    y = left_shoulder_aligned_positions[elbow_left_idx][1]
+    z = left_shoulder_aligned_positions[elbow_left_idx][2]
+
     # Convert to spherical coordinates
     r = math.sqrt(x**2 + y**2 + z**2)
     # Y-Axis points upwards
@@ -123,6 +124,7 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
     # So for Left shoulder, we mirror the Z and X Axes
     phi = math.degrees(math.atan2(-z, -x))
 
+    # The phi_ratio will determine how much of the theta angle is flexion_extension and abduction_adduction
     # phi_ratio == -1 -> 0% Abduction_Adduction / 100% Extension
     # phi_ratio == 0(-2) -> 100% Abduction / 0% Flexion_Extension
     # phi_ratio == 1 -> 0% Abduction_Adduction / 100% Flexion
@@ -154,6 +156,11 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
         print(f"phi spherical: {phi}")
         print(f"flexion_extension angle: {flexion_extension} (phi ratio: {phi_ratio_flex_ex})")
         print(f"abduction_adduction angle: {abduction_adduction} (phi ratio: {phi_ratio_abd_add})")
+
+    return {
+        "flexion_extension": flexion_extension,
+        "abduction_adduction": abduction_adduction
+    }
 
 
 def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_left_idx: int, neck_idx: int, elbow_right_idx: int) -> dict:
