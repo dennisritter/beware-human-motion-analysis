@@ -76,7 +76,7 @@ class PoseMapper:
            The Sequence Object instance representing the motion sequence of the input string.
         """
         MOCAP_BODY_PARTS = {
-            "RightWrist": 0,
+            "LeftWrist": 0,
             "LeftElbow": 1,
             "LeftShoulder": 2,
             "Neck": 3,

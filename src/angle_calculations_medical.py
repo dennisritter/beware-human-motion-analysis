@@ -2,6 +2,8 @@ from Sequence import Sequence
 import numpy as np
 import math
 import transformations
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
 
 
 def calc_angle(angle_vertex: list, ray_vertex_a: list, ray_vertex_b: list) -> float:
@@ -157,6 +159,40 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
         print(f"phi spherical: {phi}")
         print(f"flexion_extension angle: {flexion_extension} (phi ratio: {phi_ratio_flex_ex})")
         print(f"abduction_adduction angle: {abduction_adduction} (phi ratio: {phi_ratio_abd_add})")
+
+    # rotation angle
+
+    ex = left_shoulder_aligned_positions[elbow_left_idx][0]
+    ey = left_shoulder_aligned_positions[elbow_left_idx][1]
+    ez = left_shoulder_aligned_positions[elbow_left_idx][2]
+    wx = left_shoulder_aligned_positions[0][0]
+    wy = left_shoulder_aligned_positions[0][1]
+    wz = left_shoulder_aligned_positions[0][2]
+
+    e_phi = math.degrees(math.atan2(-ez, -ex))
+    w_phi = math.degrees(math.atan2(-wz, -wx))
+    print(f"e_phi: {e_phi}")
+    print(f"w_phi: {w_phi}")
+
+    fig = plt.figure(figsize=plt.figaspect(1)*2)
+    ax = fig.add_subplot(1, 1, 1, projection='3d')
+    ax.set_xlim3d(-0.5, 0.5)
+    ax.set_ylim3d(-0.5, 0.5)
+    ax.set_zlim3d(-0.5, 0.5)
+    for i, p in enumerate(left_shoulder_aligned_positions):
+        if i == 1:
+            ax.scatter(p[0], p[1], p[2], c="blue")
+        else:
+            ax.scatter(p[0], p[1], p[2], c="blue")
+    ax.plot([left_shoulder_aligned_positions[shoulder_left_idx][0], x], [left_shoulder_aligned_positions[shoulder_left_idx][1], y], [left_shoulder_aligned_positions[shoulder_left_idx][2], z], color="pink", linewidth=1)
+    zero_position = left_shoulder_aligned_positions[shoulder_left_idx]
+    vx = transformations.norm(np.array([1, 0, 0]))
+    vy = transformations.norm(np.array([0, 1, 0]))
+    vz = transformations.norm(np.array([0, 0, 1]))
+    ax.plot([zero_position[0], vx[0]], [zero_position[1], vx[1]], [zero_position[2], vx[2]], color="pink", linewidth=1)
+    ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]], [zero_position[2], vy[2]], color="maroon", linewidth=1)
+    ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]], color="red", linewidth=1)
+    plt.show()
 
     return {
         "flexion_extension": flexion_extension,

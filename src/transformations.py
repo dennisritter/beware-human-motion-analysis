@@ -126,29 +126,29 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
         transformed_positions.append(pos)
 
     ################### PLOTTING #####################
-    fig = plt.figure(figsize=plt.figaspect(1)*2)
-    ax = fig.add_subplot(1, 1, 1, projection='3d')
-    ax.set_xlim3d(-0.5, 0.5)
-    ax.set_ylim3d(-0.5, 0.5)
-    ax.set_zlim3d(-0.5, 0.5)
-    for i, p in enumerate(transformed_positions):
-        if i == 1:
-            ax.scatter(p[0], p[1], p[2], c="blue")
-        else:
-            ax.scatter(p[0], p[1], p[2], c="blue")
-    # ax.plot([zero_position[0], -0.1], [zero_position[1], 0.05], [zero_position[2], -0.1], color="pink", linewidth=1)
-    ax.plot([transformed_positions[14][0], transformed_positions[13][0]], [transformed_positions[14][1], transformed_positions[13][1]], [transformed_positions[14][2], transformed_positions[13][2]], color="pink", linewidth=1)
-    ax.plot([transformed_positions[2][0], transformed_positions[1][0]], [transformed_positions[2][1], transformed_positions[1][1]], [transformed_positions[2][2], transformed_positions[1][2]], color="pink", linewidth=1)
+    # fig = plt.figure(figsize=plt.figaspect(1)*2)
+    # ax = fig.add_subplot(1, 1, 1, projection='3d')
+    # ax.set_xlim3d(-0.5, 0.5)
+    # ax.set_ylim3d(-0.5, 0.5)
+    # ax.set_zlim3d(-0.5, 0.5)
+    # for i, p in enumerate(transformed_positions):
+    #     if i == 1:
+    #         ax.scatter(p[0], p[1], p[2], c="blue")
+    #     else:
+    #         ax.scatter(p[0], p[1], p[2], c="blue")
+    # # ax.plot([zero_position[0], -0.1], [zero_position[1], 0.05], [zero_position[2], -0.1], color="pink", linewidth=1)
+    # ax.plot([transformed_positions[14][0], transformed_positions[13][0]], [transformed_positions[14][1], transformed_positions[13][1]], [transformed_positions[14][2], transformed_positions[13][2]], color="pink", linewidth=1)
+    # ax.plot([transformed_positions[2][0], transformed_positions[1][0]], [transformed_positions[2][1], transformed_positions[1][1]], [transformed_positions[2][2], transformed_positions[1][2]], color="pink", linewidth=1)
 
-    # for j in range(len(seq.positions[frame])):
-    #     ax.scatter(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], c="red", alpha=0.5)
-    #     ax.text(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], j)
-    # ax.annotate(f"{j}", (seq.positions[frame][j][0], seq.positions[frame][j][1]))
-    ax.plot([zero_position[0], vx[0]/5], [zero_position[1], vx[1]], [zero_position[2], vx[2]], color="pink", linewidth=1)
-    ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]/5], [zero_position[2], vy[2]], color="maroon", linewidth=1)
-    ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]/5], color="red", linewidth=1)
-    # ax.plot([zero_position[0], vx[0]], [zero_position[1], vx[1]], [zero_position[2], vx[2]], color="pink", linewidth=1)
-    # ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]], [zero_position[2], vy[2]], color="maroon", linewidth=1)
-    # ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]], color="red", linewidth=1)
-    plt.show()
+    # # for j in range(len(seq.positions[frame])):
+    # #     ax.scatter(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], c="red", alpha=0.5)
+    # #     ax.text(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], j)
+    # # ax.annotate(f"{j}", (seq.positions[frame][j][0], seq.positions[frame][j][1]))
+    # ax.plot([zero_position[0], vx[0]/5], [zero_position[1], vx[1]], [zero_position[2], vx[2]], color="pink", linewidth=1)
+    # ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]/5], [zero_position[2], vy[2]], color="maroon", linewidth=1)
+    # ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]/5], color="red", linewidth=1)
+    # # ax.plot([zero_position[0], vx[0]], [zero_position[1], vx[1]], [zero_position[2], vx[2]], color="pink", linewidth=1)
+    # # ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]], [zero_position[2], vy[2]], color="maroon", linewidth=1)
+    # # ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]], color="red", linewidth=1)
+    # plt.show()
     return transformed_positions

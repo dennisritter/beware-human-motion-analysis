@@ -31,4 +31,4 @@ mocap_posemapper = PoseMapper(PoseFormatEnum.MOCAP)
 seq = mocap_posemapper.load('data/sequences/squat_3/complete-session.json', 'Squat')
 
 acm.calc_angles_shoulder_left(seq, 2, 14, 3, 1, log=True)
-acm.calc_angles_shoulder_right(seq, 14, 2, 3, 13, log=True)
+# acm.calc_angles_shoulder_right(seq, 14, 2, 3, 13, log=True)
