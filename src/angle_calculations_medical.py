@@ -189,7 +189,7 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
         print(f"inner_outer_rotation angle: {inner_outer_rotation}")
 
     ### Plotting ###
-
+    """
     fig = plt.figure(figsize=plt.figaspect(1)*2)
     ax = fig.add_subplot(1, 1, 1, projection='3d')
     ax.set_xlim3d(-0.5, 0.5)
@@ -233,7 +233,7 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
             [ez, sew_plane_normal[2] + ez],
             color="blue", linewidth=3)
     plt.show()
-
+    """
     return {
         "flexion_extension": flexion_extension,
         "abduction_adduction": abduction_adduction,
