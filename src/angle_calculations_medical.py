@@ -159,7 +159,7 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
     abduction_adduction = theta*phi_ratio_abd_add
 
     # rotation angle
-
+    # TODO: Confirm rotation angle correctness by calculating it for more obvious poses
     # Get normal for down and front vectors
     vx = transformations.norm(np.array([1, 0, 0]))
     vy = transformations.norm(np.array([0, 1, 0]))
