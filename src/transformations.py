@@ -86,22 +86,6 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     # New Y-Axis is perpendicular to new X-Axis and Z-Axis
     vy_new = get_perpendicular_vector(vx_new, vz_new)
 
-    ##### TODO: CLEANUP
-    # # FLEXION
-    # a = seq.positions[frame][1] - origin
-    # b = vz_new
-    # # a_dot_b = np.dot(a, b) / (transformations.norm(a) * transformatiorns.norm(b))
-    # a_dot_b = np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
-    # print(f"theta_flex_no_transformation: {np.degrees(np.arcsin(a_dot_b))}")
-
-    # # ABDUCTION
-    # a = seq.positions[frame][1] - origin
-    # b = vx_new
-    # # a_dot_b = np.dot(a, b) / (transformations.norm(a) * transformatiorns.norm(b))
-    # a_dot_b = np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
-    # print(f"theta_abd_no_transformation: {np.degrees(np.arcsin(a_dot_b))}")
-    # ##########
-
     # Construct rotation matrix for X-Alignment to rotate about x_rot_axis for the angle theta
     x_rot_axis = get_perpendicular_vector(vx_new, vx)
     theta_x = get_angle(vx_new, vx)
@@ -111,6 +95,8 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     y_rot_axis = np.matmul(Rx, np.append(vx_new, 1))[:3]
     vy_new_rx = np.matmul(Rx, np.append(vy_new, 1))[:3]
     theta_y = get_angle(vy_new_rx, vy)
+    # NOTE: Notices wrong Y-Rotation in a few cases -> could not reproduce consistently
+    # print(f"Frame: {frame} - Y-Axis Angle: {np.degrees(theta_y)}")
     Ry = rotation_matrix_4x4(norm(y_rot_axis), theta_y)
 
     # Construct translation Matrix to move given origin to zero-position
