@@ -209,13 +209,13 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
         inner_outer_rotation_arr.append(inner_outer_rotation)
 
         if log:
-            # print("\n##### SHOULDER LEFT ANGLES #####")
-            # print(f"[{frame}] r spherical: {er}")
-            # print(f"[{frame}] theta spherical: {theta}")
-            # print(f"[{frame}] phi spherical: {phi}")
+            print("\n##### SHOULDER LEFT ANGLES #####")
+            print(f"[{frame}] r spherical: {er}")
+            print(f"[{frame}] theta spherical: {theta}")
+            print(f"[{frame}] phi spherical: {phi}")
             print(f"[{frame}] flexion_extension angle: {flexion_extension} (phi ratio: {phi_ratio_flex_ex})")
-            # print(f"[{frame}] abduction_adduction angle: {abduction_adduction} (phi ratio: {phi_ratio_abd_add})")
-            # print(f"[{frame}] inner_outer_rotation angle: {inner_outer_rotation}")
+            print(f"[{frame}] abduction_adduction angle: {abduction_adduction} (phi ratio: {phi_ratio_abd_add})")
+            print(f"[{frame}] inner_outer_rotation angle: {inner_outer_rotation}")
 
     ### Plotting ###
     """
