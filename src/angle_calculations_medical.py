@@ -130,14 +130,29 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
 
         # Convert to spherical coordinates
         er = math.sqrt(ex**2 + ey**2 + ez**2)
-        # Y-Axis points upwards
+        # # Y-Axis points upwards
+        # # Theta should be the angle between downwards vector and r
+        # # So we mirror Y-Axis
+        # theta = math.degrees(math.acos(-ey/er))
+        # # Phi is the anti-clockwise angle between Z and X
+        # # For Left shoulder, Z-Axis points away from camera and X-Axis is aligned to the right shoulder after transformations.
+        # # So for Left shoulder, we mirror the Z and X Axes
+        # phi = math.degrees(math.atan2(-ez, -ex))
+
+        # NOTE: Hacky: We assume that the neck coords are above shoulders to determine if Y points up or down
+        #       and Z points to front or back. Spherical coords must be calculated differently for each case.
+        neck_pos = left_shoulder_aligned_positions[neck_idx]
         # Theta should be the angle between downwards vector and r
-        # So we mirror Y-Axis
-        theta = math.degrees(math.acos(-ey/er))
+        # True: Y-Axis Points up -> Mirror Y-Axis so it points down (to 0° medical definition)
+        # False: Y-Axis Points down -> Don't mirror Y-Axis
+        theta = math.degrees(math.acos(-ey/er)) if (neck_pos[1] >= 0) else math.degrees(math.acos(ey/er))
+
         # Phi is the anti-clockwise angle between Z and X
-        # For Left shoulder, Z-Axis points away from camera and X-Axis is aligned to the right shoulder after transformations.
-        # So for Left shoulder, we mirror the Z and X Axes
-        phi = math.degrees(math.atan2(-ez, -ex))
+        # True: Y-Axis Points up -> Z points away from camera -> mirror Z-Axis
+        # False: Y-Axis Points down -> Z points to camera -> mirror Z-Axis
+        # NOTE: This is different to right shoulder because X-Axis is rotated by 180° in respect to the other shoulders positions
+        #       (mirror Z for left shoulder, but not for right shoulder if Y Points up)
+        phi = math.degrees(math.atan2(-ez, -ex)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(ez, -ex))
 
         # The phi_ratio will determine how much of the theta angle is flexion_extension and abduction_adduction
         # phi_ratio == -1 -> 0% Abduction_Adduction / 100% Extension
@@ -284,14 +299,18 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
 
         # Convert to spherical coordinates
         er = math.sqrt(ex**2 + ey**2 + ez**2)
-        # Y-Axis points upwards
+        # NOTE: Hacky: We assume that the neck coords are above shoulders to determine if Y points up or down
+        #       and Z points to front or back. Spherical coords must be calculated differently for each case.
+        neck_pos = right_shoulder_aligned_positions[neck_idx]
         # Theta should be the angle between downwards vector and r
-        # So we mirror Y-Axis
-        theta = math.degrees(math.acos(-ey/er))
+        # True: Y-Axis Points up -> Mirror Y-Axis so it points down (to 0° medical definition)
+        # False: Y-Axis Points down -> Don't mirror Y-Axis
+        theta = math.degrees(math.acos(-ey/er)) if (neck_pos[1] >= 0) else math.degrees(math.acos(ey/er))
+
         # Phi is the anti-clockwise angle between Z and X
-        # For Right shoulder, Z-Axis points to the camera and X-Axis is aligned to the left shoulder after transformations.
-        # So for Right shoulder, we mirror ONLY the X Axes to get a positive angle for flexion and negative angle for extension
-        phi = math.degrees(math.atan2(ez, -ex))
+        # True: Y-Axis Points up -> Z points to camera -> don't mirror Z-Axis
+        # False: Y-Axis Points down -> Z points away from camera -> mirror Z-Axis
+        phi = math.degrees(math.atan2(ez, -ex)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ez, -ex))
 
         # The phi_ratio will determine how much of the theta angle is flexion_extension and abduction_adduction
         # phi_ratio == -1 -> 0% Abduction_Adduction / 100% Extension

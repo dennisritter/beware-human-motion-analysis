@@ -95,8 +95,8 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     # print(f"theta x: {np.degrees(theta_x)}")
     Rx = rotation_matrix_4x4(x_rot_axis, theta_x)
 
-    # Rotate X to use it as axis for y rotation and Rotate Y-direction vector to get rotation angle for Y-Alignment
-    y_rot_axis = np.matmul(Rx, np.append(vx_new, 1))[:3]
+    # Use new X-Axis axis for y rotation and Rotate Y-direction vector to get rotation angle for Y-Alignment
+    y_rot_axis = vx_new
     vy_new_rx = np.matmul(Rx, np.append(vy_new, 1))[:3]
     theta_y = get_angle(vy_new_rx, vy)
 
@@ -129,7 +129,7 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
         transformed_positions.append(pos)
 
     ################### PLOTTING #####################
-
+    """
     fig = plt.figure(figsize=plt.figaspect(1)*2)
     ax = fig.add_subplot(1, 1, 1, projection='3d')
     ax.set_xlim3d(-0.5, 0.5)
@@ -153,5 +153,5 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     # ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]], [zero_position[2], vy[2]], color="maroon", linewidth=1)
     # ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]], color="red", linewidth=1)
     plt.show()
-
+    """
     return transformed_positions

@@ -40,16 +40,13 @@ seq = mocap_posemapper.load('data/sequences/squat_3/complete-session.json', 'Squ
 # inner_outer_Rotation getting very high sometimes they shouldn't -> SEW Normal flips 180° sometimes
 # [54-64] data/sequences/squat_3/complete-session.json -> false rotation angles
 #
-# left_shoulder_angles = acm.calc_angles_shoulder_left(seq, 2, 14, 3, 1, 0, log=True)
+left_shoulder_angles = acm.calc_angles_shoulder_left(seq, 2, 14, 3, 1, 0, log=True)
 # NOTE:
-# flexion_extension false angles:
-# [38, 48] data/sequences/squat_3/complete-session.json
-# abduction_adduction false angles:
-# [38, 48, 74] data/sequences/squat_3/complete-session.json
 # inner_outer_Rotation getting very high sometimes they shouldn't -> SEW Normal flips 180° sometimes
 # [54, 55, 58, 59, 106, 107] data/sequences/squat_3/complete-session.json
 #
-right_shoulder_angles = acm.calc_angles_shoulder_right(seq, 14, 2, 3, 13, 12, log=True)
+# right_shoulder_angles = acm.calc_angles_shoulder_right(seq, 14, 2, 3, 13, 12, log=True)
+
 # left_hip_angles = acm.calc_angles_shoulder_left(seq, 2, 14, 3, 1, 0)
 # right_hip_angles = acm.calc_angles_shoulder_right(seq, 14, 2, 3, 13)
 
