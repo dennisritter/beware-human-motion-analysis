@@ -19,6 +19,86 @@ def calc_angle(angle_vertex: list, ray_vertex_a: list, ray_vertex_b: list) -> fl
     return np.degrees(np.arccos(cos_angle))
 
 
+def calc_angles_hip_left(seq: Sequence, hip_left_idx: int, hip_right_idx: int, torso_idx: int, knee_left_idx: int, log: bool = False) -> dict:
+    """ Calculates Right Hip angles 
+    Parameters
+    ----------
+    seq : Sequence
+        A Motion Sequence
+    """
+    flexion_extension_arr = []
+    abduction_adduction_arr = []
+
+    # for frame in range(37, 40):
+    for frame in range(0, len(seq.positions)):
+        left_hip_aligned_positions = transformations.align_coordinates_to(hip_left_idx, hip_right_idx, torso_idx, seq, frame=frame)
+        
+        vx = transformations.norm(np.array([1, 0, 0]))
+        vy = transformations.norm(np.array([0, 1, 0]))
+        vz = transformations.norm(np.array([0, 0, 1]))
+        kx = left_hip_aligned_positions[knee_left_idx][0]
+        ky = left_hip_aligned_positions[knee_left_idx][1]
+        kz = left_hip_aligned_positions[knee_left_idx][2]
+
+        # Convert to spherical coordinates
+        kr = math.sqrt(kx**2 + ky**2 + kz**2)
+                # NOTE: Hacky: We assume that the neck coords are above shoulders to determine if Y points up or down
+        #       and Z points to front or back. Spherical coords must be calculated differently for each case.
+        torso_pos = left_hip_aligned_positions[torso_idx]
+        # Theta should be the angle between downwards vector and r
+        # True: Y-Axis Points up -> Mirror Y-Axis so it points down (to 0° medical definition)
+        # False: Y-Axis Points down -> Don't mirror Y-Axis
+        theta = math.degrees(math.acos(-ky/kr)) if (torso_pos[1] >= 0) else math.degrees(math.acos(ky/kr))
+
+        # Phi is the anti-clockwise angle between Z and X
+        # True: Y-Axis Points up -> Z points away from camera -> mirror Z-Axis
+        # False: Y-Axis Points down -> Z points to camera -> mirror Z-Axis
+        # NOTE: This is different to right hip because X-Axis is rotated by 180° in respect to the other hips positions
+        #       (mirror Z for left hip, but not for right hip if Y Points up)
+        phi = math.degrees(math.atan2(-kz, -kx)) if (torso_pos[1] >= 0) else math.degrees(math.atan2(kz, -kx))
+
+        # The phi_ratio will determine how much of the theta angle is flexion_extension and abduction_adduction
+        # phi_ratio == -1 -> 0% Abduction_Adduction / 100% Extension
+        # phi_ratio == 0(-2) -> 100% Abduction / 0% Flexion_Extension
+        # phi_ratio == 1 -> 0% Abduction_Adduction / 100% Flexion
+        # phi_ratio == 2 -> 100% Adduction / 0% Flexion_Extension
+        phi_ratio = phi/90
+
+        # Ensure phi_ratio_flex_ex alters between -1 and 1
+        # flexion_extension > 0 -> Flexion
+        # flexion_extension < 0 -> Extension
+        phi_ratio_flex_ex = phi_ratio
+        if phi_ratio_flex_ex <= 1 and phi_ratio_flex_ex >= -1:
+            flexion_extension = theta*phi_ratio_flex_ex
+        elif phi_ratio > 1:
+            phi_ratio_flex_ex = 2-phi_ratio_flex_ex
+            flexion_extension = theta*phi_ratio_flex_ex
+        elif phi_ratio < -1:
+            phi_ratio_flex_ex = -2-phi_ratio_flex_ex
+            flexion_extension = theta*phi_ratio_flex_ex
+
+        # Ensure phi_ratio_abd_add is between -1 and 1
+        phi_ratio_abd_add = 1-abs(phi_ratio)
+        # abduction_adduction > 0 -> Abduction
+        # abduction_adduction < 0 -> Adduction
+        abduction_adduction = theta*phi_ratio_abd_add
+        
+        flexion_extension_arr.append(flexion_extension)
+        abduction_adduction_arr.append(abduction_adduction)
+        
+        if log:
+            print("\n##### HIP LEFT ANGLES #####")
+            print(f"[{frame}] r spherical: {kr}")
+            print(f"[{frame}] theta spherical: {theta}")
+            print(f"[{frame}] phi spherical: {phi}")
+            print(f"[{frame}] flexion_extension angle: {flexion_extension} (phi ratio: {phi_ratio_flex_ex})")
+            print(f"[{frame}] abduction_adduction angle: {abduction_adduction} (phi ratio: {phi_ratio_abd_add})")
+    
+    return {
+        "flexion_extension": flexion_extension_arr,
+        "abduction_adduction": abduction_adduction_arr,
+    }
+
 def calc_angles_hip_right(seq: Sequence, hip_right_idx: int, hip_left_idx: int, torso_idx: int, knee_right_idx: int, log: bool = False) -> dict:
     """ Calculates Right Hip angles 
     Parameters
@@ -130,21 +210,12 @@ def calc_angles_hip_right(seq: Sequence, hip_right_idx: int, hip_left_idx: int, 
         "abduction_adduction": abduction_adduction_arr,
     }
 
-  
-
-
-def calc_angle_knee_flexion_extension(seq: Sequence, knee_idx: int, hip_idx: int, ankle_idx: int) -> list:
+def calc_angles_knee(seq: Sequence, knee_idx: int, hip_idx: int, ankle_idx: int) -> dict:
     """ Calculates the Knees flexion/extension angles for each frame of the Sequence.
     Parameters
     ----------
     seq : Sequence
         A Motion Sequence
-    joints : dict
-        The joints to use for angle calculation.
-        Attributes:
-            angle_vertex : int
-            rays : list<int>
-        Example: { "angle_vertex": 1, "rays": [0, 2] }
     """
     knee = seq.positions[:, knee_idx, :]
     hip = seq.positions[:, hip_idx, :]
@@ -157,7 +228,6 @@ def calc_angle_knee_flexion_extension(seq: Sequence, knee_idx: int, hip_idx: int
     return {
         "flexion_extension": angles
     }
-
 
 def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_right_idx: int, neck_idx: int, elbow_left_idx: int, wrist_left_idx: int, log: bool = False) -> dict:
     """ Calculates Left Shoulder angles
@@ -329,7 +399,6 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
         # "inner_outer_rotation": inner_outer_rotation_arr
     }
 
-
 def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_left_idx: int, neck_idx: int, elbow_right_idx: int, log: bool = False) -> dict:
     """ Calculates Right Shoulder angles 
     Parameters
@@ -442,8 +511,7 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
         "abduction_adduction": abduction_adduction_arr,
     }
 
-
-def calc_angle_elbow_flexion_extension(seq: Sequence, elbow_idx: int, shoulder_idx: int, wrist_idx: int) -> list:
+def calc_angles_elbow(seq: Sequence, elbow_idx: int, shoulder_idx: int, wrist_idx: int) -> dict:
     """ Calculates the Elbows flexion/extension angles for each frame of the Sequence.
     Parameters
     ----------

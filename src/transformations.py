@@ -129,7 +129,7 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
         transformed_positions.append(pos)
 
     ################### PLOTTING #####################
-    
+    """
     fig = plt.figure(figsize=plt.figaspect(1)*2)
     ax = fig.add_subplot(1, 1, 1, projection='3d')
     ax.set_xlim3d(-0.5, 0.5)
@@ -138,9 +138,9 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     for i, p in enumerate(transformed_positions):
         ax.scatter(p[0], p[1], p[2], c="blue")
     # ax.plot([zero_position[0], -0.1], [zero_position[1], 0.05], [zero_position[2], -0.1], color="pink", linewidth=1)
-    ax.plot([transformed_positions[11][0], transformed_positions[10][0]], 
-            [transformed_positions[11][1], transformed_positions[10][1]], 
-            [transformed_positions[11][2], transformed_positions[10][2]], 
+    ax.plot([transformed_positions[8][0], transformed_positions[7][0]], 
+            [transformed_positions[8][1], transformed_positions[7][1]], 
+            [transformed_positions[8][2], transformed_positions[7][2]], 
             color="pink", linewidth=1)
     # ax.plot([transformed_positions[2][0], transformed_positions[1][0]], 
     #         [transformed_positions[2][1], transformed_positions[1][1]], 
@@ -159,5 +159,5 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     # ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]], [zero_position[2], vy[2]], color="maroon", linewidth=1)
     # ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]], color="red", linewidth=1)
     plt.show()
-    
+    """
     return transformed_positions

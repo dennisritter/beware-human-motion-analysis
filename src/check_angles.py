@@ -8,6 +8,7 @@ import numpy as np
 import transformations
 import math
 import matplotlib.pyplot as plt
+import logging
 
 MOCAP_BODY_PARTS = {
     "LeftWrist": 0,
@@ -28,6 +29,7 @@ MOCAP_BODY_PARTS = {
     "Head": 15
 }
 FRAME = 0
+
 # Get Exercise Object from json file
 ex = exercise_loader.load('data/exercises/squat.json')
 # Get PoseMapper instance for MOCAP sequences
@@ -35,40 +37,22 @@ mocap_posemapper = PoseMapper(PoseFormatEnum.MOCAP)
 # Convert mocap json string Positions to Sequence Object
 seq = mocap_posemapper.load('data/sequences/squat_3/complete-session.json', 'Squat')
 
-# left_shoulder_angles = acm.calc_angles_shoulder_left(seq, 2, 14, 3, 1, 0, log=True)
-# right_shoulder_angles = acm.calc_angles_shoulder_right(seq, 14, 2, 3, 13, 12, log=True)
+left_shoulder_angles = acm.calc_angles_shoulder_left(seq, 2, 14, 3, 1, 0, log=False)
+right_shoulder_angles = acm.calc_angles_shoulder_right(seq, 14, 2, 3, 13, log=False)
+left_hip_angles = acm.calc_angles_hip_left(seq, 8, 11, 4, 7, log=False)
+right_hip_angles = acm.calc_angles_hip_right(seq, 11, 8, 4, 10, log=False )
+left_elbow_angles = acm.calc_angles_elbow(seq, 1, 2, 0)
+right_elbow_angles = acm.calc_angles_elbow(seq, 13, 14, 12)
+left_knee_angles = acm.calc_angles_knee(seq, 7, 8, 6)
+right_knee_angles = acm.calc_angles_knee(seq, 10, 11, 9)
 
-# left_hip_angles = acm.calc_angles_shoulder_left(seq, 2, 14, 3, 1, 0)
-right_hip_angles = acm.calc_angles_hip_right(seq, 11, 8, 4, 10, True)
-
-# left_elbow_angles = acm.calc_angle_elbow_flexion_extension(seq, 1, 2, 0)
-# right_elbow_angles = acm.calc_angle_elbow_flexion_extension(seq, 13, 14, 12)
-# print(f"Left Elbow angles: {left_elbow_angles['flexion_extension'][FRAME]}")
-# print(f"Right Elbow angles: {right_elbow_angles['flexion_extension'][FRAME]}")
-# left_knee_angles = acm.calc_angle_knee_flexion_extension(seq, 7, 8, 6)
-# right_knee_angles = acm.calc_angle_knee_flexion_extension(seq, 10, 11, 9)
-# print(f"Left Knee angles: {left_knee_angles['flexion_extension'][FRAME]}")
-# print(f"Right Knee angles: {right_knee_angles['flexion_extension'][FRAME]}")
-
-### Plotting ###
-
-# fig = plt.figure(figsize=plt.figaspect(1)*2)
-# ax = fig.add_subplot(1, 1, 1, projection='3d')
-# ax.set_xlim3d(-1, 1)
-# ax.set_ylim3d(-1, 1)
-# ax.set_zlim3d(-1, 1)
-# for i, p in enumerate(seq.positions[FRAME]):
-#     if i == 11 or i == 5 or i == 10:
-#         ax.scatter(p[0], p[1], p[2], c="red")
-#     else:
-#         ax.scatter(p[0], p[1], p[2], c="blue")
-#     # ax.plot([seq.positions[FRAME][7][0], seq.positions[FRAME][8][0]],
-#     #         [seq.positions[FRAME][7][1], seq.positions[FRAME][8][1]],
-#     #         [seq.positions[FRAME][7][2], seq.positions[FRAME][8][2]],
-#     #         color="red", linewidth=1)
-#     # ax.plot([seq.positions[FRAME][7][0], seq.positions[FRAME][6][0]],
-#     #         [seq.positions[FRAME][7][1], seq.positions[FRAME][6][1]],
-#     #         [seq.positions[FRAME][7][2], seq.positions[FRAME][6][2]],
-#     #         color="red", linewidth=1)
-# plt.show()
+logging.log_angles(left_shoulder_angles, 
+                    right_shoulder_angles, 
+                    left_hip_angles, 
+                    right_hip_angles,
+                    left_elbow_angles, 
+                    right_elbow_angles, 
+                    left_knee_angles,
+                    right_knee_angles, 
+                    frame=FRAME)
 
