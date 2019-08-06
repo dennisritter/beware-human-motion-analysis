@@ -179,7 +179,7 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
         # abduction_adduction > 0 -> Abduction
         # abduction_adduction < 0 -> Adduction
         abduction_adduction = theta*phi_ratio_abd_add
-
+        """ INNER OUTER ROTATION
         # rotation angle
         # TODO: Confirm rotation angle correctness by calculating it for more obvious poses
         # Get normal for down and front vectors
@@ -207,7 +207,7 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
         flexion_extension_arr.append(flexion_extension)
         abduction_adduction_arr.append(abduction_adduction)
         inner_outer_rotation_arr.append(inner_outer_rotation)
-
+        """
         if log:
             print("\n##### SHOULDER LEFT ANGLES #####")
             print(f"[{frame}] r spherical: {er}")
@@ -215,7 +215,7 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
             print(f"[{frame}] phi spherical: {phi}")
             print(f"[{frame}] flexion_extension angle: {flexion_extension} (phi ratio: {phi_ratio_flex_ex})")
             print(f"[{frame}] abduction_adduction angle: {abduction_adduction} (phi ratio: {phi_ratio_abd_add})")
-            print(f"[{frame}] inner_outer_rotation angle: {inner_outer_rotation}")
+            # print(f"[{frame}] inner_outer_rotation angle: {inner_outer_rotation}")
 
     ### Plotting ###
     """
@@ -266,7 +266,7 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
     return {
         "flexion_extension": flexion_extension_arr,
         "abduction_adduction": abduction_adduction_arr,
-        "inner_outer_rotation": inner_outer_rotation_arr
+        # "inner_outer_rotation": inner_outer_rotation_arr
     }
 
 
@@ -279,10 +279,10 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
     """
     flexion_extension_arr = []
     abduction_adduction_arr = []
-    inner_outer_rotation_arr = []
+    # inner_outer_rotation_arr = []
 
-    for frame in range(37, 40):
-        # for frame in range(0, len(seq.positions)):
+    # for frame in range(37, 40):
+    for frame in range(0, len(seq.positions)):
         # Move coordinate system to left shoulder for frame 20
         # align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_direction_bp_idx: int, seq: Sequence, frame: int)
         right_shoulder_aligned_positions = transformations.align_coordinates_to(shoulder_right_idx, shoulder_left_idx, neck_idx, seq, frame=frame)
@@ -337,7 +337,8 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
         # abduction_adduction > 0 -> Abduction
         # abduction_adduction < 0 -> Adduction
         abduction_adduction = theta*phi_ratio_abd_add
-
+        
+        """ INNER OUTER ROTATION
         # rotation angle
         # TODO: Confirm rotation angle correctness by calculating it for more obvious poses
         # Get normal for down and front vectors
@@ -365,7 +366,7 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
         flexion_extension_arr.append(flexion_extension)
         abduction_adduction_arr.append(abduction_adduction)
         inner_outer_rotation_arr.append(inner_outer_rotation)
-
+        """
         if log:
             print("\n##### SHOULDER RIGHT ANGLES #####")
             print(f"[{frame}] r spherical: {er}")
@@ -373,7 +374,7 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
             print(f"[{frame}] phi spherical: {phi}")
             print(f"[{frame}] flexion_extension angle: {flexion_extension} (phi ratio: {phi_ratio_flex_ex})")
             print(f"[{frame}] abduction_adduction angle: {abduction_adduction} (phi ratio: {phi_ratio_abd_add})")
-            print(f"[{frame}] inner_outer_rotation angle: {inner_outer_rotation}")
+            # print(f"[{frame}] inner_outer_rotation angle: {inner_outer_rotation}")
 
     ### Plotting ###
     """
@@ -424,7 +425,7 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
     return {
         "flexion_extension": flexion_extension_arr,
         "abduction_adduction": abduction_adduction_arr,
-        "inner_outer_rotation": inner_outer_rotation_arr
+        # "inner_outer_rotation": inner_outer_rotation_arr
     }
 
 
