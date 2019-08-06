@@ -203,11 +203,12 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
         sew_plane_normal = transformations.get_perpendicular_vector(v_ew, v_es)
         # Calc angle between transformed zero reference plane normal and actual plane normal to get the inner/outer rotation
         inner_outer_rotation = np.degrees(transformations.get_angle(trans_zero_rot_plane_normal, sew_plane_normal))
+        """
 
         flexion_extension_arr.append(flexion_extension)
         abduction_adduction_arr.append(abduction_adduction)
-        inner_outer_rotation_arr.append(inner_outer_rotation)
-        """
+        # inner_outer_rotation_arr.append(inner_outer_rotation)
+        
         if log:
             print("\n##### SHOULDER LEFT ANGLES #####")
             print(f"[{frame}] r spherical: {er}")
@@ -279,7 +280,6 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
     """
     flexion_extension_arr = []
     abduction_adduction_arr = []
-    # inner_outer_rotation_arr = []
 
     # for frame in range(37, 40):
     for frame in range(0, len(seq.positions)):
@@ -338,35 +338,9 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
         # abduction_adduction < 0 -> Adduction
         abduction_adduction = theta*phi_ratio_abd_add
         
-        """ INNER OUTER ROTATION
-        # rotation angle
-        # TODO: Confirm rotation angle correctness by calculating it for more obvious poses
-        # Get normal for down and front vectors
-        vx = transformations.norm(np.array([1, 0, 0]))
-        vy = transformations.norm(np.array([0, 1, 0]))
-        vz = transformations.norm(np.array([0, 0, 1]))
-
-        # Get reversed Normal vector for YZ Plane ()
-        zero_rot_plane_normal = transformations.get_perpendicular_vector(vy, vz)
-        # Rotate the zero reference planes normal by abduction_adduction angle about wrist-elbow axis
-        Re = transformations.rotation_matrix_4x4(right_shoulder_aligned_positions[0] - right_shoulder_aligned_positions[elbow_right_idx], np.radians(abduction_adduction))
-        trans_zero_rot_plane_normal = np.matmul(Re, np.append(zero_rot_plane_normal, 1))[:3]
-
-        # Elbow-Shoulder and Elbow-Wrist vectors
-        v_es = np.array([sx, sy, sz]) - np.array([ex, ey, ez])
-        v_ew = np.array([wx, wy, wz]) - np.array([ex, ey, ez])
-        # Compute actual shoulder-elbow-wrist plane normal
-        # TODO: In some cases, the sew_normal points to the opposite direction it actually should.
-        #       That case leads to very high rotation angle, when they should be 180° - angle.
-        #       How can we ensure the correct normal direction / When to substract {angle} from 180° ?
-        sew_plane_normal = transformations.get_perpendicular_vector(v_es, v_ew)
-        # Calc angle between transformed zero reference plane normal and actual plane normal to get the inner/outer rotation
-        inner_outer_rotation = np.degrees(transformations.get_angle(trans_zero_rot_plane_normal, sew_plane_normal))
-
         flexion_extension_arr.append(flexion_extension)
         abduction_adduction_arr.append(abduction_adduction)
-        inner_outer_rotation_arr.append(inner_outer_rotation)
-        """
+        
         if log:
             print("\n##### SHOULDER RIGHT ANGLES #####")
             print(f"[{frame}] r spherical: {er}")
@@ -374,7 +348,6 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
             print(f"[{frame}] phi spherical: {phi}")
             print(f"[{frame}] flexion_extension angle: {flexion_extension} (phi ratio: {phi_ratio_flex_ex})")
             print(f"[{frame}] abduction_adduction angle: {abduction_adduction} (phi ratio: {phi_ratio_abd_add})")
-            # print(f"[{frame}] inner_outer_rotation angle: {inner_outer_rotation}")
 
     ### Plotting ###
     """
@@ -406,20 +379,6 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
             [zero_position[1], vz[1]],
             [zero_position[2], vz[2]],
             color="red", linewidth=1)
-
-    # inner/outer Rotation plane normals
-    ax.plot([ex, zero_rot_plane_normal[0] + ex],
-            [ey, zero_rot_plane_normal[1] + ey],
-            [ez, zero_rot_plane_normal[2] + ez],
-            color="green", linewidth=3)
-    ax.plot([ex, trans_zero_rot_plane_normal[0] + ex],
-            [ey, trans_zero_rot_plane_normal[1] + ey],
-            [ez, trans_zero_rot_plane_normal[2] + ez],
-            color="red", linewidth=3)
-    ax.plot([ex, sew_plane_normal[0] + ex],
-            [ey, sew_plane_normal[1] + ey],
-            [ez, sew_plane_normal[2] + ez],
-            color="blue", linewidth=3)
     plt.show()
     """
     return {
