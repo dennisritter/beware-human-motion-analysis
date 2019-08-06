@@ -110,7 +110,7 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
     """
     flexion_extension_arr = []
     abduction_adduction_arr = []
-    inner_outer_rotation_arr = []
+    # inner_outer_rotation_arr = []
     # for frame in range(44, 45):
     for frame in range(0, len(seq.positions)):
 
