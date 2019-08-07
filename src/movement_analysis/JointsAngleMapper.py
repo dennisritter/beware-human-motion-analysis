@@ -1,7 +1,6 @@
 import sys
-from Exercise import Exercise
-sys.path.append('src/motion_sequences/')
-from PoseFormatEnum import PoseFormatEnum  # noqa: E402
+from .Exercise import Exercise
+from .PoseFormatEnum import PoseFormatEnum  # noqa: E402
 
 
 class JointsAngleMapper:

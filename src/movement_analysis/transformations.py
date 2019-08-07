@@ -1,6 +1,6 @@
+from .Sequence import Sequence
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-from Sequence import Sequence
 import numpy as np
 import math
 

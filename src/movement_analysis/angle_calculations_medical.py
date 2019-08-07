@@ -1,7 +1,7 @@
-from Sequence import Sequence
+from .Sequence import Sequence
+from . import transformations
 import numpy as np
 import math
-import transformations
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
@@ -17,6 +17,9 @@ def calc_angle(angle_vertex: list, ray_vertex_a: list, ray_vertex_b: list) -> fl
     float
         Angle between angle_vertex_2d-ray_vertex_a and angle_vertex_2d-ray_vertex_b in degrees
     """
+    angle_vertex = np.array(angle_vertex)
+    ray_vertex_a = np.array(ray_vertex_a)
+    ray_vertex_b = np.array(ray_vertex_b)
     ray_a = ray_vertex_a - angle_vertex
     ray_b = ray_vertex_b - angle_vertex
     cos_angle = np.dot(ray_a, ray_b) / (np.linalg.norm(ray_a) * np.linalg.norm(ray_b))

@@ -1,12 +1,12 @@
+from movement_analysis.Sequence import Sequence
+from movement_analysis.PoseMapper import PoseMapper
+from movement_analysis.PoseFormatEnum import PoseFormatEnum
+from movement_analysis import distance
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import tslearn.metrics as ts
 import seaborn as sns
-from PoseMapper import PoseMapper
-from PoseFormatEnum import PoseFormatEnum
 import numpy as np
-import Sequence
-import distance
 
 
 sns.set()

@@ -1,22 +1,23 @@
+from .PoseMapper import PoseMapper
+from .PoseFormatEnum import PoseFormatEnum
+from .Sequence import Sequence
+from . import distance
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import tslearn.metrics as ts
 import seaborn as sns
-from PoseMapper import PoseMapper
-from PoseFormatEnum import PoseFormatEnum
 import numpy as np
-import Sequence
-import distance
 
 
 sns.set()
 sns.set_style(style='whitegrid')
 
+
 def plot_ball_joint_angle(joint_aligned_positions: list, ball_joint_idx: int, angle_ref_joint_idx: int):
     zero_x, zero_y, zero_z = joint_aligned_positions[ball_joint_idx]
     ax, ay, az = joint_aligned_positions[angle_ref_joint_idx]
-    vx, vy, vz = [[1,0,0], [0,1,0], [0,0,1]]
-    
+    vx, vy, vz = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+
     fig = plt.figure(figsize=plt.figaspect(1)*2)
     ax = fig.add_subplot(1, 1, 1, projection='3d')
     ax.set_xlim3d(-1, 1)

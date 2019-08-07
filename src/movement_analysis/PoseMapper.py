@@ -1,7 +1,7 @@
-from PoseFormatEnum import PoseFormatEnum
+from .PoseFormatEnum import PoseFormatEnum
+from .Sequence import Sequence
 import json
 import numpy as np
-from Sequence import Sequence
 
 
 class PoseMapper:
