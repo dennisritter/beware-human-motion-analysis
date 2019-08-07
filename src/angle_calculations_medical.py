@@ -5,6 +5,10 @@ import transformations
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
+""" This module contains functions to calculate medical angles for human body joints.
+    Functions are Developed for the tracking input of Realsense MOCAP Project (https://gitlab.beuth-hochschule.de/iisy/realsense).
+    If other input is used or the joint position output of Realsense MOCAP changes, the functions might need adjustments.
+"""
 
 def calc_angle(angle_vertex: list, ray_vertex_a: list, ray_vertex_b: list) -> float:
     """ Calculates the angle between angle_vertex_2d-ray_vertex_a and angle_vertex_2d-ray_vertex_b in 2D space.
