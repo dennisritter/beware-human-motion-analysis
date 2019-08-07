@@ -39,7 +39,7 @@ def calc_angles_hip_left(seq: Sequence, hip_left_idx: int, hip_right_idx: int, t
     # for frame in range(37, 40):
     for frame in range(0, len(seq.positions)):
         left_hip_aligned_positions = transformations.align_coordinates_to(hip_left_idx, hip_right_idx, torso_idx, seq, frame=frame)
-        
+        print(left_hip_aligned_positions)
         vx = transformations.norm(np.array([1, 0, 0]))
         vy = transformations.norm(np.array([0, 1, 0]))
         vz = transformations.norm(np.array([0, 0, 1]))
