@@ -5,11 +5,11 @@ from sklearn.decomposition import PCA
 
 class Sequence:
 
-    def __init__(self, body_parts: list, positions: list, timestamps: list, poseformat: PoseFormatEnum, name: str = 'sequence'):
+    def __init__(self, body_parts: dict, positions: list, timestamps: list, poseformat: PoseFormatEnum, name: str = 'sequence'):
         self.name = name
         # Number, order and label of tracked body parts
-        # Example: ["Head", "Neck", "RShoulder", "RElbow", ...]
-        self.body_parts = np.array(body_parts)
+        # Example: { "Head": 0, "RightShoulder": 1, ... }
+        self.body_parts = body_parts
         # Defines positions of each bodypart
         # TODO: Change to: Time, Bodypart, xyz
         # 1. Dimension = Time

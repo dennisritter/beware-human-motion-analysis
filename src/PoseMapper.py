@@ -3,6 +3,7 @@ import json
 import numpy as np
 from Sequence import Sequence
 
+
 class PoseMapper:
     # TODO: Remove?
     OPENPOSE_MPI_BODY_PARTS = {"Head": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
@@ -42,7 +43,14 @@ class PoseMapper:
                 "'poseformat' parameter must be a member of 'PoseFormat' enumeration.")
         self.poseformat = poseformat
 
-    def map(self, input: str, name: str = 'sequence') -> Sequence:
+    def load(self, path: str, name: str = 'Some Sequence') -> Sequence:
+        """ Loads a Sequence from path and maps it to the specified poseformat.
+        """
+        with open(path, 'r') as myfile:
+            seq = myfile.read()
+        return self.map(seq, name)
+
+    def map(self, input: str, name: str = 'Some Sequence') -> Sequence:
         """
         Parameters
         ----------
@@ -67,9 +75,24 @@ class PoseMapper:
         Sequence
            The Sequence Object instance representing the motion sequence of the input string.
         """
-        MOCAP_BODY_PARTS = {"Head": 0, "Neck": 1, "RightShoulder": 2, "RightElbow": 3, "RightWrist": 4,
-                            "LeftShoulder": 5, "LeftElbow": 6, "LeftWrist": 7, "RightHip": 8, "RightKnee": 9,
-                            "RightAnkle": 10, "LeftHip": 11, "LeftKnee": 12, "LeftAnkle": 13, "Torso": 14, "Waist": 15, }
+        MOCAP_BODY_PARTS = {
+            "LeftWrist": 0,
+            "LeftElbow": 1,
+            "LeftShoulder": 2,
+            "Neck": 3,
+            "Torso": 4,
+            "Waist": 5,
+            "LeftAnkle": 6,
+            "LeftKnee": 7,
+            "LeftHip": 8,
+            "RightAnkle": 9,
+            "RightKnee": 10,
+            "RightHip": 11,
+            "RightWrist": 12,
+            "RightElbow": 13,
+            "RightShoulder": 14,
+            "Head": 15
+        }
         mocap_sequence = json.loads(input)
 
         body_parts = mocap_sequence["format"]
@@ -78,6 +101,8 @@ class PoseMapper:
 
         # reshape positions to 3d array
         positions = np.reshape(positions, (np.shape(positions)[0], int(np.shape(positions)[1]/3), 3))
+
+        # Find b
 
         # Center Positions by subtracting the mean of each coordinate
         positions[:, :,

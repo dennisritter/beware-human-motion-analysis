@@ -10,6 +10,8 @@
 
 #### Exercise
 
+See [exercises.md](./docs/exercises.md)
+
 ### Contributing
 
 Use [gitflow](https://de.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) as git workflow when implementing features, please.
