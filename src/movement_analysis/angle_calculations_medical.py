@@ -235,7 +235,8 @@ def calc_angles_knee(seq: Sequence, knee_idx: int, hip_idx: int, ankle_idx: int)
         "flexion_extension": angles
     }
 
-def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_right_idx: int, neck_idx: int, elbow_left_idx: int, wrist_left_idx: int, log: bool = False) -> dict:
+def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_right_idx: int, neck_idx: int, elbow_left_idx: int, log: bool = False) -> dict:
+# def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_right_idx: int, neck_idx: int, elbow_left_idx: int, wrist_left_idx: int, log: bool = False) -> dict:
     """ Calculates Left Shoulder angles
     Parameters
     ----------
