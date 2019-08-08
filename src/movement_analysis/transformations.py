@@ -94,7 +94,6 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     # Construct rotation matrix for X-Alignment to rotate about x_rot_axis for the angle theta
     x_rot_axis = get_perpendicular_vector(vx_new, vx)
     theta_x = get_angle(vx_new, vx)
-    # print(f"theta x: {np.degrees(theta_x)}")
     Rx = rotation_matrix_4x4(x_rot_axis, theta_x)
 
     # Use new X-Axis axis for y rotation and Rotate Y-direction vector to get rotation angle for Y-Alignment
@@ -116,10 +115,8 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     # The smaller absolute Z-coord deviation to 0 after all transformations must be the correct rotation.
     if(abs(trans_y_bp_pos_plus[2]) <= abs(trans_y_bp_pos_minus[2])):
         Ry = Ry_plus
-        # print(f"+: ( {abs(trans_y_bp_pos_plus[2])} < {abs(trans_y_bp_pos_minus[2])})")
     else:
         Ry = Ry_minus
-        # print(f"-: ( {abs(trans_y_bp_pos_plus[2])} > {abs(trans_y_bp_pos_minus[2])})")
 
     # Actually transform all keypoints of the given frame
     transformed_positions = []
