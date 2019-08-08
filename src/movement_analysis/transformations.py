@@ -1,6 +1,6 @@
+from .Sequence import Sequence
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-from Sequence import Sequence
 import numpy as np
 import math
 
@@ -23,8 +23,10 @@ def get_perpendicular_vector(v1, v2):
 
 
 def norm(v):
-    return v / np.linalg.norm(v)
-    # return v / math.sqrt(np.dot(v, v))
+    if math.sqrt(np.dot(v, v)) == 0:
+        return np.zeros(3)
+    else:
+        return v / math.sqrt(np.dot(v, v))
 
 
 def rotation_matrix_4x4(axis, theta):
@@ -34,7 +36,7 @@ def rotation_matrix_4x4(axis, theta):
     the given axis by theta in radians as 4x4 Transformation Matrix
     """
     axis = np.asarray(axis)
-    axis = axis / math.sqrt(np.dot(axis, axis))
+    axis = norm(axis)
     a = math.cos(theta / 2.0)
     b, c, d = -axis * math.sin(theta / 2.0)
     aa, bb, cc, dd = a * a, b * b, c * c, d * d
@@ -92,7 +94,6 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     # Construct rotation matrix for X-Alignment to rotate about x_rot_axis for the angle theta
     x_rot_axis = get_perpendicular_vector(vx_new, vx)
     theta_x = get_angle(vx_new, vx)
-    # print(f"theta x: {np.degrees(theta_x)}")
     Rx = rotation_matrix_4x4(x_rot_axis, theta_x)
 
     # Use new X-Axis axis for y rotation and Rotate Y-direction vector to get rotation angle for Y-Alignment
@@ -114,10 +115,8 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     # The smaller absolute Z-coord deviation to 0 after all transformations must be the correct rotation.
     if(abs(trans_y_bp_pos_plus[2]) <= abs(trans_y_bp_pos_minus[2])):
         Ry = Ry_plus
-        # print(f"+: ( {abs(trans_y_bp_pos_plus[2])} < {abs(trans_y_bp_pos_minus[2])})")
     else:
         Ry = Ry_minus
-        # print(f"-: ( {abs(trans_y_bp_pos_plus[2])} > {abs(trans_y_bp_pos_minus[2])})")
 
     # Actually transform all keypoints of the given frame
     transformed_positions = []
@@ -138,13 +137,13 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     for i, p in enumerate(transformed_positions):
         ax.scatter(p[0], p[1], p[2], c="blue")
     # ax.plot([zero_position[0], -0.1], [zero_position[1], 0.05], [zero_position[2], -0.1], color="pink", linewidth=1)
-    ax.plot([transformed_positions[8][0], transformed_positions[7][0]], 
-            [transformed_positions[8][1], transformed_positions[7][1]], 
-            [transformed_positions[8][2], transformed_positions[7][2]], 
+    ax.plot([transformed_positions[8][0], transformed_positions[7][0]],
+            [transformed_positions[8][1], transformed_positions[7][1]],
+            [transformed_positions[8][2], transformed_positions[7][2]],
             color="pink", linewidth=1)
-    # ax.plot([transformed_positions[2][0], transformed_positions[1][0]], 
-    #         [transformed_positions[2][1], transformed_positions[1][1]], 
-    #         [transformed_positions[2][2], transformed_positions[1][2]], 
+    # ax.plot([transformed_positions[2][0], transformed_positions[1][0]],
+    #         [transformed_positions[2][1], transformed_positions[1][1]],
+    #         [transformed_positions[2][2], transformed_positions[1][2]],
     #         color="pink", linewidth=1)
 
     # for j in range(len(seq.positions[frame])):

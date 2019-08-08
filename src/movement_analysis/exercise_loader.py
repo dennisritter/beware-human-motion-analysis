@@ -1,6 +1,6 @@
+from .Exercise import Exercise
 import warnings
 import json
-from Exercise import Exercise
 
 REQUIRED_KEYS = ["name", "description", "angles", "userId"]
 OPTIONAL_KEYS = []  # TODO: How to apply Optional parameters to the constructor without 1000 if statements?

@@ -1,5 +1,5 @@
+from .PoseFormatEnum import PoseFormatEnum
 import numpy as np
-from PoseFormatEnum import PoseFormatEnum
 from sklearn.decomposition import PCA
 
 

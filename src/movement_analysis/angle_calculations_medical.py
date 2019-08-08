@@ -1,10 +1,14 @@
-from Sequence import Sequence
+from .Sequence import Sequence
+from . import transformations
 import numpy as np
 import math
-import transformations
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
+""" This module contains functions to calculate medical angles for human body joints.
+    Functions are Developed for the tracking input of Realsense MOCAP Project (https://gitlab.beuth-hochschule.de/iisy/realsense).
+    If other input is used or the joint position output of Realsense MOCAP changes, the functions might need adjustments.
+"""
 
 def calc_angle(angle_vertex: list, ray_vertex_a: list, ray_vertex_b: list) -> float:
     """ Calculates the angle between angle_vertex_2d-ray_vertex_a and angle_vertex_2d-ray_vertex_b in 2D space.
@@ -13,6 +17,9 @@ def calc_angle(angle_vertex: list, ray_vertex_a: list, ray_vertex_b: list) -> fl
     float
         Angle between angle_vertex_2d-ray_vertex_a and angle_vertex_2d-ray_vertex_b in degrees
     """
+    angle_vertex = np.array(angle_vertex)
+    ray_vertex_a = np.array(ray_vertex_a)
+    ray_vertex_b = np.array(ray_vertex_b)
     ray_a = ray_vertex_a - angle_vertex
     ray_b = ray_vertex_b - angle_vertex
     cos_angle = np.dot(ray_a, ray_b) / (np.linalg.norm(ray_a) * np.linalg.norm(ray_b))
@@ -32,7 +39,6 @@ def calc_angles_hip_left(seq: Sequence, hip_left_idx: int, hip_right_idx: int, t
     # for frame in range(37, 40):
     for frame in range(0, len(seq.positions)):
         left_hip_aligned_positions = transformations.align_coordinates_to(hip_left_idx, hip_right_idx, torso_idx, seq, frame=frame)
-        
         vx = transformations.norm(np.array([1, 0, 0]))
         vy = transformations.norm(np.array([0, 1, 0]))
         vz = transformations.norm(np.array([0, 0, 1]))
@@ -229,7 +235,8 @@ def calc_angles_knee(seq: Sequence, knee_idx: int, hip_idx: int, ankle_idx: int)
         "flexion_extension": angles
     }
 
-def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_right_idx: int, neck_idx: int, elbow_left_idx: int, wrist_left_idx: int, log: bool = False) -> dict:
+def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_right_idx: int, neck_idx: int, elbow_left_idx: int, log: bool = False) -> dict:
+# def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_right_idx: int, neck_idx: int, elbow_left_idx: int, wrist_left_idx: int, log: bool = False) -> dict:
     """ Calculates Left Shoulder angles
     Parameters
     ----------
