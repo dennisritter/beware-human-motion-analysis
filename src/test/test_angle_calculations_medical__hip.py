@@ -887,7 +887,3 @@ class TestAngleCalculationsMedicalHip(unittest.TestCase):
                                                          self.bp["Torso"],
                                                          self.bp["RightKnee"])["abduction_adduction"][0],
                                expected_result["abduction_adduction"][0])
-
-
-if __name__ == '__main__':
-    unittest.main()

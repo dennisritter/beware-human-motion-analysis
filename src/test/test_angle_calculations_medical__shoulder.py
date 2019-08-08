@@ -553,7 +553,3 @@ class TestAngleCalculationsMedicalShoulder(unittest.TestCase):
                                                               self.bp["Neck"],
                                                               self.bp["RightElbow"])["abduction_adduction"][0],
                                expected_result["abduction_adduction"][0])
-
-
-if __name__ == '__main__':
-    unittest.main()
