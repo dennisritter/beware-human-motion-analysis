@@ -3,8 +3,8 @@
 ### Setup
 
 1. Clone or download this repository
-2. Load and activate the env.yml Anaconda3 enviroment _//TODO: Update env file_
-3. Run main.py
+2. Load and activate the conda_enviroment.yml Anaconda3 enviroment
+3. Check, run, edit, add scripts in ./src
 
 ### Implementation
 
