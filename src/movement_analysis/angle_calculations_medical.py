@@ -61,7 +61,7 @@ def calc_angles_hip_left(seq: Sequence, hip_left_idx: int, hip_right_idx: int, t
         # False: Y-Axis Points down -> Z points to camera -> mirror Z-Axis
         # NOTE: This is different to right hip because X-Axis is rotated by 180° in respect to the other hips positions
         #       (mirror Z for left hip, but not for right hip if Y Points up)
-        phi = math.degrees(math.atan2(-kz, -kx)) if (torso_pos[1] >= 0) else math.degrees(math.atan2(kz, -kx))
+        phi = math.degrees(math.atan2(kz, -kx)) if (torso_pos[1] >= 0) else math.degrees(math.atan2(-kz, -kx))
 
         # The phi_ratio will determine how much of the theta angle is flexion_extension and abduction_adduction
         # phi_ratio == -1 -> 0% Abduction_Adduction / 100% Extension
@@ -139,7 +139,7 @@ def calc_angles_hip_right(seq: Sequence, hip_right_idx: int, hip_left_idx: int, 
         # Phi is the anti-clockwise angle between Z and X
         # True: Y-Axis Points up -> Z points to camera -> don't mirror Z-Axis
         # False: Y-Axis Points down -> Z points away from camera -> mirror Z-Axis
-        phi = math.degrees(math.atan2(kz, -kx)) if (torso_pos[1] >= 0) else math.degrees(math.atan2(-kz, -kx))
+        phi = math.degrees(math.atan2(-kz, -kx)) if (torso_pos[1] >= 0) else math.degrees(math.atan2(kz, -kx))
 
         # The phi_ratio will determine how much of the theta angle is flexion_extension and abduction_adduction
         # phi_ratio == -1 -> 0% Abduction_Adduction / 100% Extension
