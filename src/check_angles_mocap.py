@@ -35,7 +35,9 @@ results= []
 for angle in left_shoulder_angles["flexion_extension"]:
     results.append(ex._check_angle_shoulder_left_flexion_extension(angle, AngleTargetStates.END, 10))
 
-print(results[FRAME - 1])
+print(left_shoulder_angles["flexion_extension"])
+print(right_shoulder_angles["flexion_extension"])
+# print(results[FRAME - 1])
 
 
 # logging.log_angles(left_shoulder_angles,

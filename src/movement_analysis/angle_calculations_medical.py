@@ -291,7 +291,7 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
         # False: Y-Axis Points down -> Z points to camera -> mirror Z-Axis
         # NOTE: This is different to right shoulder because X-Axis is rotated by 180° in respect to the other shoulders positions
         #       (mirror Z for left shoulder, but not for right shoulder if Y Points up)
-        phi = math.degrees(math.atan2(-ez, -ex)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(ez, -ex))
+        phi = math.degrees(math.atan2(ez, -ex)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ez, -ex))
 
         # The phi_ratio will determine how much of the theta angle is flexion_extension and abduction_adduction
         # phi_ratio == -1 -> 0% Abduction_Adduction / 100% Extension
@@ -442,7 +442,7 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
         # Phi is the anti-clockwise angle between Z and X
         # True: Y-Axis Points up -> Z points to camera -> don't mirror Z-Axis
         # False: Y-Axis Points down -> Z points away from camera -> mirror Z-Axis
-        phi = math.degrees(math.atan2(ez, -ex)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ez, -ex))
+        phi = math.degrees(math.atan2(-ez, -ex)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(ez, -ex))
 
         # The phi_ratio will determine how much of the theta angle is flexion_extension and abduction_adduction
         # phi_ratio == -1 -> 0% Abduction_Adduction / 100% Extension
