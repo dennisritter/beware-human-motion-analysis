@@ -209,10 +209,10 @@ A `Exercise` class instance will be created by loading those `exercise.json` fil
 
 ### Assigning joints for angle calculation
 
-The `JointAngleMapper` class is responsible for assigning the correct joints to all bodypart angles that might be checked.
-Its constructor takes a pose format of the `PoseFormatEnum` as parameter. The defined pose format defines how many and which joints will be assigned to the angles of an `Exercise`. Which joints will be applied to the angles has to be defined manually in `JointsAngleMapper.py` for each pose format of `PoseFormatEnum`.
+Each function that calculates angles for a particular joint expects an instance of a `Sequence` and indices of necessary joints for the computations.
+The necessary joint positions will then be retrieved from the `Sequence.positions` attribute by selecting a timeframe and using the joint index. (e.g.: `my_sequence[<frame>][<joint_index>]`). All joint indices can be found in the `Sequence.body_parts` attribute, which is a dictionary that maps the joint names to it's index for the used tracking technique.
 
-After creating a JointAngleMapper instance for a specific pose format the `JointAngleMapper.addJointstoAnglesMocap(self, exercise: Exercise)` method can be used to add the defined joints to the `angles` property of an `exercise`.
+Possibly, the present angle calculation functions to not fit well to arbitrary tracking techniques, because of different numbers and kinds joints. So it might be necessary to implement new angle calculation funtions for different tracking techniques used.
 
 ### How Joint angles are medically defined and how they are actually calculated
 
