@@ -1,5 +1,6 @@
 from movement_analysis.Exercise import Exercise
 from movement_analysis.PoseFormatEnum import PoseFormatEnum
+from movement_analysis.AngleTargetStates import AngleTargetStates
 from movement_analysis.Sequence import Sequence
 from movement_analysis.PoseMapper import PoseMapper
 from movement_analysis import exercise_loader
@@ -13,7 +14,7 @@ import numpy as np
 FRAME = 50
 
 # Get Exercise Object from json file
-ex = exercise_loader.load('data/exercises/squat.json')
+ex = exercise_loader.load('data/exercises/kniebeuge.json')
 # Get PoseMapper instance for MOCAP sequences
 mocap_posemapper = PoseMapper(PoseFormatEnum.MOCAP)
 # Convert mocap json string Positions to Sequence Object
@@ -29,9 +30,12 @@ right_elbow_angles = acm.calc_angles_elbow(seq, seq.body_parts["RightElbow"], se
 left_knee_angles = acm.calc_angles_knee(seq, seq.body_parts["LeftKnee"], seq.body_parts["LeftHip"], seq.body_parts["LeftAnkle"])
 right_knee_angles = acm.calc_angles_knee(seq, seq.body_parts["RightKnee"], seq.body_parts["RightHip"], seq.body_parts["RightAnkle"])
 
+# Check left shoulder FlexEx angles
+results= []
+for angle in left_shoulder_angles["flexion_extension"]:
+    results.append(ex._check_angle_shoulder_left_flexion_extension(angle, AngleTargetStates.END, 10))
 
-
-
+print(results[FRAME - 1])
 
 
 # logging.log_angles(left_shoulder_angles,
