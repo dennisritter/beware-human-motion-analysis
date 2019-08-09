@@ -1,7 +1,7 @@
 {
-  "name": "Squat",
+  "name": "Wechsel Lunges",
   "userId": 0, 
-  "description": "A Squat for healthy people.",
+  "description": "A Lunge, changing legs each iteration.",
   "angles": {
     "start": {
       "hip_left": {
