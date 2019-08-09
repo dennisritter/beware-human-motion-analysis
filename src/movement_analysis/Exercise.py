@@ -12,20 +12,4 @@ class Exercise:
         self.userId = userId
         self.description = description
 
-    def addJointsToAngle(self, bodypart: str, anglename: str, joints: dict):
-        """ Adds a 'joints' key:value pair to self.angles for the 
-            specified bodypart key and inner anglename key
-
-            Example for a joints key:value pair
-            ----------
-            "joints": { angle_vertex: 1, rays: [0, 2] }
-                -> angle_vertex: The origin of both rays and joint to check the angle for
-                -> rays: The rays that span the angle
-
-        """
-        # Try to add given joints dict to specified angle
-        try:
-            self.angles["start"][bodypart][anglename]["joints"] = joints
-            self.angles["end"][bodypart][anglename]["joints"] = joints
-        except KeyError as e:
-            print(e)
+    

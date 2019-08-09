@@ -29,12 +29,17 @@ right_elbow_angles = acm.calc_angles_elbow(seq, seq.body_parts["RightElbow"], se
 left_knee_angles = acm.calc_angles_knee(seq, seq.body_parts["LeftKnee"], seq.body_parts["LeftHip"], seq.body_parts["LeftAnkle"])
 right_knee_angles = acm.calc_angles_knee(seq, seq.body_parts["RightKnee"], seq.body_parts["RightHip"], seq.body_parts["RightAnkle"])
 
-logging.log_angles(left_shoulder_angles,
-                   right_shoulder_angles,
-                   left_hip_angles,
-                   right_hip_angles,
-                   left_elbow_angles,
-                   right_elbow_angles,
-                   left_knee_angles,
-                   right_knee_angles,
-                   frame=FRAME)
+
+
+
+
+
+# logging.log_angles(left_shoulder_angles,
+#                    right_shoulder_angles,
+#                    left_hip_angles,
+#                    right_hip_angles,
+#                    left_elbow_angles,
+#                    right_elbow_angles,
+#                    left_knee_angles,
+#                    right_knee_angles,
+#                    frame=FRAME)
