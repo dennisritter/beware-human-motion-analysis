@@ -1,0 +1,171 @@
+{
+  "name": "Left Lunge",
+  "userId": 0, 
+  "description": "A Lunge, where the left leg is in front.",
+  "angles": {
+    "start": {
+      "hip_left": {
+        "flexion_extension": {
+            "angle": [10, 20],
+            "priority": 1.0
+        },
+        "innerrotation_outerrotation": {
+            "angle": [0, 0],
+            "priority": 0.0
+        },
+        "abduction_adduction": {
+            "angle": [0, 0],
+            "priority": 0.5
+        }
+      },
+      "hip_right": {
+        "flexion_extension": {
+            "angle": [-5, -10],
+            "priority": 1.0
+        },
+        "innerrotation_outerrotation": {
+            "angle": [0, 0],
+            "priority": 0.0
+        },
+        "abduction_adduction": {
+            "angle": [0, 0],
+            "priority": 0.5
+        }
+      },
+      "knee_left": {
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 1.0
+        }
+      },
+      "knee_right": {
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 1.0
+        }
+      },
+      "shoulder_left": {
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 0.0
+        },
+        "innerrotation_outerrotation": {
+            "angle": [0, 0],
+            "priority": 0.0
+        },
+        "abduction_adduction": {
+            "angle": [0, 0],
+            "priority": 0.0
+        }
+      },
+      "shoulder_right": {
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 0.0
+        },
+        "innerrotation_outerrotation": {
+            "angle": [0, 0],
+            "priority": 0.0
+        },
+        "abduction_adduction": {
+            "angle": [0, 0],
+            "priority": 0.0
+        }
+      },
+      "elbow_left": {
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 0.0
+        }
+      },
+      "elbow_right": {
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 0.0
+        }
+      }
+    },
+    "end": {
+      "hip_left": {
+        "flexion_extension": {
+            "angle": [45, 90],
+            "priority": 1.0
+        },
+        "innerrotation_outerrotation": {
+            "angle": [0, 0],
+            "priority": 0.0
+        },
+        "abduction_adduction": {
+            "angle": [0, 0],
+            "priority": 0.5
+        }
+      },
+      "hip_right": {
+        "flexion_extension": {
+            "angle": [-5, -10],
+            "priority": 1
+        },
+        "innerrotation_outerrotation": {
+            "angle": [0, 0],
+            "priority": 0.0
+        },
+        "abduction_adduction": {
+            "angle": [0, 0],
+            "priority": 0.5
+        }
+      },
+      "knee_left": {
+        "flexion_extension": {
+            "angle": [45, 90],
+            "priority": 1.0
+        }
+      },
+      "knee_right": {
+        "flexion_extension": {
+            "angle": [45, 90],
+            "priority": 1.0
+        }
+      },
+      "shoulder_left": {
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 0.0
+        },
+        "innerrotation_outerrotation": {
+            "angle": [0, 0],
+            "priority": 0.0
+        },
+        "abduction_adduction": {
+            "angle": [0, 0],
+            "priority": 0.0
+        }
+      },
+      "shoulder_right": {
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 0.0
+        },
+        "innerrotation_outerrotation": {
+            "angle": [0, 0],
+            "priority": 0.0
+        },
+        "abduction_adduction": {
+            "angle": [0, 0],
+            "priority": 0.0
+        }
+      },
+      "elbow_left": {
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 0.0
+        }
+      },
+      "elbow_right": {
+        "flexion_extension": {
+            "angle": [0, 0],
+            "priority": 0.0
+        }
+      }
+    }
+  }
+}
