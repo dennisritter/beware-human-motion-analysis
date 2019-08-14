@@ -83,11 +83,11 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     # TODO: Ensure correct directions of perpendicular vectors: Z-Axis to front or back? Y-Axis up or down?
     origin = seq.positions[frame][origin_bp_idx]
     # New X-Axis from origin to x_direction
-    vx_new = seq.positions[frame][x_direction_bp_idx] - origin
+    vx_new = np.absolute(seq.positions[frame][x_direction_bp_idx] - origin)*-1
     # New Z-Axis is perpendicular to the origin to x_direction and origin to y_direction vectors
-    vz_new = get_perpendicular_vector(seq.positions[frame][y_direction_bp_idx] - origin, vx_new)
+    vz_new = np.absolute(get_perpendicular_vector(seq.positions[frame][y_direction_bp_idx] - origin, vx_new))
     # New Y-Axis is perpendicular to new X-Axis and Z-Axis
-    vy_new = get_perpendicular_vector(vx_new, vz_new)
+    vy_new = np.absolute(get_perpendicular_vector(vx_new, vz_new))
 
     # Construct translation Matrix to move given origin to zero-position
     T = translation_matrix_4x4(zero_position-origin)
