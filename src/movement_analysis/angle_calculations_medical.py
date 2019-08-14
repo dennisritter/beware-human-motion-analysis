@@ -1,8 +1,9 @@
 from .Sequence import Sequence
 from . import transformations
+from . import plotting
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import math
-from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
 """ This module contains functions to calculate medical angles for human body joints.
@@ -284,40 +285,14 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
         # Theta should be the angle between downwards vector and r
         # True: Y-Axis Points up -> Mirror Y-Axis so it points down (to 0° medical definition)
         # False: Y-Axis Points down -> Don't mirror Y-Axis
-        theta = math.degrees(math.acos(-ey/er)) if (neck_pos[1] >= 0) else math.degrees(math.acos(ey/er))
-
-        # Phi is the anti-clockwise angle between Z and X
-        # True: Y-Axis Points up -> Z points away from camera -> mirror Z-Axis
-        # False: Y-Axis Points down -> Z points to camera -> mirror Z-Axis
-        # NOTE: This is different to right shoulder because X-Axis is rotated by 180° in respect to the other shoulders positions
-        #       (mirror Z for left shoulder, but not for right shoulder if Y Points up)
-        phi = math.degrees(math.atan2(ez, -ex)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ez, -ex))
-
-        # The phi_ratio will determine how much of the theta angle is flexion_extension and abduction_adduction
-        # phi_ratio == -1 -> 0% Abduction_Adduction / 100% Extension
-        # phi_ratio == 0(-2) -> 100% Abduction / 0% Flexion_Extension
-        # phi_ratio == 1 -> 0% Abduction_Adduction / 100% Flexion
-        # phi_ratio == 2 -> 100% Adduction / 0% Flexion_Extension
-        phi_ratio = phi/90
-
-        # Ensure phi_ratio_flex_ex alters between -1 and 1
-        # flexion_extension > 0 -> Flexion
-        # flexion_extension < 0 -> Extension
-        phi_ratio_flex_ex = phi_ratio
-        if phi_ratio_flex_ex <= 1 and phi_ratio_flex_ex >= -1:
-            flexion_extension = theta*phi_ratio_flex_ex
-        elif phi_ratio > 1:
-            phi_ratio_flex_ex = 2-phi_ratio_flex_ex
-            flexion_extension = theta*phi_ratio_flex_ex
-        elif phi_ratio < -1:
-            phi_ratio_flex_ex = -2-phi_ratio_flex_ex
-            flexion_extension = theta*phi_ratio_flex_ex
-
-        # Ensure phi_ratio_abd_add is between -1 and 1
-        phi_ratio_abd_add = 1-abs(phi_ratio)
-        # abduction_adduction > 0 -> Abduction
-        # abduction_adduction < 0 -> Adduction
-        abduction_adduction = theta*phi_ratio_abd_add
+        theta = math.degrees(math.acos(-ex/er))
+        theta = 90 - theta
+        abduction_adduction = theta
+        
+        # Phi is the angle of the Elbow around the X-Axis (Down = 0) and represents the medical flexion/extension angle
+        phi = math.degrees(math.atan2(ey, ez)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ey, ez))
+        phi += 90
+        flexion_extension = phi
 
         """ INNER OUTER ROTATION
         # rotation angle
@@ -347,59 +322,12 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
         
         if log:
             print("\n##### SHOULDER LEFT ANGLES #####")
-            print(f"[{frame}] r spherical: {er}")
-            print(f"[{frame}] theta spherical: {theta}")
-            print(f"[{frame}] phi spherical: {phi}")
-            print(f"[{frame}] flexion_extension angle: {flexion_extension} (phi ratio: {phi_ratio_flex_ex})")
-            print(f"[{frame}] abduction_adduction angle: {abduction_adduction} (phi ratio: {phi_ratio_abd_add})")
+            print(f"[{frame}] flexion_extension angle: {flexion_extension}")
+            print(f"[{frame}] abduction_adduction angle: {abduction_adduction}")
             # print(f"[{frame}] inner_outer_rotation angle: {inner_outer_rotation}")
 
-    ### Plotting ###
-    """
-    fig = plt.figure(figsize=plt.figaspect(1)*2)
-    ax = fig.add_subplot(1, 1, 1, projection='3d')
-    ax.set_xlim3d(-0.5, 0.5)
-    ax.set_ylim3d(-0.5, 0.5)
-    ax.set_zlim3d(-0.5, 0.5)
-    for i, p in enumerate(left_shoulder_aligned_positions):
-        if i == 1:
-            ax.scatter(p[0], p[1], p[2], c="blue")
-        else:
-            ax.scatter(p[0], p[1], p[2], c="blue")
-    ax.plot([left_shoulder_aligned_positions[shoulder_left_idx][0], ex],
-            [left_shoulder_aligned_positions[shoulder_left_idx][1], ey],
-            [left_shoulder_aligned_positions[shoulder_left_idx][2], ez],
-            color="pink", linewidth=1)
-    zero_position = left_shoulder_aligned_positions[shoulder_left_idx]
+        plotting.plot_ball_joint_angle(left_shoulder_aligned_positions, shoulder_left_idx, elbow_left_idx)
 
-    ax.plot([zero_position[0], vx[0]],
-            [zero_position[1], vx[1]],
-            [zero_position[2], vx[2]],
-            color="pink", linewidth=1)
-    ax.plot([zero_position[0], vy[0]],
-            [zero_position[1], vy[1]],
-            [zero_position[2], vy[2]],
-            color="maroon", linewidth=1)
-    ax.plot([zero_position[0], vz[0]],
-            [zero_position[1], vz[1]],
-            [zero_position[2], vz[2]],
-            color="red", linewidth=1)
-
-    # inner/outer Rotation plane normals
-    ax.plot([ex, zero_rot_plane_normal[0] + ex],
-            [ey, zero_rot_plane_normal[1] + ey],
-            [ez, zero_rot_plane_normal[2] + ez],
-            color="green", linewidth=3)
-    ax.plot([ex, trans_zero_rot_plane_normal[0] + ex],
-            [ey, trans_zero_rot_plane_normal[1] + ey],
-            [ez, trans_zero_rot_plane_normal[2] + ez],
-            color="red", linewidth=3)
-    ax.plot([ex, sew_plane_normal[0] + ex],
-            [ey, sew_plane_normal[1] + ey],
-            [ez, sew_plane_normal[2] + ez],
-            color="blue", linewidth=3)
-    plt.show()
-    """
     return {
         "flexion_extension": flexion_extension_arr,
         "abduction_adduction": abduction_adduction_arr,
