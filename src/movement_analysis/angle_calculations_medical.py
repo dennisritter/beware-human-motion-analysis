@@ -290,7 +290,7 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
         abduction_adduction = theta
         
         # Phi is the angle of the Elbow around the X-Axis (Down = 0) and represents the medical flexion/extension angle
-        phi = math.degrees(math.atan2(ey, ez)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ey, ez))
+        phi = math.degrees(math.atan2(ey, -ez)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ey, -ez))
         phi += 90
         flexion_extension = phi
 
@@ -325,7 +325,6 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
             print(f"[{frame}] flexion_extension angle: {flexion_extension}")
             print(f"[{frame}] abduction_adduction angle: {abduction_adduction}")
             # print(f"[{frame}] inner_outer_rotation angle: {inner_outer_rotation}")
-
         plotting.plot_ball_joint_angle(left_shoulder_aligned_positions, shoulder_left_idx, elbow_left_idx)
 
     return {
@@ -362,53 +361,22 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
         # NOTE: Hacky: We assume that the neck coords are above shoulders to determine if Y points up or down
         #       and Z points to front or back. Spherical coords must be calculated differently for each case.
         neck_pos = right_shoulder_aligned_positions[neck_idx]
-        # Theta should be the angle between downwards vector and r
-        # True: Y-Axis Points up -> Mirror Y-Axis so it points down (to 0° medical definition)
-        # False: Y-Axis Points down -> Don't mirror Y-Axis
-        theta = math.degrees(math.acos(-ey/er)) if (neck_pos[1] >= 0) else math.degrees(math.acos(ey/er))
-
-        # Phi is the anti-clockwise angle between Z and X
-        # True: Y-Axis Points up -> Z points to camera -> don't mirror Z-Axis
-        # False: Y-Axis Points down -> Z points away from camera -> mirror Z-Axis
-        phi = math.degrees(math.atan2(-ez, -ex)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(ez, -ex))
-
-        # The phi_ratio will determine how much of the theta angle is flexion_extension and abduction_adduction
-        # phi_ratio == -1 -> 0% Abduction_Adduction / 100% Extension
-        # phi_ratio == 0(-2) -> 100% Abduction / 0% Flexion_Extension
-        # phi_ratio == 1 -> 0% Abduction_Adduction / 100% Flexion
-        # phi_ratio == 2 -> 100% Adduction / 0% Flexion_Extension
-        phi_ratio = phi/90
-
-        # Ensure phi_ratio_flex_ex alters between -1 and 1
-        # flexion_extension > 0 -> Flexion
-        # flexion_extension < 0 -> Extension
-        phi_ratio_flex_ex = phi_ratio
-        if phi_ratio_flex_ex <= 1 and phi_ratio_flex_ex >= -1:
-            flexion_extension = theta*phi_ratio_flex_ex
-        elif phi_ratio > 1:
-            phi_ratio_flex_ex = 2-phi_ratio_flex_ex
-            flexion_extension = theta*phi_ratio_flex_ex
-        elif phi_ratio < -1:
-            phi_ratio_flex_ex = -2-phi_ratio_flex_ex
-            flexion_extension = theta*phi_ratio_flex_ex
-
-        # Ensure phi_ratio_abd_add is between -1 and 1
-        phi_ratio_abd_add = 1-abs(phi_ratio)
-        # abduction_adduction > 0 -> Abduction
-        # abduction_adduction < 0 -> Adduction
-        abduction_adduction = theta*phi_ratio_abd_add
+        theta = math.degrees(math.acos(-ex/er))
+        theta = 90 - theta
+        abduction_adduction = theta
+        
+        # Phi is the angle of the Elbow around the X-Axis (Down = 0) and represents the medical flexion/extension angle
+        phi = math.degrees(math.atan2(ey, ez)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ey, ez))
+        phi += 90
+        flexion_extension = phi
         
         flexion_extension_arr.append(flexion_extension)
         abduction_adduction_arr.append(abduction_adduction)
         
         if log:
-            print("\n##### SHOULDER RIGHT ANGLES #####")
-            print(f"[{frame}] r spherical: {er}")
-            print(f"[{frame}] theta spherical: {theta}")
-            print(f"[{frame}] phi spherical: {phi}")
-            print(f"[{frame}] flexion_extension angle: {flexion_extension} (phi ratio: {phi_ratio_flex_ex})")
-            print(f"[{frame}] abduction_adduction angle: {abduction_adduction} (phi ratio: {phi_ratio_abd_add})")
-
+            print(f"[{frame}] flexion_extension angle: {flexion_extension}")
+            print(f"[{frame}] abduction_adduction angle: {abduction_adduction}")
+        # plotting.plot_ball_joint_angle(right_shoulder_aligned_positions, shoulder_right_idx, elbow_right_idx)
     ### Plotting ###
     """
     fig = plt.figure(figsize=plt.figaspect(1)*2)
