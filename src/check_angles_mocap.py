@@ -32,27 +32,18 @@ right_knee_angles = acm.calc_angles_knee(seq, seq.body_parts["RightKnee"], seq.b
 
 
 # Check left shoulder FlexEx angles
-results= []
-for i, angle in enumerate(left_shoulder_angles["flexion_extension"]):
-    logging.log_angles(left_shoulder_angles,
-                   right_shoulder_angles,
-                   left_hip_angles,
-                   right_hip_angles,
-                   left_elbow_angles,
-                   right_elbow_angles,
-                   left_knee_angles,
-                   right_knee_angles,
-                   frame=i)
+# results= []
+# for i, angle in enumerate(left_shoulder_angles["flexion_extension"]):
 #     results.append(ex._check_angle_shoulder_left_flexion_extension(angle, AngleTargetStates.END, 10))
 #     print(ex._check_angle_shoulder_left_flexion_extension(angle, AngleTargetStates.END, 10))
 
 
-logging.log_angles(left_shoulder_angles,
-                   right_shoulder_angles,
-                   left_hip_angles,
-                   right_hip_angles,
-                   left_elbow_angles,
-                   right_elbow_angles,
-                   left_knee_angles,
-                   right_knee_angles,
-                   frame=FRAME)
+# logging.log_angles(left_shoulder_angles,
+#                    right_shoulder_angles,
+#                    left_hip_angles,
+#                    right_hip_angles,
+#                    left_elbow_angles,
+#                    right_elbow_angles,
+#                    left_knee_angles,
+#                    right_knee_angles,
+#                    frame=FRAME)
