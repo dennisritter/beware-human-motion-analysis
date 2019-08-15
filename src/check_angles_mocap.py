@@ -11,7 +11,32 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 
-FRAME = 50
+def process_ball_joint_angles(
+    angle_flex_ex: float, 
+    angle_abd_add: float, 
+    target_angle_range_flex_ex: list, 
+    target_angle_range_abd_add: list,
+    ignore_flex_abd90_delta: int = 20,
+    abd_add_motion_thresh: int = 45) -> tuple:
+
+    # Check if angle-vector.y is higher than origin and adjust abduction/adduction angles if conditions are met
+    # If flexion angle is >90.0, angle-vector.y is higher than origin because flexion angle represents a rotation about the X-Axis
+    if angle_flex_ex > 90.0:
+        # If motion is considered as Abduction, add 90 degrees to the current angle to meet the expected abduction range [0,180] and not only [0,90] 
+        if angle_abd_add > abd_add_motion_thresh:
+            angle_abd_add += 90
+        # If motion is considered as Adduction, sub 90 degrees to the current angle to meet the expected abduction range [0,-180] and not only [0,-90] 
+        if angle_abd_add < -abd_add_motion_thresh:
+            angle_abd_add -= 90
+
+    # Set Flexion/Extension to 0.0° when angle-vector is close to X-Axis.
+    # -> Flexion/Extension angles get very sensitive and error prone when close to X-Axis because it represents a rotation around it.
+    full_absolute_abd_add = 90.0 
+    if abs(full_absolute_abd_add - abs(angle_abd_add)) < ignore_flex_abd90_delta:
+        angle_flex_ex = 0.0
+
+
+    return angle_flex_ex, angle_abd_add
 
 # Get Exercise Object from json file
 ex = exercise_loader.load('data/exercises/kniebeuge.json')
@@ -32,10 +57,16 @@ right_knee_angles = acm.calc_angles_knee(seq, seq.body_parts["RightKnee"], seq.b
 
 
 # Check left shoulder FlexEx angles
-# results= []
-# for i, angle in enumerate(left_shoulder_angles["flexion_extension"]):
-#     results.append(ex._check_angle_shoulder_left_flexion_extension(angle, AngleTargetStates.END, 10))
-#     print(ex._check_angle_shoulder_left_flexion_extension(angle, AngleTargetStates.END, 10))
+results= []
+for frame in range(0, len(seq.positions)):
+    angle_flex_ex, angle_abd_add = process_ball_joint_angles(
+        left_shoulder_angles["flexion_extension"][frame], 
+        left_shoulder_angles["abduction_adduction"][frame], 
+        ex.angles[AngleTargetStates.END.value]["shoulder_left"]["flexion_extension"]["angle"],
+        ex.angles[AngleTargetStates.END.value]["shoulder_left"]["abduction_adduction"]["angle"])
+    results.append(ex.check_angles_shoulder_left(angle_flex_ex, angle_abd_add, AngleTargetStates.END, 10))
+    print(f"Flexion: {ex.check_angles_shoulder_left(angle_flex_ex, angle_abd_add, AngleTargetStates.END, 10)['flexion_extension']}")
+    print(f"Abduction: {ex.check_angles_shoulder_left(angle_flex_ex, angle_abd_add, AngleTargetStates.END, 10)['abduction_adduction']}")
 
 
 # logging.log_angles(left_shoulder_angles,
