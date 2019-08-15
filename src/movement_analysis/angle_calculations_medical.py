@@ -57,6 +57,9 @@ def calc_angles_hip_left(seq: Sequence, hip_left_idx: int, hip_right_idx: int, t
         torso_pos = left_hip_aligned_positions[torso_idx]
         phi = math.degrees(math.atan2(ky, -kz)) if (torso_pos[1] >= 0) else math.degrees(math.atan2(-ky, -kz))
         phi += 90
+        # An Extension should be represented in a negative angle 
+        if phi > 180:
+            phi -= 360
         flexion_extension = phi
         
         flexion_extension_arr.append(flexion_extension)
@@ -102,8 +105,11 @@ def calc_angles_hip_right(seq: Sequence, hip_right_idx: int, hip_left_idx: int, 
         # Phi is the angle of the Knee around the X-Axis (Down = 0) and represents flexion/extension angle
         # NOTE: We assume that the Torso coords are above Hip to determine if Y points up or down
         torso_pos = right_hip_aligned_positions[torso_idx]
-        phi = math.degrees(math.atan2(ky, -kz)) if (torso_pos[1] >= 0) else math.degrees(math.atan2(-ky, -kz))
+        phi = math.degrees(math.atan2(ky, kz)) if (torso_pos[1] >= 0) else math.degrees(math.atan2(-ky, kz))
         phi += 90
+        # An Extension should be represented in a negative angle 
+        if phi > 180:
+            phi -= 360
         flexion_extension = phi
         
         flexion_extension_arr.append(flexion_extension)
@@ -140,7 +146,6 @@ def calc_angles_knee(seq: Sequence, knee_idx: int, hip_idx: int, ankle_idx: int)
     }
 
 def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_right_idx: int, neck_idx: int, elbow_left_idx: int, log: bool = False) -> dict:
-# def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_right_idx: int, neck_idx: int, elbow_left_idx: int, wrist_left_idx: int, log: bool = False) -> dict:
     """ Calculates Left Shoulder angles
     Parameters
     ----------
@@ -172,6 +177,9 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
         neck_pos = left_shoulder_aligned_positions[neck_idx]
         phi = math.degrees(math.atan2(ey, -ez)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ey, -ez))
         phi += 90
+        # An Extension should be represented in a negative angle 
+        if phi > 180:
+            phi -= 360
         flexion_extension = phi
 
         flexion_extension_arr.append(flexion_extension)
@@ -219,6 +227,9 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
         neck_pos = right_shoulder_aligned_positions[neck_idx]
         phi = math.degrees(math.atan2(ey, ez)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ey, ez))
         phi += 90
+        # An Extension should be represented in a negative angle 
+        if phi > 180:
+            phi -= 360
         flexion_extension = phi
         
         flexion_extension_arr.append(flexion_extension)

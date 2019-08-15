@@ -23,7 +23,7 @@ bp = seq.body_parts
 
 left_shoulder_angles = acm.calc_angles_shoulder_left(seq, seq.body_parts["LeftShoulder"], seq.body_parts["RightShoulder"], seq.body_parts["Neck"], seq.body_parts["LeftElbow"])
 right_shoulder_angles = acm.calc_angles_shoulder_right(seq, seq.body_parts["RightShoulder"], seq.body_parts["LeftShoulder"], seq.body_parts["Neck"], seq.body_parts["RightElbow"])
-left_hip_angles = acm.calc_angles_hip_left(seq, seq.body_parts["LeftHip"], seq.body_parts["RightHip"], seq.body_parts["Torso"], seq.body_parts["LeftKnee"], log=True)
+left_hip_angles = acm.calc_angles_hip_left(seq, seq.body_parts["LeftHip"], seq.body_parts["RightHip"], seq.body_parts["Torso"], seq.body_parts["LeftKnee"])
 right_hip_angles = acm.calc_angles_hip_right(seq, seq.body_parts["RightHip"], seq.body_parts["LeftHip"], seq.body_parts["Torso"], seq.body_parts["RightKnee"])
 left_elbow_angles = acm.calc_angles_elbow(seq, seq.body_parts["LeftElbow"], seq.body_parts["LeftShoulder"], seq.body_parts["LeftWrist"])
 right_elbow_angles = acm.calc_angles_elbow(seq, seq.body_parts["RightElbow"], seq.body_parts["RightShoulder"], seq.body_parts["RightWrist"])
@@ -32,18 +32,27 @@ right_knee_angles = acm.calc_angles_knee(seq, seq.body_parts["RightKnee"], seq.b
 
 
 # Check left shoulder FlexEx angles
-# results= []
-# for angle in left_shoulder_angles["flexion_extension"]:
+results= []
+for i, angle in enumerate(left_shoulder_angles["flexion_extension"]):
+    logging.log_angles(left_shoulder_angles,
+                   right_shoulder_angles,
+                   left_hip_angles,
+                   right_hip_angles,
+                   left_elbow_angles,
+                   right_elbow_angles,
+                   left_knee_angles,
+                   right_knee_angles,
+                   frame=i)
 #     results.append(ex._check_angle_shoulder_left_flexion_extension(angle, AngleTargetStates.END, 10))
 #     print(ex._check_angle_shoulder_left_flexion_extension(angle, AngleTargetStates.END, 10))
 
 
-# logging.log_angles(left_shoulder_angles,
-#                    right_shoulder_angles,
-#                    left_hip_angles,
-#                    right_hip_angles,
-#                    left_elbow_angles,
-#                    right_elbow_angles,
-#                    left_knee_angles,
-#                    right_knee_angles,
-#                    frame=FRAME)
+logging.log_angles(left_shoulder_angles,
+                   right_shoulder_angles,
+                   left_hip_angles,
+                   right_hip_angles,
+                   left_elbow_angles,
+                   right_elbow_angles,
+                   left_knee_angles,
+                   right_knee_angles,
+                   frame=FRAME)
