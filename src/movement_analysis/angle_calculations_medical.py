@@ -52,14 +52,19 @@ def calc_angles_hip_left(seq: Sequence, hip_left_idx: int, hip_right_idx: int, t
         theta = 90 - theta
         abduction_adduction = theta
         
-        # Phi is the angle of the Knee around the X-Axis (Down = 0) and represents flexion/extension angle
-        # NOTE: We assume that the torso coords are above Hip to determine if Y points up or down
-        torso_pos = left_hip_aligned_positions[torso_idx]
-        phi = math.degrees(math.atan2(ky, -kz)) if (torso_pos[1] >= 0) else math.degrees(math.atan2(-ky, -kz))
-        phi += 90
-        # An Extension should be represented in a negative angle 
-        if phi > 180:
-            phi -= 360
+        # Phi is arbitrary when point is on rotation axis, so we set it to zero
+        knee_xaxis_angle = transformations.get_angle(np.array([1,0,0]), left_hip_aligned_positions[knee_left_idx])
+        if knee_xaxis_angle == 0.0 or knee_xaxis_angle == math.pi:
+            phi = 0.0
+        else:
+            # Phi is the angle of the Knee around the X-Axis (Down = 0) and represents flexion/extension angle
+            # NOTE: We assume that the torso coords are above Hip to determine if Y points up or down
+            torso_pos = left_hip_aligned_positions[torso_idx]
+            phi = math.degrees(math.atan2(ky, -kz)) if (torso_pos[1] >= 0) else math.degrees(math.atan2(-ky, -kz))
+            phi += 90
+            # An Extension should be represented in a negative angle 
+            if phi > 180:
+                phi -= 360
         flexion_extension = phi
         
         flexion_extension_arr.append(flexion_extension)
@@ -102,14 +107,19 @@ def calc_angles_hip_right(seq: Sequence, hip_right_idx: int, hip_left_idx: int, 
         theta = 90 - theta
         abduction_adduction = theta
         
-        # Phi is the angle of the Knee around the X-Axis (Down = 0) and represents flexion/extension angle
-        # NOTE: We assume that the Torso coords are above Hip to determine if Y points up or down
-        torso_pos = right_hip_aligned_positions[torso_idx]
-        phi = math.degrees(math.atan2(ky, kz)) if (torso_pos[1] >= 0) else math.degrees(math.atan2(-ky, kz))
-        phi += 90
-        # An Extension should be represented in a negative angle 
-        if phi > 180:
-            phi -= 360
+        # Phi is arbitrary when point is on rotation axis, so we set it to zero
+        knee_xaxis_angle = transformations.get_angle(np.array([1,0,0]), right_hip_aligned_positions[knee_right_idx])
+        if knee_xaxis_angle == 0.0 or knee_xaxis_angle == math.pi:
+            phi = 0.0
+        else:
+            # Phi is the angle of the Knee around the X-Axis (Down = 0) and represents flexion/extension angle
+            # NOTE: We assume that the Torso coords are above Hip to determine if Y points up or down
+            torso_pos = right_hip_aligned_positions[torso_idx]
+            phi = math.degrees(math.atan2(ky, kz)) if (torso_pos[1] >= 0) else math.degrees(math.atan2(-ky, kz))
+            phi += 90
+            # An Extension should be represented in a negative angle 
+            if phi > 180:
+                phi -= 360
         flexion_extension = phi
         
         flexion_extension_arr.append(flexion_extension)
@@ -169,17 +179,22 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
 
         # Theta is the angle of the Shoulder-Elbow Vector to the YZ-Plane
         theta = math.degrees(math.acos(-ex/er))
-        theta = 90 - theta
+        theta = 90.0 - theta
         abduction_adduction = theta
         
-        # Phi is the angle of the Elbow around the X-Axis (Down = 0) and represents flexion/extension angle
-        # NOTE: We assume that the neck coords are above shoulders to determine if Y points up or down
-        neck_pos = left_shoulder_aligned_positions[neck_idx]
-        phi = math.degrees(math.atan2(ey, -ez)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ey, -ez))
-        phi += 90
-        # An Extension should be represented in a negative angle 
-        if phi > 180:
-            phi -= 360
+        # Phi is arbitrary when point is on rotation axis, so we set it to zero
+        elbow_xaxis_angle = transformations.get_angle(np.array([1,0,0]), left_shoulder_aligned_positions[elbow_left_idx])
+        if elbow_xaxis_angle == 0.0 or elbow_xaxis_angle == math.pi:
+            phi = 0
+        else:
+            # Phi is the angle of the Elbow around the X-Axis (Down = 0) and represents flexion/extension angle
+            # NOTE: We assume that the neck coords are above shoulders to determine if Y points up or down
+            neck_pos = left_shoulder_aligned_positions[neck_idx]
+            phi = math.degrees(math.atan2(ey, -ez)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ey, -ez))
+            phi += 90.0
+            # An Extension should be represented in a negative angle 
+            if phi > 180.0:
+                phi -= 360.0
         flexion_extension = phi
 
         flexion_extension_arr.append(flexion_extension)
@@ -222,14 +237,19 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
         theta = 90 - theta
         abduction_adduction = theta
         
-        # Phi is the angle of the Elbow around the X-Axis (Down = 0) and represents flexion/extension angle
-        # NOTE: We assume that the neck coords are above shoulders to determine if Y points up or down
-        neck_pos = right_shoulder_aligned_positions[neck_idx]
-        phi = math.degrees(math.atan2(ey, ez)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ey, ez))
-        phi += 90
-        # An Extension should be represented in a negative angle 
-        if phi > 180:
-            phi -= 360
+        # Phi is arbitrary when point is on rotation axis, so we set it to zero
+        elbow_xaxis_angle = transformations.get_angle(np.array([1,0,0]), right_shoulder_aligned_positions[elbow_right_idx])
+        if elbow_xaxis_angle == 0.0 or elbow_xaxis_angle == math.pi:
+            phi = 0
+        else:
+            # Phi is the angle of the Elbow around the X-Axis (Down = 0) and represents flexion/extension angle
+            # NOTE: We assume that the neck coords are above shoulders to determine if Y points up or down
+            neck_pos = right_shoulder_aligned_positions[neck_idx]
+            phi = math.degrees(math.atan2(ey, ez)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ey, ez))
+            phi += 90
+            # An Extension should be represented in a negative angle 
+            if phi > 180:
+                phi -= 360
         flexion_extension = phi
         
         flexion_extension_arr.append(flexion_extension)
