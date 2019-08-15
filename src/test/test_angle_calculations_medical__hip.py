@@ -266,13 +266,13 @@ class TestAngleCalculationsMedicalHip(unittest.TestCase):
                                                         self.bp["LeftKnee"])["abduction_adduction"][0],
                                expected_result["abduction_adduction"][0])
 
-    def test_calc_angles_hip_left_flex45_abd45(self):
+    def test_calc_angles_hip_left_flex90_abd45(self):
         positions = self.positions_left
         positions[0][7] = [0.5, 1, 0.5]
 
         seq = Sequence(self.bp, positions, [0.0], PoseFormatEnum.MOCAP)
         expected_result = {
-            "flexion_extension": np.array([45.0]),
+            "flexion_extension": np.array([90.0]),
             "abduction_adduction": np.array([45.0]),
         }
         self.assertAlmostEqual(acm.calc_angles_hip_left(seq,
@@ -288,13 +288,13 @@ class TestAngleCalculationsMedicalHip(unittest.TestCase):
                                                         self.bp["LeftKnee"])["abduction_adduction"][0],
                                expected_result["abduction_adduction"][0])
 
-    def test_calc_angles_hip_left_flex45n_abd45n(self):
+    def test_calc_angles_hip_left_flex90n_abd45n(self):
         positions = self.positions_left
         positions[0][7] = [1.5, 1, 1.5]
 
         seq = Sequence(self.bp, positions, [0.0], PoseFormatEnum.MOCAP)
         expected_result = {
-            "flexion_extension": np.array([-45.0]),
+            "flexion_extension": np.array([-90.0]),
             "abduction_adduction": np.array([-45.0]),
         }
         self.assertAlmostEqual(acm.calc_angles_hip_left(seq,
@@ -311,6 +311,7 @@ class TestAngleCalculationsMedicalHip(unittest.TestCase):
                                expected_result["abduction_adduction"][0])
 
     ### calc_angles_hip_right ###
+
     def test_calc_angles_hip_right_flex0_abd0(self):
         positions = self.positions_right
         positions[0][10] = [2, 0.5, 1]
@@ -420,7 +421,7 @@ class TestAngleCalculationsMedicalHip(unittest.TestCase):
                                                          self.bp["Torso"],
                                                          self.bp["RightKnee"])["abduction_adduction"][0],
                                expected_result["abduction_adduction"][0])
-
+    
     def test_calc_angles_hip_right_flex0_abd90(self):
         positions = self.positions_right
         positions[0][10] = [2.5, 1, 1]
@@ -509,13 +510,13 @@ class TestAngleCalculationsMedicalHip(unittest.TestCase):
                                                          self.bp["RightKnee"])["abduction_adduction"][0],
                                expected_result["abduction_adduction"][0])
 
-    def test_calc_angles_hip_right_flex45_abd45(self):
+    def test_calc_angles_hip_right_flex90_abd45(self):
         positions = self.positions_right
         positions[0][10] = [2.5, 1, 0.5]
 
         seq = Sequence(self.bp, positions, [0.0], PoseFormatEnum.MOCAP)
         expected_result = {
-            "flexion_extension": np.array([45.0]),
+            "flexion_extension": np.array([90.0]),
             "abduction_adduction": np.array([45.0]),
         }
         self.assertAlmostEqual(acm.calc_angles_hip_right(seq,
@@ -531,13 +532,13 @@ class TestAngleCalculationsMedicalHip(unittest.TestCase):
                                                          self.bp["RightKnee"])["abduction_adduction"][0],
                                expected_result["abduction_adduction"][0])
 
-    def test_calc_angles_hip_right_flex45n_abd45n(self):
+    def test_calc_angles_hip_right_flex90n_abd45n(self):
         positions = self.positions_right
         positions[0][10] = [1.5, 1, 1.5]
 
         seq = Sequence(self.bp, positions, [0.0], PoseFormatEnum.MOCAP)
         expected_result = {
-            "flexion_extension": np.array([-45.0]),
+            "flexion_extension": np.array([-90.0]),
             "abduction_adduction": np.array([-45.0]),
         }
         self.assertAlmostEqual(acm.calc_angles_hip_right(seq,
