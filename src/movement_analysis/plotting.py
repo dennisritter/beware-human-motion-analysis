@@ -19,29 +19,29 @@ def plot_ball_joint_angle(joint_aligned_positions: list, ball_joint_idx: int, an
     vx, vy, vz = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
 
     fig = plt.figure(figsize=plt.figaspect(1)*2)
-    ax = fig.add_subplot(1, 1, 1, projection='3d')
-    ax.set_xlim3d(-1, 1)
-    ax.set_ylim3d(-1, 1)
-    ax.set_zlim3d(-1, 1)
+    ax3d = fig.add_subplot(1, 1, 1, projection='3d')
+    ax3d.set_xlim3d(-1, 1)
+    ax3d.set_ylim3d(-1, 1)
+    ax3d.set_zlim3d(-1, 1)
     for i, p in enumerate(joint_aligned_positions):
         if i == ball_joint_idx or i == angle_ref_joint_idx:
-            ax.scatter(p[0], p[1], p[2], c="red")
+            ax3d.scatter(p[0], p[1], p[2], c="red")
         else:
-            ax.scatter(p[0], p[1], p[2], c="blue")
-    ax.plot([zero_x, ax],
+            ax3d.scatter(p[0], p[1], p[2], c="blue")
+    ax3d.plot([zero_x, ax],
             [zero_y, ay],
             [zero_z, az],
             color="pink", linewidth=1)
 
-    ax.plot([zero_x, vx[0]],
+    ax3d.plot([zero_x, vx[0]],
             [zero_y, vx[1]],
             [zero_z, vx[2]],
             color="pink", linewidth=1)
-    ax.plot([zero_x, vy[0]],
+    ax3d.plot([zero_x, vy[0]],
             [zero_y, vy[1]],
             [zero_z, vy[2]],
             color="maroon", linewidth=1)
-    ax.plot([zero_x, vz[0]],
+    ax3d.plot([zero_x, vz[0]],
             [zero_y, vz[1]],
             [zero_z, vz[2]],
             color="red", linewidth=1)
