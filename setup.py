@@ -13,7 +13,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://gitlab.beuth-hochschule.de/iisy/humanmotionanalysis",
     package_dir={'': 'src'},
-    packages=setuptools.find_packages(where='src', exclude=['test']),
+    packages=setuptools.find_namespace_packages(where='src'),
     install_requires=[
             'numpy',
             'matplotlib',
