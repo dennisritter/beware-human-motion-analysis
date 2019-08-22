@@ -1,8 +1,8 @@
 import warnings
 import math
-from movement_analysis.AngleTargetStates import AngleTargetStates
-from movement_analysis.AngleAnalysisResultStates import AngleAnalysisResultStates
 
+from .AngleTargetStates import AngleTargetStates
+from .AngleAnalysisResultStates import AngleAnalysisResultStates
 
 class Exercise:
 

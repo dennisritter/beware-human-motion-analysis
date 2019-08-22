@@ -1,12 +1,12 @@
-from movement_analysis.Exercise import Exercise
-from movement_analysis.PoseFormatEnum import PoseFormatEnum
-from movement_analysis.AngleTargetStates import AngleTargetStates
-from movement_analysis.Sequence import Sequence
-from movement_analysis.PoseMapper import PoseMapper
-from movement_analysis import exercise_loader
-from movement_analysis import angle_calculations_medical as acm
-from movement_analysis import transformations
-from movement_analysis import logging
+from hma.movement_analysis.Exercise import Exercise
+from hma.movement_analysis.PoseFormatEnum import PoseFormatEnum
+from hma.movement_analysis.AngleTargetStates import AngleTargetStates
+from hma.movement_analysis.Sequence import Sequence
+from hma.movement_analysis.PoseMapper import PoseMapper
+from hma.movement_analysis import exercise_loader
+from hma.movement_analysis import angle_calculations_medical as acm
+from hma.movement_analysis import transformations
+from hma.movement_analysis import logging
 import math
 import matplotlib.pyplot as plt
 import numpy as np

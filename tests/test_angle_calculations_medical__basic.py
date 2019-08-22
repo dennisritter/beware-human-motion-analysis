@@ -1,8 +1,9 @@
 import unittest
 import numpy as np
-from movement_analysis import angle_calculations_medical as acm
-from movement_analysis.Sequence import Sequence
-from movement_analysis.PoseFormatEnum import PoseFormatEnum
+
+from src.hma.movement_analysis import angle_calculations_medical as acm
+from src.hma.movement_analysis.Sequence import Sequence
+from src.hma.movement_analysis.PoseFormatEnum import PoseFormatEnum
 
 
 class TestAngleCalculationsMedicalBasic(unittest.TestCase):
