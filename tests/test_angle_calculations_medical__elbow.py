@@ -1,9 +1,9 @@
 import unittest
 import numpy as np
 
-from hma.movement_analysis import angle_calculations_medical as acm
-from hma.movement_analysis.Sequence import Sequence
-from hma.movement_analysis.PoseFormatEnum import PoseFormatEnum
+from src.hma.movement_analysis import angle_calculations_medical as acm
+from src.hma.movement_analysis.Sequence import Sequence
+from src.hma.movement_analysis.PoseFormatEnum import PoseFormatEnum
 
 
 class TestAngleCalculationsMedicalcElbow(unittest.TestCase):

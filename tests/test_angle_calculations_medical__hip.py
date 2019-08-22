@@ -1,9 +1,9 @@
 import unittest
 import numpy as np
 
-from hma.movement_analysis import angle_calculations_medical as acm
-from hma.movement_analysis.Sequence import Sequence
-from hma.movement_analysis.PoseFormatEnum import PoseFormatEnum
+from src.hma.movement_analysis import angle_calculations_medical as acm
+from src.hma.movement_analysis.Sequence import Sequence
+from src.hma.movement_analysis.PoseFormatEnum import PoseFormatEnum
 
 
 class TestAngleCalculationsMedicalHip(unittest.TestCase):
@@ -422,7 +422,7 @@ class TestAngleCalculationsMedicalHip(unittest.TestCase):
                                                          self.bp["Torso"],
                                                          self.bp["RightKnee"])["abduction_adduction"][0],
                                expected_result["abduction_adduction"][0])
-    
+
     def test_calc_angles_hip_right_flex0_abd90(self):
         positions = self.positions_right
         positions[0][10] = [2.5, 1, 1]
