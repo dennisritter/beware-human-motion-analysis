@@ -83,8 +83,8 @@ for frame in range(0, len(seq.positions)):
         ex.angles[current_target_state.value]["shoulder_right"]["flexion_extension"]["angle"],
         ex.angles[current_target_state.value]["shoulder_right"]["abduction_adduction"]["angle"])
     shoulder_right_results.append(ex.check_angles_shoulder_right(shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add, current_target_state, 10))
-    print(f"Shoulder Right Flexion: {ex.check_angles_shoulder_right(shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add, current_target_state, 10)['flexion_extension']}")
-    print(f"Shoulder Right Abduction: {ex.check_angles_shoulder_right(shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add, current_target_state, 10)['abduction_adduction']}")
+    # print(f"Shoulder Right Flexion: {ex.check_angles_shoulder_right(shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add, current_target_state, 10)['flexion_extension']}")
+    # print(f"Shoulder Right Abduction: {ex.check_angles_shoulder_right(shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add, current_target_state, 10)['abduction_adduction']}")
     hip_left_angle_flex_ex, hip_left_angle_abd_add = process_ball_joint_angles(
         left_hip_angles["flexion_extension"][frame],
         left_hip_angles["abduction_adduction"][frame],
@@ -99,8 +99,8 @@ for frame in range(0, len(seq.positions)):
         ex.angles[current_target_state.value]["hip_right"]["flexion_extension"]["angle"],
         ex.angles[current_target_state.value]["hip_right"]["abduction_adduction"]["angle"])
     hip_right_results.append(ex.check_angles_shoulder_right(hip_right_angle_flex_ex, hip_right_angle_abd_add, current_target_state, 10))
-    # print(f"Hip Right Flexion: {ex.check_angles_hip_right(hip_right_angle_flex_ex, hip_right_angle_abd_add, current_target_state, 10)['flexion_extension']}")
-    # print(f"Hip Right Abduction: {ex.check_angles_hip_right(hip_right_angle_flex_ex, hip_right_angle_abd_add, current_target_state, 10)['abduction_adduction']}")
+    print(f"Hip Right Flexion: {ex.check_angles_hip_right(hip_right_angle_flex_ex, hip_right_angle_abd_add, current_target_state, 10)['flexion_extension']}")
+    print(f"Hip Right Abduction: {ex.check_angles_hip_right(hip_right_angle_flex_ex, hip_right_angle_abd_add, current_target_state, 10)['abduction_adduction']}")
 
     elbow_left_angle_flex_ex = left_elbow_angles["flexion_extension"][frame]
     elbow_left_results.append(ex.check_angles_elbow_left(elbow_left_angle_flex_ex, current_target_state, 10))

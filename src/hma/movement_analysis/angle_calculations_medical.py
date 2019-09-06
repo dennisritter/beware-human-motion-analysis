@@ -59,9 +59,7 @@ def calc_angles_hip_left(seq: Sequence, hip_left_idx: int, hip_right_idx: int, t
             phi = 0.0
         else:
             # Phi is the angle of the Knee around the X-Axis (Down = 0) and represents flexion/extension angle
-            # NOTE: We assume that the torso coords are above Hip to determine if Y points up or down
-            torso_pos = left_hip_aligned_positions[torso_idx]
-            phi = math.degrees(math.atan2(ky, -kz)) if (torso_pos[1] >= 0) else math.degrees(math.atan2(-ky, -kz))
+            phi = math.degrees(math.atan2(ky, -kz))
             phi += 90
             # An Extension should be represented in a negative angle
             if phi > 180:
@@ -105,7 +103,7 @@ def calc_angles_hip_right(seq: Sequence, hip_right_idx: int, hip_left_idx: int, 
         kr = math.sqrt(kx**2 + ky**2 + kz**2)
 
         # Theta is the angle of the Hip-Knee Vector to the YZ-Plane
-        theta = math.degrees(math.acos(-kx/kr))
+        theta = math.degrees(math.acos(kx/kr))
         theta = 90 - theta
         abduction_adduction = theta
 
@@ -115,9 +113,7 @@ def calc_angles_hip_right(seq: Sequence, hip_right_idx: int, hip_left_idx: int, 
             phi = 0.0
         else:
             # Phi is the angle of the Knee around the X-Axis (Down = 0) and represents flexion/extension angle
-            # NOTE: We assume that the Torso coords are above Hip to determine if Y points up or down
-            torso_pos = right_hip_aligned_positions[torso_idx]
-            phi = math.degrees(math.atan2(ky, kz)) if (torso_pos[1] >= 0) else math.degrees(math.atan2(-ky, kz))
+            phi = math.degrees(math.atan2(ky, -kz))
             phi += 90
             # An Extension should be represented in a negative angle
             if phi > 180:
@@ -131,7 +127,8 @@ def calc_angles_hip_right(seq: Sequence, hip_right_idx: int, hip_left_idx: int, 
             print("\n##### HIP RIGHT ANGLES #####")
             print(f"[{frame}] flexion_extension angle: {flexion_extension}")
             print(f"[{frame}] abduction_adduction angle: {abduction_adduction}")
-        # plotting.plot_ball_joint_angle(right_hip_aligned_positions, hip_right_idx, knee_right_idx)
+        if frame == 0:
+            plotting.plot_ball_joint_angle(right_hip_aligned_positions, hip_right_idx, knee_right_idx)
 
     return {
         "flexion_extension": flexion_extension_arr,
@@ -247,8 +244,6 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
         else:
             # Phi is the angle of the Elbow around the X-Axis (Down = 0) and represents flexion/extension angle
 
-            # torso_pos = right_shoulder_aligned_positions[torso_idx]
-            # phi = math.degrees(math.atan2(ey, ez)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ey, ez))
             phi = math.degrees(math.atan2(ey, -ez))
             phi += 90
             # An Extension should be represented in a negative angle
