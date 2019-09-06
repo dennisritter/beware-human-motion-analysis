@@ -127,8 +127,7 @@ def calc_angles_hip_right(seq: Sequence, hip_right_idx: int, hip_left_idx: int, 
             print("\n##### HIP RIGHT ANGLES #####")
             print(f"[{frame}] flexion_extension angle: {flexion_extension}")
             print(f"[{frame}] abduction_adduction angle: {abduction_adduction}")
-        if frame == 0:
-            plotting.plot_ball_joint_angle(right_hip_aligned_positions, hip_right_idx, knee_right_idx)
+        # plotting.plot_ball_joint_angle(right_hip_aligned_positions, hip_right_idx, knee_right_idx)
 
     return {
         "flexion_extension": flexion_extension_arr,
@@ -203,7 +202,7 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
             print("\n##### SHOULDER LEFT ANGLES #####")
             print(f"[{frame}] flexion_extension angle: {flexion_extension}")
             print(f"[{frame}] abduction_adduction angle: {abduction_adduction}")
-        #plotting.plot_ball_joint_angle(left_shoulder_aligned_positions, shoulder_left_idx, elbow_left_idx)
+        # plotting.plot_ball_joint_angle(left_shoulder_aligned_positions, shoulder_left_idx, elbow_left_idx)
 
     return {
         "flexion_extension": flexion_extension_arr,
