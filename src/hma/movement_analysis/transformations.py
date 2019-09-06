@@ -81,15 +81,33 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     vz = norm(np.array([0, 0, 1]))
 
     # TODO: Ensure correct directions of perpendicular vectors: Z-Axis to front or back? Y-Axis up or down?
+    # Positions of given orientation joints in GCS
     origin = seq.positions[frame][origin_bp_idx]
+    x_direction_bp_gpos = seq.positions[frame][x_direction_bp_idx]
+    y_direction_bp_gpos = seq.positions[frame][y_direction_bp_idx]
+    # Y-direction should point upwards. So turn y_direction if it lies under origin
     # New X-Axis from origin to x_direction
-    vx_new = seq.positions[frame][x_direction_bp_idx] - origin
+    vx_new = x_direction_bp_gpos - origin
+    if vx_new[0] < 0:
+        vx_new = -vx_new
+    print(f"vx_new: {vx_new}")
+
     # New Z-Axis is perpendicular to the origin to x_direction and origin to y_direction vectors
-    vz_new = get_perpendicular_vector(seq.positions[frame][y_direction_bp_idx] - origin, vx_new)
+    # if origin[1] > y_direction_bp_gpos[1]:
+    #     vz_new = get_perpendicular_vector((y_direction_bp_gpos - origin)*-1, vx_new)
+    # else:
+    vz_new = get_perpendicular_vector((y_direction_bp_gpos - origin), vx_new)
+    # Ensure Z points away from camera position
+    if vz_new[2] < 0:
+        vz_new = -vz_new
+
     # New Y-Axis is perpendicular to new X-Axis and Z-Axis
     vy_new = get_perpendicular_vector(vx_new, vz_new)
+    # Ensure that vy points up
+    if vy_new[1] < 0:
+        vy_new = -vy_new
 
-    # Construct translation Matrix to move given origin to zero-position
+        # Construct translation Matrix to move given origin to zero-position
     T = translation_matrix_4x4(zero_position-origin)
     # Construct rotation matrix for X-Alignment to rotate about x_rot_axis for the angle theta
     x_rot_axis = get_perpendicular_vector(vx_new, vx)
@@ -106,7 +124,7 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     # Check Y Rotation direction
     # NOTE: Did not find a way to determine Y-Rotation direction (theta_y || -theta_y) consistently
     #       without checking y_direction_bp_idx Z-Position after the transformation. (should be ~0)
-    trans_y_bp_pos = seq.positions[frame][y_direction_bp_idx]
+    trans_y_bp_pos = y_direction_bp_gpos
     trans_y_bp_pos = np.matmul(T, np.append(trans_y_bp_pos, 1))[:3]
     trans_y_bp_pos_plus = np.matmul(Ry_plus, np.append(trans_y_bp_pos, 1))[:3]
     trans_y_bp_pos_minus = np.matmul(Ry_minus, np.append(trans_y_bp_pos, 1))[:3]
@@ -128,35 +146,26 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
         transformed_positions.append(pos)
 
     ################### PLOTTING #####################
-    """
-    fig = plt.figure(figsize=plt.figaspect(1)*2)
-    ax = fig.add_subplot(1, 1, 1, projection='3d')
-    ax.set_xlim3d(-0.5, 0.5)
-    ax.set_ylim3d(-0.5, 0.5)
-    ax.set_zlim3d(-0.5, 0.5)
-    for i, p in enumerate(transformed_positions):
-        ax.scatter(p[0], p[1], p[2], c="blue")
-    # ax.plot([zero_position[0], -0.1], [zero_position[1], 0.05], [zero_position[2], -0.1], color="pink", linewidth=1)
-    ax.plot([transformed_positions[8][0], transformed_positions[7][0]],
-            [transformed_positions[8][1], transformed_positions[7][1]],
-            [transformed_positions[8][2], transformed_positions[7][2]],
-            color="pink", linewidth=1)
-    # ax.plot([transformed_positions[2][0], transformed_positions[1][0]],
-    #         [transformed_positions[2][1], transformed_positions[1][1]],
-    #         [transformed_positions[2][2], transformed_positions[1][2]],
-    #         color="pink", linewidth=1)
 
-    # for j in range(len(seq.positions[frame])):
-    #     ax.scatter(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], c="red", alpha=0.5)
-    #     ax.text(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], j)
-    # ax.annotate(f"{j}", (seq.positions[frame][j][0], seq.positions[frame][j][1]))
-    ax.plot([zero_position[0], vx[0]/2], [zero_position[1], vx[1]], [zero_position[2], vx[2]], color="pink", linewidth=1)
-    ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]/2], [zero_position[2], vy[2]], color="maroon", linewidth=1)
-    ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]/2], color="red", linewidth=1)
-    # ax.plot([zero_position[0], vy_new[0]], [zero_position[1], vy_new[1]], [zero_position[2], vy_new[2]], color="green", linewidth=1)
-    # ax.plot([zero_position[0], vx[0]], [zero_position[1], vx[1]], [zero_position[2], vx[2]], color="pink", linewidth=1)
-    # ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]], [zero_position[2], vy[2]], color="maroon", linewidth=1)
-    # ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]], color="red", linewidth=1)
-    plt.show()
-    """
+    # fig = plt.figure(figsize=plt.figaspect(1)*2)
+    # ax = fig.add_subplot(1, 1, 1, projection='3d')
+    # ax.set_xlim3d(-0.5, 0.5)
+    # ax.set_ylim3d(-0.5, 0.5)
+    # ax.set_zlim3d(-0.5, 0.5)
+    # for i, p in enumerate(transformed_positions):
+    #     ax.scatter(p[0], p[1], p[2], c="blue")
+    # # ax.plot([zero_position[0], -0.1], [zero_position[1], 0.05], [zero_position[2], -0.1], color="pink", linewidth=1)
+    # # for j in range(len(seq.positions[frame])):
+    # #     ax.scatter(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], c="red", alpha=0.5)
+    # #     ax.text(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], j)
+    # # ax.annotate(f"{j}", (seq.positions[frame][j][0], seq.positions[frame][j][1]))
+    # ax.plot([zero_position[0], vx[0]/2], [zero_position[1], vx[1]], [zero_position[2], vx[2]], color="pink", linewidth=1)
+    # ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]/2], [zero_position[2], vy[2]], color="maroon", linewidth=1)
+    # ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]/2], color="red", linewidth=1)
+    # # ax.plot([zero_position[0], vy_new[0]], [zero_position[1], vy_new[1]], [zero_position[2], vy_new[2]], color="green", linewidth=1)
+    # # ax.plot([zero_position[0], vx[0]], [zero_position[1], vx[1]], [zero_position[2], vx[2]], color="pink", linewidth=1)
+    # # ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]], [zero_position[2], vy[2]], color="maroon", linewidth=1)
+    # # ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]], color="red", linewidth=1)
+    # plt.show()
+
     return transformed_positions

@@ -47,7 +47,7 @@ mocap_posemapper = PoseMapper(PoseFormatEnum.MOCAP)
 seq = mocap_posemapper.load('data/sequences/squat_3/complete-session.json', 'Squat')
 bp = seq.body_parts
 
-left_shoulder_angles = acm.calc_angles_shoulder_left(seq, seq.body_parts["LeftShoulder"], seq.body_parts["RightShoulder"], seq.body_parts["Neck"], seq.body_parts["LeftElbow"])
+left_shoulder_angles = acm.calc_angles_shoulder_left(seq, seq.body_parts["LeftShoulder"], seq.body_parts["RightShoulder"], seq.body_parts["Torso"], seq.body_parts["LeftElbow"])
 right_shoulder_angles = acm.calc_angles_shoulder_right(seq, seq.body_parts["RightShoulder"], seq.body_parts["LeftShoulder"], seq.body_parts["Neck"], seq.body_parts["RightElbow"])
 left_hip_angles = acm.calc_angles_hip_left(seq, seq.body_parts["LeftHip"], seq.body_parts["RightHip"], seq.body_parts["Torso"], seq.body_parts["LeftKnee"])
 right_hip_angles = acm.calc_angles_hip_right(seq, seq.body_parts["RightHip"], seq.body_parts["LeftHip"], seq.body_parts["Torso"], seq.body_parts["RightKnee"])
@@ -55,7 +55,7 @@ left_elbow_angles = acm.calc_angles_elbow(seq, seq.body_parts["LeftElbow"], seq.
 right_elbow_angles = acm.calc_angles_elbow(seq, seq.body_parts["RightElbow"], seq.body_parts["RightShoulder"], seq.body_parts["RightWrist"])
 left_knee_angles = acm.calc_angles_knee(seq, seq.body_parts["LeftKnee"], seq.body_parts["LeftHip"], seq.body_parts["LeftAnkle"])
 right_knee_angles = acm.calc_angles_knee(seq, seq.body_parts["RightKnee"], seq.body_parts["RightHip"], seq.body_parts["RightAnkle"])
-
+# print(left_shoulder_angles)
 
 # ANGLE ANALYSIS
 shoulder_left_results = []
@@ -75,8 +75,8 @@ for frame in range(0, len(seq.positions)):
         ex.angles[current_target_state.value]["shoulder_left"]["flexion_extension"]["angle"],
         ex.angles[current_target_state.value]["shoulder_left"]["abduction_adduction"]["angle"])
     shoulder_left_results.append(ex.check_angles_shoulder_left(shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add, current_target_state, 10))
-    # print(f"Shoulder Left Flexion: {ex.check_angles_shoulder_left(shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add, current_target_state, 10)['flexion_extension']}")
-    # print(f"Shoulder Left Abduction: {ex.check_angles_shoulder_left(shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add, current_target_state, 10)['abduction_adduction']}")
+    print(f"Shoulder Left Flexion: {ex.check_angles_shoulder_left(shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add, current_target_state, 10)['flexion_extension']}")
+    print(f"Shoulder Left Abduction: {ex.check_angles_shoulder_left(shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add, current_target_state, 10)['abduction_adduction']}")
     shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add = process_ball_joint_angles(
         right_shoulder_angles["flexion_extension"][frame],
         right_shoulder_angles["abduction_adduction"][frame],
