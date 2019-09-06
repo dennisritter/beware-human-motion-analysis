@@ -90,7 +90,6 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     vx_new = x_direction_bp_gpos - origin
     if vx_new[0] < 0:
         vx_new = -vx_new
-    print(f"vx_new: {vx_new}")
 
     # New Z-Axis is perpendicular to the origin to x_direction and origin to y_direction vectors
     # if origin[1] > y_direction_bp_gpos[1]:
