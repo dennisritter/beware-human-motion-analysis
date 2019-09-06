@@ -206,8 +206,7 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
             print("\n##### SHOULDER LEFT ANGLES #####")
             print(f"[{frame}] flexion_extension angle: {flexion_extension}")
             print(f"[{frame}] abduction_adduction angle: {abduction_adduction}")
-        if frame == 0:
-            plotting.plot_ball_joint_angle(left_shoulder_aligned_positions, shoulder_left_idx, elbow_left_idx)
+        #plotting.plot_ball_joint_angle(left_shoulder_aligned_positions, shoulder_left_idx, elbow_left_idx)
 
     return {
         "flexion_extension": flexion_extension_arr,
@@ -215,7 +214,7 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
     }
 
 
-def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_left_idx: int, neck_idx: int, elbow_right_idx: int, log: bool = False) -> dict:
+def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_left_idx: int, torso_idx: int, elbow_right_idx: int, log: bool = False) -> dict:
     """ Calculates Right Shoulder angles 
     Parameters
     ----------
@@ -227,7 +226,7 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
 
     for frame in range(0, len(seq.positions)):
         # Move coordinate system to right shoulder
-        right_shoulder_aligned_positions = transformations.align_coordinates_to(shoulder_right_idx, shoulder_left_idx, neck_idx, seq, frame=frame)
+        right_shoulder_aligned_positions = transformations.align_coordinates_to(shoulder_right_idx, shoulder_left_idx, torso_idx, seq, frame=frame)
 
         ex = right_shoulder_aligned_positions[elbow_right_idx][0]
         ey = right_shoulder_aligned_positions[elbow_right_idx][1]
@@ -237,7 +236,7 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
         er = math.sqrt(ex**2 + ey**2 + ez**2)
 
         # Theta is the angle of the Shoulder-Elbow Vector to the YZ-Plane
-        theta = math.degrees(math.acos(-ex/er))
+        theta = math.degrees(math.acos(ex/er))
         theta = 90 - theta
         abduction_adduction = theta
 
@@ -247,9 +246,10 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
             phi = 0
         else:
             # Phi is the angle of the Elbow around the X-Axis (Down = 0) and represents flexion/extension angle
-            # NOTE: We assume that the neck coords are above shoulders to determine if Y points up or down
-            neck_pos = right_shoulder_aligned_positions[neck_idx]
-            phi = math.degrees(math.atan2(ey, ez)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ey, ez))
+
+            # torso_pos = right_shoulder_aligned_positions[torso_idx]
+            # phi = math.degrees(math.atan2(ey, ez)) if (neck_pos[1] >= 0) else math.degrees(math.atan2(-ey, ez))
+            phi = math.degrees(math.atan2(ey, -ez))
             phi += 90
             # An Extension should be represented in a negative angle
             if phi > 180:
@@ -263,7 +263,8 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
             print("\n##### SHOULDER RIGHT ANGLES #####")
             print(f"[{frame}] flexion_extension angle: {flexion_extension}")
             print(f"[{frame}] abduction_adduction angle: {abduction_adduction}")
-        # plotting.plot_ball_joint_angle(right_shoulder_aligned_positions, shoulder_right_idx, elbow_right_idx)
+        if frame == 0:
+            plotting.plot_ball_joint_angle(right_shoulder_aligned_positions, shoulder_right_idx, elbow_right_idx)
 
     return {
         "flexion_extension": flexion_extension_arr,
