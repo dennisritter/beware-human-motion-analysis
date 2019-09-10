@@ -11,7 +11,6 @@ class Sequence:
         # Example: { "Head": 0, "RightShoulder": 1, ... }
         self.body_parts = body_parts
         # Defines positions of each bodypart
-        # TODO: Change to: Time, Bodypart, xyz
         # 1. Dimension = Time
         # 2. Dimension = Bodypart
         # 3. Dimension = x, y, z
