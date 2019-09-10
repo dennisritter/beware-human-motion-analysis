@@ -2,7 +2,7 @@ from hma.movement_analysis.Exercise import Exercise
 from hma.movement_analysis.PoseFormatEnum import PoseFormatEnum
 from hma.movement_analysis.AngleTargetStates import AngleTargetStates
 from hma.movement_analysis.Sequence import Sequence
-from hma.movement_analysis.PoseMapper import PoseMapper
+from hma.movement_analysis.PoseProcessor import PoseProcessor
 from hma.movement_analysis import exercise_loader
 from hma.movement_analysis import angle_calculations_medical as acm
 from hma.movement_analysis import transformations
@@ -41,10 +41,10 @@ def process_ball_joint_angles(
 
 # Get Exercise Object from json file
 ex = exercise_loader.load('data/exercises/kniebeuge.json')
-# Get PoseMapper instance for MOCAP sequences
-mocap_posemapper = PoseMapper(PoseFormatEnum.MOCAP)
+# Get PoseProcessor instance for MOCAP sequences
+mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 # Convert mocap json string Positions to Sequence Object
-seq = mocap_posemapper.load('data/sequences/squat_3/complete-session.json', 'Squat')
+seq = mocap_poseprocessor.load('data/sequences/squat_3/complete-session.json', 'Squat')
 bp = seq.body_parts
 
 left_shoulder_angles = acm.calc_angles_shoulder_left(seq, seq.body_parts["LeftShoulder"], seq.body_parts["RightShoulder"], seq.body_parts["Torso"], seq.body_parts["LeftElbow"])

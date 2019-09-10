@@ -1,4 +1,4 @@
-from .PoseMapper import PoseMapper
+from .PoseProcessor import PoseProcessor
 from .PoseFormatEnum import PoseFormatEnum
 from .Sequence import Sequence
 from . import distance
@@ -29,20 +29,20 @@ def plot_ball_joint_angle(joint_aligned_positions: list, ball_joint_idx: int, an
         else:
             ax3d.scatter(p[0], p[1], p[2], c="blue")
     ax3d.plot([zero_x, ax],
-            [zero_y, ay],
-            [zero_z, az],
-            color="pink", linewidth=1)
+              [zero_y, ay],
+              [zero_z, az],
+              color="pink", linewidth=1)
 
     ax3d.plot([zero_x, vx[0]],
-            [zero_y, vx[1]],
-            [zero_z, vx[2]],
-            color="pink", linewidth=1)
+              [zero_y, vx[1]],
+              [zero_z, vx[2]],
+              color="pink", linewidth=1)
     ax3d.plot([zero_x, vy[0]],
-            [zero_y, vy[1]],
-            [zero_z, vy[2]],
-            color="maroon", linewidth=1)
+              [zero_y, vy[1]],
+              [zero_z, vy[2]],
+              color="maroon", linewidth=1)
     ax3d.plot([zero_x, vz[0]],
-            [zero_y, vz[1]],
-            [zero_z, vz[2]],
-            color="red", linewidth=1)
+              [zero_y, vz[1]],
+              [zero_z, vz[2]],
+              color="red", linewidth=1)
     plt.show()

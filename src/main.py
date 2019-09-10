@@ -1,5 +1,5 @@
 from hma.movement_analysis.Sequence import Sequence
-from hma.movement_analysis.PoseMapper import PoseMapper
+from hma.movement_analysis.PoseProcessor import PoseProcessor
 from hma.movement_analysis.PoseFormatEnum import PoseFormatEnum
 from hma.movement_analysis import distance
 import matplotlib.pyplot as plt
@@ -127,11 +127,11 @@ with open('data/sequences/squat_1/complete-session.json', 'r') as myfile:
     mocap_seq1 = myfile.read()
 with open('data/sequences/squat_3/complete-session.json', 'r') as myfile:
     mocap_seq2 = myfile.read()
-# Get PoseMapper instance for MOCAP sequences in json
-mocap_opmpi_mapper = PoseMapper(PoseFormatEnum.MOCAP)
+# Get PoseProcessor instance for MOCAP sequences in json
+mocap_opmpi_processor = PoseProcessor(PoseFormatEnum.MOCAP)
 # Convert mocap json string Positions to Sequence Object
-seq1 = mocap_opmpi_mapper.map(mocap_seq1, 'squat_1')
-seq2 = mocap_opmpi_mapper.map(mocap_seq2, 'squat_2')
+seq1 = mocap_opmpi_processor.map(mocap_seq1, 'squat_1')
+seq2 = mocap_opmpi_processor.map(mocap_seq2, 'squat_2')
 
 # Calculate Hausdorff distance between two sequences' principal component graphs
 seq1_pc = seq1.get_pcs()

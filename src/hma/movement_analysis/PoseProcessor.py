@@ -4,7 +4,7 @@ import json
 import numpy as np
 
 
-class PoseMapper:
+class PoseProcessor:
     # TODO: Remove?
     OPENPOSE_MPI_BODY_PARTS = {"Head": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
                                "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
@@ -27,16 +27,16 @@ class PoseMapper:
                           ["LKnee", "LAnkle"]]
 
     def __init__(self, poseformat: PoseFormatEnum):
-        """ PoseMapper Constructor
+        """ PoseProcessor Constructor
         Parameters
         ----------
         poseformat : PoseFormatEnum
-            A PoseFormat Enumeration member defining input format of the PoseMapper instance.
+            A PoseFormat Enumeration member defining input format of the PoseProcessor instance.
 
         Returns
         ----------
-        PoseMapper
-            A PoseMapper instance.
+        PoseProcessor
+            A PoseProcessor instance.
         """
         if(not isinstance(poseformat, PoseFormatEnum)):
             raise ValueError(
@@ -48,9 +48,9 @@ class PoseMapper:
         """
         with open(path, 'r') as myfile:
             seq = myfile.read()
-        return self.map(seq, name)
+        return self.process(seq, name)
 
-    def map(self, input: str, name: str = 'Some Sequence') -> Sequence:
+    def process(self, input: str, name: str = 'Some Sequence') -> Sequence:
         """
         Parameters
         ----------
@@ -62,9 +62,9 @@ class PoseMapper:
            The Sequence Object instance representing the motion sequence of the input string.
         """
         if (self.poseformat == PoseFormatEnum.MOCAP):
-            return self.map_sequence_mocap(input, name=name)
+            return self.process_sequence_mocap(input, name=name)
 
-    def map_sequence_mocap(self, input: str, name='sequence') -> Sequence:
+    def process_sequence_mocap(self, input: str, name='sequence') -> Sequence:
         """
         Parameters
         ----------
