@@ -80,12 +80,11 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     vy = norm(np.array([0, 1, 0]))
     vz = norm(np.array([0, 0, 1]))
 
-    # TODO: Ensure correct directions of perpendicular vectors: Z-Axis to front or back? Y-Axis up or down?
     # Positions of given orientation joints in GCS
     origin = seq.positions[frame][origin_bp_idx]
     x_direction_bp_gpos = seq.positions[frame][x_direction_bp_idx]
     y_direction_bp_gpos = seq.positions[frame][y_direction_bp_idx]
-    # Y-direction should point upwards. So turn y_direction if it lies under origin
+
     # New X-Axis from origin to x_direction
     vx_new = x_direction_bp_gpos - origin
     if vx_new[0] < 0:
@@ -102,6 +101,7 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
 
     # New Y-Axis is perpendicular to new X-Axis and Z-Axis
     vy_new = get_perpendicular_vector(vx_new, vz_new)
+    # Y-direction should point upwards. So turn y_direction if it lies under origin
     # Ensure that vy points up
     if vy_new[1] < 0:
         vy_new = -vy_new
@@ -138,10 +138,8 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     # Actually transform all keypoints of the given frame
     transformed_positions = []
     for pos in seq.positions[frame]:
-        # TODO: Construct one Transformation Matrix M from T-Ry-Rx
-        pos = np.matmul(T, np.append(pos, 1))[:3]
-        pos = np.matmul(Ry, np.append(pos, 1))[:3]
-        pos = np.matmul(Rx, np.append(pos, 1))[:3]
+        M = np.matmul(T, Rx, Ry)
+        pos = np.matmul(M, np.append(pos, 1))[:3]
         transformed_positions.append(pos)
 
     ################### PLOTTING #####################
