@@ -202,7 +202,7 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
             print("\n##### SHOULDER LEFT ANGLES #####")
             print(f"[{frame}] flexion_extension angle: {flexion_extension}")
             print(f"[{frame}] abduction_adduction angle: {abduction_adduction}")
-        plotting.plot_ball_joint_angle(left_shoulder_aligned_positions, shoulder_left_idx, elbow_left_idx)
+        # plotting.plot_ball_joint_angle(left_shoulder_aligned_positions, shoulder_left_idx, elbow_left_idx)
 
     return {
         "flexion_extension": flexion_extension_arr,
