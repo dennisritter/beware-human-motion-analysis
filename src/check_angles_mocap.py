@@ -12,6 +12,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+# TODO: This function needs a review, whether the processing is correct.
+# => Always altering abduction/adduction angles might be incorrect because in case of a flexion->abduction rotation order,
+#    the abduction represents the horizontal abduction, which is actually limited to [-90, 90°]. In this case, adding 90° would be wrong.
+#    Possible solution: Add 90° only if the prioritised angle is an abduction/adduction.
 def process_ball_joint_angles(
         angle_flex_ex: float,
         angle_abd_add: float,
@@ -23,10 +27,10 @@ def process_ball_joint_angles(
     # Check if angle-vector.y is higher than origin and adjust abduction/adduction angles if conditions are met
     # If flexion angle is >90.0, angle-vector.y is higher than origin because flexion angle represents a rotation about the X-Axis
     if angle_flex_ex > 90.0:
-        # If motion is considered as Abduction, add 90 degrees to the current angle to meet the expected abduction range [0,180] and not only [0,90]
+        # If motion is considered an Abduction, add 90 degrees to the current angle to meet the expected abduction range [0,180] and not only [0,90]
         if angle_abd_add > abd_add_motion_thresh:
             angle_abd_add += 90
-        # If motion is considered as Adduction, sub 90 degrees to the current angle to meet the expected abduction range [0,-180] and not only [0,-90]
+        # If motion is considered an Adduction, sub 90 degrees to the current angle to meet the expected abduction range [0,-180] and not only [0,-90]
         if angle_abd_add < -abd_add_motion_thresh:
             angle_abd_add -= 90
 
