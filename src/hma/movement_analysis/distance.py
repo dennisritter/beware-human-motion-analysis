@@ -1,9 +1,13 @@
-from scipy.spatial.distance import directed_hausdorff
+from scipy.spatial import distance
 import fastdtw
 
 
 def hausdorff(u, v):
-    return directed_hausdorff(u, v)
+    return distance.directed_hausdorff(u, v)
+
+
+def euclidean(u, v):
+    return distance.euclidean(u, v)
 
 
 def dtw(u, v):

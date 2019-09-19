@@ -17,27 +17,27 @@ def get_minmax_angles_mocap(seq):
     bp = seq.body_parts
 
     minmax_angles = []
-    minmax_angles.append((np.min(seq.joint_angles[bp["LeftShoulder"]]["flexion_extension"]), np.max(seq.joint_angles[bp["LeftShoulder"]]["flexion_extension"])))
-    minmax_angles.append((np.min(seq.joint_angles[bp["LeftShoulder"]]["abduction_adduction"]), np.max(seq.joint_angles[bp["LeftShoulder"]]["abduction_adduction"])))
-    minmax_angles.append((np.min(seq.joint_angles[bp["RightShoulder"]]["flexion_extension"]), np.max(seq.joint_angles[bp["RightShoulder"]]["flexion_extension"])))
-    minmax_angles.append((np.min(seq.joint_angles[bp["RightShoulder"]]["abduction_adduction"]), np.max(seq.joint_angles[bp["RightShoulder"]]["abduction_adduction"])))
-    minmax_angles.append((np.min(seq.joint_angles[bp["LeftHip"]]["flexion_extension"]), np.max(seq.joint_angles[bp["LeftHip"]]["flexion_extension"])))
-    minmax_angles.append((np.min(seq.joint_angles[bp["LeftHip"]]["abduction_adduction"]), np.max(seq.joint_angles[bp["LeftHip"]]["abduction_adduction"])))
-    minmax_angles.append((np.min(seq.joint_angles[bp["RightHip"]]["flexion_extension"]), np.max(seq.joint_angles[bp["RightHip"]]["flexion_extension"])))
-    minmax_angles.append((np.min(seq.joint_angles[bp["RightHip"]]["abduction_adduction"]), np.max(seq.joint_angles[bp["RightHip"]]["abduction_adduction"])))
-    minmax_angles.append((np.min(seq.joint_angles[bp["LeftElbow"]]["flexion_extension"]), np.max(seq.joint_angles[bp["LeftElbow"]]["flexion_extension"])))
-    minmax_angles.append((np.min(seq.joint_angles[bp["RightElbow"]]["flexion_extension"]), np.max(seq.joint_angles[bp["RightElbow"]]["flexion_extension"])))
-    minmax_angles.append((np.min(seq.joint_angles[bp["LeftKnee"]]["flexion_extension"]), np.max(seq.joint_angles[bp["LeftKnee"]]["flexion_extension"])))
-    minmax_angles.append((np.min(seq.joint_angles[bp["RightKnee"]]["flexion_extension"]), np.max(seq.joint_angles[bp["RightKnee"]]["flexion_extension"])))
+    minmax_angles.append([np.min(seq.joint_angles[bp["LeftShoulder"]]["flexion_extension"]), np.max(seq.joint_angles[bp["LeftShoulder"]]["flexion_extension"])])
+    minmax_angles.append([np.min(seq.joint_angles[bp["LeftShoulder"]]["abduction_adduction"]), np.max(seq.joint_angles[bp["LeftShoulder"]]["abduction_adduction"])])
+    minmax_angles.append([np.min(seq.joint_angles[bp["RightShoulder"]]["flexion_extension"]), np.max(seq.joint_angles[bp["RightShoulder"]]["flexion_extension"])])
+    minmax_angles.append([np.min(seq.joint_angles[bp["RightShoulder"]]["abduction_adduction"]), np.max(seq.joint_angles[bp["RightShoulder"]]["abduction_adduction"])])
+    minmax_angles.append([np.min(seq.joint_angles[bp["LeftHip"]]["flexion_extension"]), np.max(seq.joint_angles[bp["LeftHip"]]["flexion_extension"])])
+    minmax_angles.append([np.min(seq.joint_angles[bp["LeftHip"]]["abduction_adduction"]), np.max(seq.joint_angles[bp["LeftHip"]]["abduction_adduction"])])
+    minmax_angles.append([np.min(seq.joint_angles[bp["RightHip"]]["flexion_extension"]), np.max(seq.joint_angles[bp["RightHip"]]["flexion_extension"])])
+    minmax_angles.append([np.min(seq.joint_angles[bp["RightHip"]]["abduction_adduction"]), np.max(seq.joint_angles[bp["RightHip"]]["abduction_adduction"])])
+    minmax_angles.append([np.min(seq.joint_angles[bp["LeftElbow"]]["flexion_extension"]), np.max(seq.joint_angles[bp["LeftElbow"]]["flexion_extension"])])
+    minmax_angles.append([np.min(seq.joint_angles[bp["RightElbow"]]["flexion_extension"]), np.max(seq.joint_angles[bp["RightElbow"]]["flexion_extension"])])
+    minmax_angles.append([np.min(seq.joint_angles[bp["LeftKnee"]]["flexion_extension"]), np.max(seq.joint_angles[bp["LeftKnee"]]["flexion_extension"])])
+    minmax_angles.append([np.min(seq.joint_angles[bp["RightKnee"]]["flexion_extension"]), np.max(seq.joint_angles[bp["RightKnee"]]["flexion_extension"])])
     return np.array(minmax_angles)
 
 
 # Calculates dtw_distance of sequences in seqs_angles compared to ground_truth_angles
 # Returns a list of floats
-def get_distances_dtw(ground_truth_angles, seqs_angles):
+def get_distances_minmax(ground_truth_angles, seqs_angles):
     distances = []
     for seq_angles in seqs_angles:
-        distances.append(ts.dtw_path(ground_truth_angles, seq_angles)[1])
+        distances.append(distance.hausdorff(ground_truth_angles, seq_angles)[0])
     return distances
 
 
@@ -52,16 +52,5 @@ seq_3_angles = get_minmax_angles_mocap(mocap_poseprocessor.load('data/sequences/
 seq_4_angles = get_minmax_angles_mocap(mocap_poseprocessor.load('data/sequences/squat_false/complete-session.json', 'False Squat'))
 seq_5_angles = get_minmax_angles_mocap(mocap_poseprocessor.load('data/sequences/no_squat/complete-session.json', 'No Squat'))
 
-# Compare sequences to ground truth sequence (squat)
-# dtw_result = get_distances_dtw(seq_gt_angles, [seq_1_angles, seq_2_angles, seq_3_angles, seq_4_angles, seq_5_angles])
-print(seq_gt_angles)
-print("############")
-print(seq_1_angles)
-print("############")
-print(seq_2_angles)
-print("############")
-print(seq_3_angles)
-print("############")
-print(seq_4_angles)
-print("############")
-print(seq_5_angles)
+minmax_result = get_distances_minmax(seq_gt_angles, [seq_1_angles, seq_2_angles, seq_3_angles, seq_4_angles, seq_5_angles])
+print(minmax_result)
