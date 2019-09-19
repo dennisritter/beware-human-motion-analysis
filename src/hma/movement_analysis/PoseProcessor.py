@@ -109,4 +109,5 @@ class PoseProcessor:
                   1] -= np.mean(positions[:, :, 1])
         positions[:, :,
                   2] -= np.mean(positions[:, :, 2])
+
         return Sequence(body_parts, positions, timestamps, self.poseformat, name=name)
