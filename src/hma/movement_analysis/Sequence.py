@@ -1,6 +1,7 @@
-from .PoseFormatEnum import PoseFormatEnum
 import numpy as np
 from sklearn.decomposition import PCA
+from .PoseFormatEnum import PoseFormatEnum
+from . import angle_calculations as acm
 
 
 class Sequence:
@@ -21,6 +22,13 @@ class Sequence:
         #          ]
         # shape: (num_body_parts, num_keypoints, xyz)
         self.positions = np.array(positions)
+
+        # Stores joint angles for each frame
+        # NOTE: Body part indices are the indices stored in self.body_parts.
+        # NOTE: If angles have been computed, the stored value is a dictionary with at least one key "flexion_extension"
+        #       and a "abduction_adduction" key for ball joints.
+        # NOTE: If no angles have been computed for a particular joint, the stored value is None.
+        self.joint_angles = self._calc_joint_angles()
         # Timestamps for when the positions have been tracked
         # Example: [<someTimestamp1>, <someTimestamp2>, <someTimestamp3>, ...]
         self.timestamps = np.array(timestamps)
@@ -30,6 +38,20 @@ class Sequence:
         self.body_pairs = body_pairs
         """
         self.positions_2d = self.get_positions_2d()
+
+    def _calc_joint_angles(self):
+        joint_angles = [None] * len(self.body_parts)
+
+        bp = self.body_parts
+        joint_angles[bp["LeftShoulder"]] = acm.calc_angles_shoulder_left(self.positions, bp["LeftShoulder"], bp["RightShoulder"], bp["Torso"], bp["LeftElbow"])
+        joint_angles[bp["RightShoulder"]] = acm.calc_angles_shoulder_right(self.positions, bp["RightShoulder"], bp["LeftShoulder"], bp["Torso"], bp["RightElbow"])
+        joint_angles[bp["LeftHip"]] = acm.calc_angles_hip_left(self.positions, bp["LeftHip"], bp["RightHip"], bp["Torso"], bp["LeftKnee"])
+        joint_angles[bp["RightHip"]] = acm.calc_angles_hip_right(self.positions, bp["RightHip"], bp["LeftHip"], bp["Torso"], bp["RightKnee"])
+        joint_angles[bp["LeftElbow"]] = acm.calc_angles_elbow(self.positions, bp["LeftElbow"], bp["LeftShoulder"], bp["LeftWrist"])
+        joint_angles[bp["RightElbow"]] = acm.calc_angles_elbow(self.positions, bp["RightElbow"], bp["RightShoulder"], bp["RightWrist"])
+        joint_angles[bp["LeftKnee"]] = acm.calc_angles_knee(self.positions, bp["LeftKnee"], bp["LeftHip"], bp["LeftAnkle"])
+        joint_angles[bp["RightKnee"]] = acm.calc_angles_knee(self.positions, bp["RightKnee"], bp["RightHip"], bp["RightAnkle"])
+        return joint_angles
 
     def get_positions_2d(self):
         """

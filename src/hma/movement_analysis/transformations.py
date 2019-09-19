@@ -1,4 +1,3 @@
-from .Sequence import Sequence
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
@@ -58,7 +57,7 @@ def translation_matrix_4x4(v):
     return T
 
 
-def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_direction_bp_idx: int, seq: Sequence, frame: int):
+def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_direction_bp_idx: int, positions: list, frame: int):
     """
     Aligns the coordinate system to the given origin point.
     The X-Axis will be in direction of x_direction-origin.
@@ -81,9 +80,9 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     vz = norm(np.array([0, 0, 1]))
 
     # Positions of given orientation joints in GCS
-    origin = seq.positions[frame][origin_bp_idx]
-    x_direction_bp_gpos = seq.positions[frame][x_direction_bp_idx]
-    y_direction_bp_gpos = seq.positions[frame][y_direction_bp_idx]
+    origin = positions[frame][origin_bp_idx]
+    x_direction_bp_gpos = positions[frame][x_direction_bp_idx]
+    y_direction_bp_gpos = positions[frame][y_direction_bp_idx]
 
     # New X-Axis from origin to x_direction
     vx_new = x_direction_bp_gpos - origin
@@ -137,7 +136,7 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
 
     # Actually transform all keypoints of the given frame
     transformed_positions = []
-    for pos in seq.positions[frame]:
+    for pos in positions[frame]:
         M = np.matmul(T, Rx, Ry)
         pos = np.matmul(M, np.append(pos, 1))[:3]
         transformed_positions.append(pos)
@@ -152,10 +151,10 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     # for i, p in enumerate(transformed_positions):
     #     ax.scatter(p[0], p[1], p[2], c="blue")
     # # ax.plot([zero_position[0], -0.1], [zero_position[1], 0.05], [zero_position[2], -0.1], color="pink", linewidth=1)
-    # # for j in range(len(seq.positions[frame])):
-    # #     ax.scatter(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], c="red", alpha=0.5)
-    # #     ax.text(seq.positions[frame][j][0], seq.positions[frame][j][1], seq.positions[frame][j][2], j)
-    # # ax.annotate(f"{j}", (seq.positions[frame][j][0], seq.positions[frame][j][1]))
+    # # for j in range(len(positions[frame])):
+    # #     ax.scatter(positions[frame][j][0], positions[frame][j][1], positions[frame][j][2], c="red", alpha=0.5)
+    # #     ax.text(positions[frame][j][0], positions[frame][j][1], positions[frame][j][2], j)
+    # # ax.annotate(f"{j}", (positions[frame][j][0], positions[frame][j][1]))
     # ax.plot([zero_position[0], vx[0]/2], [zero_position[1], vx[1]], [zero_position[2], vx[2]], color="pink", linewidth=1)
     # ax.plot([zero_position[0], vy[0]], [zero_position[1], vy[1]/2], [zero_position[2], vy[2]], color="maroon", linewidth=1)
     # ax.plot([zero_position[0], vz[0]], [zero_position[1], vz[1]], [zero_position[2], vz[2]/2], color="red", linewidth=1)

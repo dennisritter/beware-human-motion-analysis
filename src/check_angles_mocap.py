@@ -4,7 +4,7 @@ from hma.movement_analysis.AngleTargetStates import AngleTargetStates
 from hma.movement_analysis.Sequence import Sequence
 from hma.movement_analysis.PoseProcessor import PoseProcessor
 from hma.movement_analysis import exercise_loader
-from hma.movement_analysis import angle_calculations_medical as acm
+from hma.movement_analysis import angle_calculations as acm
 from hma.movement_analysis import transformations
 from hma.movement_analysis import logging
 import math

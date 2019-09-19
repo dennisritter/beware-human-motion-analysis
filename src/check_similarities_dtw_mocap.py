@@ -6,7 +6,7 @@ import numpy as np
 from hma.movement_analysis.Sequence import Sequence
 from hma.movement_analysis.PoseProcessor import PoseProcessor
 from hma.movement_analysis.PoseFormatEnum import PoseFormatEnum
-from hma.movement_analysis import angle_calculations_medical as acm
+from hma.movement_analysis import angle_calculations as acm
 from hma.movement_analysis import logging
 from hma.movement_analysis import distance
 import tslearn.metrics as ts
@@ -15,29 +15,21 @@ import tslearn.metrics as ts
 # Calculating joint angles for a MOCAP sequence and returning a 2D-list containing all angles for each frame in consecutive order
 def get_dtw_angles_mocap(seq):
     bp = seq.body_parts
-    left_shoulder_angles = acm.calc_angles_shoulder_left(seq, bp["LeftShoulder"], bp["RightShoulder"], bp["Torso"], bp["LeftElbow"])
-    right_shoulder_angles = acm.calc_angles_shoulder_right(seq, bp["RightShoulder"], bp["LeftShoulder"], bp["Torso"], bp["RightElbow"])
-    left_hip_angles = acm.calc_angles_hip_left(seq, bp["LeftHip"], bp["RightHip"], bp["Torso"], bp["LeftKnee"])
-    right_hip_angles = acm.calc_angles_hip_right(seq, bp["RightHip"], bp["LeftHip"], bp["Torso"], bp["RightKnee"])
-    left_elbow_angles = acm.calc_angles_elbow(seq, bp["LeftElbow"], bp["LeftShoulder"], bp["LeftWrist"])
-    right_elbow_angles = acm.calc_angles_elbow(seq, bp["RightElbow"], bp["RightShoulder"], bp["RightWrist"])
-    left_knee_angles = acm.calc_angles_knee(seq, bp["LeftKnee"], bp["LeftHip"], bp["LeftAnkle"])
-    right_knee_angles = acm.calc_angles_knee(seq, bp["RightKnee"], bp["RightHip"], bp["RightAnkle"])
-
     dtw_angles = []
     for frame in range(0, len(seq.positions)):
         seq_frame_angles = []
-        seq_frame_angles.append(left_shoulder_angles["flexion_extension"][frame])
-        seq_frame_angles.append(left_shoulder_angles["abduction_adduction"][frame])
-        seq_frame_angles.append(right_shoulder_angles["flexion_extension"][frame])
-        seq_frame_angles.append(right_shoulder_angles["abduction_adduction"][frame])
-        seq_frame_angles.append(left_hip_angles["flexion_extension"][frame])
-        seq_frame_angles.append(left_hip_angles["abduction_adduction"][frame])
-        seq_frame_angles.append(right_hip_angles["flexion_extension"][frame])
-        seq_frame_angles.append(right_elbow_angles["flexion_extension"][frame])
-        seq_frame_angles.append(left_elbow_angles["flexion_extension"][frame])
-        seq_frame_angles.append(right_knee_angles["flexion_extension"][frame])
-        seq_frame_angles.append(left_knee_angles["flexion_extension"][frame])
+        seq_frame_angles.append(seq.joint_angles[bp["LeftShoulder"]]["flexion_extension"][frame])
+        seq_frame_angles.append(seq.joint_angles[bp["LeftShoulder"]]["abduction_adduction"][frame])
+        seq_frame_angles.append(seq.joint_angles[bp["RightShoulder"]]["flexion_extension"][frame])
+        seq_frame_angles.append(seq.joint_angles[bp["RightShoulder"]]["abduction_adduction"][frame])
+        seq_frame_angles.append(seq.joint_angles[bp["LeftHip"]]["flexion_extension"][frame])
+        seq_frame_angles.append(seq.joint_angles[bp["LeftHip"]]["abduction_adduction"][frame])
+        seq_frame_angles.append(seq.joint_angles[bp["RightHip"]]["flexion_extension"][frame])
+        seq_frame_angles.append(seq.joint_angles[bp["RightHip"]]["abduction_adduction"][frame])
+        seq_frame_angles.append(seq.joint_angles[bp["LeftElbow"]]["flexion_extension"][frame])
+        seq_frame_angles.append(seq.joint_angles[bp["RightElbow"]]["flexion_extension"][frame])
+        seq_frame_angles.append(seq.joint_angles[bp["LeftKnee"]]["flexion_extension"][frame])
+        seq_frame_angles.append(seq.joint_angles[bp["RightKnee"]]["flexion_extension"][frame])
         dtw_angles.append(seq_frame_angles)
     return np.array(dtw_angles)
 

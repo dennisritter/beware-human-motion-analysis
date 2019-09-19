@@ -1,4 +1,3 @@
-from .Sequence import Sequence
 from . import transformations
 from . import plotting
 from mpl_toolkits.mplot3d import Axes3D
@@ -28,19 +27,17 @@ def calc_angle(angle_vertex: list, ray_vertex_a: list, ray_vertex_b: list) -> fl
     return np.degrees(np.arccos(cos_angle))
 
 
-def calc_angles_hip_left(seq: Sequence, hip_left_idx: int, hip_right_idx: int, torso_idx: int, knee_left_idx: int, log: bool = False) -> dict:
+def calc_angles_hip_left(positions: list, hip_left_idx: int, hip_right_idx: int, torso_idx: int, knee_left_idx: int, log: bool = False) -> dict:
     """ Calculates Right Hip angles
     Parameters
     ----------
-    seq : Sequence
-        A Motion Sequence
     """
     flexion_extension_arr = []
     abduction_adduction_arr = []
 
-    for frame in range(0, len(seq.positions)):
+    for frame in range(0, len(positions)):
         # Move coordinate system to left Hip
-        left_hip_aligned_positions = transformations.align_coordinates_to(hip_left_idx, hip_right_idx, torso_idx, seq, frame=frame)
+        left_hip_aligned_positions = transformations.align_coordinates_to(hip_left_idx, hip_right_idx, torso_idx, positions, frame=frame)
         kx = left_hip_aligned_positions[knee_left_idx][0]
         ky = left_hip_aligned_positions[knee_left_idx][1]
         kz = left_hip_aligned_positions[knee_left_idx][2]
@@ -81,19 +78,17 @@ def calc_angles_hip_left(seq: Sequence, hip_left_idx: int, hip_right_idx: int, t
     }
 
 
-def calc_angles_hip_right(seq: Sequence, hip_right_idx: int, hip_left_idx: int, torso_idx: int, knee_right_idx: int, log: bool = False) -> dict:
+def calc_angles_hip_right(positions: list, hip_right_idx: int, hip_left_idx: int, torso_idx: int, knee_right_idx: int, log: bool = False) -> dict:
     """ Calculates Right Hip angles
     Parameters
     ----------
-    seq : Sequence
-        A Motion Sequence
     """
     flexion_extension_arr = []
     abduction_adduction_arr = []
 
-    for frame in range(0, len(seq.positions)):
+    for frame in range(0, len(positions)):
         # Move coordinate system to right Hip
-        right_hip_aligned_positions = transformations.align_coordinates_to(hip_right_idx, hip_left_idx, torso_idx, seq, frame=frame)
+        right_hip_aligned_positions = transformations.align_coordinates_to(hip_right_idx, hip_left_idx, torso_idx, positions, frame=frame)
 
         kx = right_hip_aligned_positions[knee_right_idx][0]
         ky = right_hip_aligned_positions[knee_right_idx][1]
@@ -135,16 +130,14 @@ def calc_angles_hip_right(seq: Sequence, hip_right_idx: int, hip_left_idx: int, 
     }
 
 
-def calc_angles_knee(seq: Sequence, knee_idx: int, hip_idx: int, ankle_idx: int) -> dict:
+def calc_angles_knee(positions: list, knee_idx: int, hip_idx: int, ankle_idx: int) -> dict:
     """ Calculates the Knees flexion/extension angles for each frame of the Sequence.
     Parameters
     ----------
-    seq : Sequence
-        A Motion Sequence
     """
-    knee = seq.positions[:, knee_idx, :]
-    hip = seq.positions[:, hip_idx, :]
-    ankle = seq.positions[:, ankle_idx, :]
+    knee = positions[:, knee_idx, :]
+    hip = positions[:, hip_idx, :]
+    ankle = positions[:, ankle_idx, :]
     angles = []
     for i in range(len(knee)):
         # Substract angle from 180 because 'Normal Standing' is defined as 0°
@@ -155,20 +148,18 @@ def calc_angles_knee(seq: Sequence, knee_idx: int, hip_idx: int, ankle_idx: int)
     }
 
 
-def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_right_idx: int, torso_idx: int, elbow_left_idx: int, log: bool = False) -> dict:
+def calc_angles_shoulder_left(positions: list, shoulder_left_idx: int, shoulder_right_idx: int, torso_idx: int, elbow_left_idx: int, log: bool = False) -> dict:
     """ Calculates Left Shoulder angles
     Parameters
     ----------
-    seq : Sequence
-        A Motion Sequence
     """
     flexion_extension_arr = []
     abduction_adduction_arr = []
 
-    for frame in range(0, len(seq.positions)):
+    for frame in range(0, len(positions)):
 
         # Move coordinate system to left Shoulder
-        left_shoulder_aligned_positions = transformations.align_coordinates_to(shoulder_left_idx, shoulder_right_idx, torso_idx, seq, frame=frame)
+        left_shoulder_aligned_positions = transformations.align_coordinates_to(shoulder_left_idx, shoulder_right_idx, torso_idx, positions, frame=frame)
 
         ex = left_shoulder_aligned_positions[elbow_left_idx][0]
         ey = left_shoulder_aligned_positions[elbow_left_idx][1]
@@ -210,19 +201,17 @@ def calc_angles_shoulder_left(seq: Sequence, shoulder_left_idx: int, shoulder_ri
     }
 
 
-def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_left_idx: int, torso_idx: int, elbow_right_idx: int, log: bool = False) -> dict:
+def calc_angles_shoulder_right(positions: list, shoulder_right_idx: int, shoulder_left_idx: int, torso_idx: int, elbow_right_idx: int, log: bool = False) -> dict:
     """ Calculates Right Shoulder angles 
     Parameters
     ----------
-    seq : Sequence
-        A Motion Sequence
     """
     flexion_extension_arr = []
     abduction_adduction_arr = []
 
-    for frame in range(0, len(seq.positions)):
+    for frame in range(0, len(positions)):
         # Move coordinate system to right shoulder
-        right_shoulder_aligned_positions = transformations.align_coordinates_to(shoulder_right_idx, shoulder_left_idx, torso_idx, seq, frame=frame)
+        right_shoulder_aligned_positions = transformations.align_coordinates_to(shoulder_right_idx, shoulder_left_idx, torso_idx, positions, frame=frame)
 
         ex = right_shoulder_aligned_positions[elbow_right_idx][0]
         ey = right_shoulder_aligned_positions[elbow_right_idx][1]
@@ -265,16 +254,14 @@ def calc_angles_shoulder_right(seq: Sequence, shoulder_right_idx: int, shoulder_
     }
 
 
-def calc_angles_elbow(seq: Sequence, elbow_idx: int, shoulder_idx: int, wrist_idx: int) -> dict:
+def calc_angles_elbow(positions: list, elbow_idx: int, shoulder_idx: int, wrist_idx: int) -> dict:
     """ Calculates the Elbows flexion/extension angles for each frame of the Sequence.
     Parameters
     ----------
-    seq : Sequence
-        A Motion Sequence
     """
-    elbow = seq.positions[:, elbow_idx, :]
-    wrist = seq.positions[:, wrist_idx, :]
-    shoulder = seq.positions[:, shoulder_idx, :]
+    elbow = positions[:, elbow_idx, :]
+    wrist = positions[:, wrist_idx, :]
+    shoulder = positions[:, shoulder_idx, :]
     angles = []
     for i in range(len(elbow)):
         # Substract angle from 180 because 'Normal Standing' (straight arm) is defined as 0°
