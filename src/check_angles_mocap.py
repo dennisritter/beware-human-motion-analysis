@@ -10,6 +10,7 @@ from hma.movement_analysis import logging
 import math
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.signal import argrelextrema
 
 
 # TODO: This function needs a review, whether the processing is correct.
@@ -42,14 +43,118 @@ def process_ball_joint_angles(
 
     return angle_flex_ex, angle_abd_add
 
+def get_prio_angles():
+    HIGH_PRIO = 1.0
+    prio_angles = []
+    # prio_angles -> [([START.min, START.max], [END.min, END.max], [frame0, frame1, frame2, ...]), (...), ...]
+    if ex.angles[AngleTargetStates.START.value]["shoulder_left"]["flexion_extension"]["priority"] == HIGH_PRIO:
+        prio_angles.append((
+            ex.angles[AngleTargetStates.START.value]["shoulder_left"]["flexion_extension"]["angle"], 
+            ex.angles[AngleTargetStates.END.value]["shoulder_left"]["flexion_extension"]["angle"], 
+            seq.joint_angles[bp["LeftShoulder"]]["flexion_extension"]
+            ))
+    if ex.angles[AngleTargetStates.START.value]["shoulder_left"]["abduction_adduction"]["priority"] == HIGH_PRIO:
+        prio_angles.append((
+            ex.angles[AngleTargetStates.START.value]["shoulder_left"]["abduction_adduction"]["angle"], 
+            ex.angles[AngleTargetStates.END.value]["shoulder_left"]["abduction_adduction"]["angle"], 
+            seq.joint_angles[bp["LeftShoulder"]]["abduction_adduction"]
+            ))
+    if ex.angles[AngleTargetStates.START.value]["shoulder_right"]["flexion_extension"]["priority"] == HIGH_PRIO:
+        prio_angles.append((
+            ex.angles[AngleTargetStates.START.value]["shoulder_right"]["flexion_extension"]["angle"], 
+            ex.angles[AngleTargetStates.END.value]["shoulder_right"]["flexion_extension"]["angle"], 
+            seq.joint_angles[bp["RightShoulder"]]["flexion_extension"]
+            ))
+    if ex.angles[AngleTargetStates.START.value]["shoulder_right"]["abduction_adduction"]["priority"] == HIGH_PRIO:
+        prio_angles.append((
+            ex.angles[AngleTargetStates.START.value]["shoulder_right"]["abduction_adduction"]["angle"], 
+            ex.angles[AngleTargetStates.END.value]["shoulder_right"]["abduction_adduction"]["angle"], 
+            seq.joint_angles[bp["RightShoulder"]]["abduction_adduction"]
+            ))
+
+    if ex.angles[AngleTargetStates.START.value]["hip_left"]["flexion_extension"]["priority"] == HIGH_PRIO:
+        prio_angles.append((
+            ex.angles[AngleTargetStates.START.value]["hip_left"]["flexion_extension"]["angle"], 
+            ex.angles[AngleTargetStates.END.value]["hip_left"]["flexion_extension"]["angle"], 
+            seq.joint_angles[bp["LeftHip"]]["flexion_extension"]
+            ))
+    if ex.angles[AngleTargetStates.START.value]["hip_left"]["abduction_adduction"]["priority"] == HIGH_PRIO:
+        prio_angles.append((
+            ex.angles[AngleTargetStates.START.value]["hip_left"]["abduction_adduction"]["angle"], 
+            ex.angles[AngleTargetStates.END.value]["hip_left"]["abduction_adduction"]["angle"], 
+            seq.joint_angles[bp["LeftHip"]]["abduction_adduction"]
+            ))
+    if ex.angles[AngleTargetStates.START.value]["hip_right"]["flexion_extension"]["priority"] == HIGH_PRIO:
+        prio_angles.append((
+            ex.angles[AngleTargetStates.START.value]["hip_right"]["flexion_extension"]["angle"], 
+            ex.angles[AngleTargetStates.END.value]["hip_right"]["flexion_extension"]["angle"], 
+            seq.joint_angles[bp["RightHip"]]["flexion_extension"]
+            ))
+    if ex.angles[AngleTargetStates.START.value]["hip_right"]["abduction_adduction"]["priority"] == HIGH_PRIO:
+        prio_angles.append((
+            ex.angles[AngleTargetStates.START.value]["hip_right"]["fleabduction_adductionxion_extension"]["angle"], 
+            ex.angles[AngleTargetStates.END.value]["hip_right"]["abduction_adduction"]["angle"], 
+            seq.joint_angles[bp["RightHip"]]["abduction_adduction"]
+            ))
+
+    if ex.angles[AngleTargetStates.START.value]["elbow_left"]["flexion_extension"]["priority"] == HIGH_PRIO:
+        prio_angles.append((
+            ex.angles[AngleTargetStates.START.value]["elbow_left"]["flexion_extension"]["angle"], 
+            ex.angles[AngleTargetStates.END.value]["elbow_left"]["flexion_extension"]["angle"], 
+            seq.joint_angles[bp["LeftElbow"]]["flexion_extension"]
+            ))
+    if ex.angles[AngleTargetStates.START.value]["elbow_right"]["flexion_extension"]["priority"] == HIGH_PRIO:
+        prio_angles.append((
+            ex.angles[AngleTargetStates.START.value]["elbow_right"]["flexion_extension"]["angle"], 
+            ex.angles[AngleTargetStates.END.value]["elbow_right"]["flexion_extension"]["angle"], 
+            seq.joint_angles[bp["RightElbow"]]["flexion_extension"]
+            ))
+    if ex.angles[AngleTargetStates.START.value]["knee_left"]["flexion_extension"]["priority"] == HIGH_PRIO:
+        prio_angles.append((
+            ex.angles[AngleTargetStates.START.value]["knee_left"]["flexion_extension"]["angle"], 
+            ex.angles[AngleTargetStates.END.value]["knee_left"]["flexion_extension"]["angle"], 
+            seq.joint_angles[bp["LeftKnee"]]["flexion_extension"]
+            ))
+    if ex.angles[AngleTargetStates.START.value]["knee_right"]["flexion_extension"]["priority"] == HIGH_PRIO:
+        prio_angles.append((
+            ex.angles[AngleTargetStates.START.value]["knee_right"]["flexion_extension"]["angle"], 
+            ex.angles[AngleTargetStates.END.value]["knee_right"]["flexion_extension"]["angle"], 
+            seq.joint_angles[bp["RightKnee"]]["flexion_extension"]
+            ))
+    return prio_angles
 
 # Get Exercise Object from json file
 ex = exercise_loader.load('data/exercises/kniebeuge.json')
 # Get PoseProcessor instance for MOCAP sequences
 mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 # Convert mocap json string Positions to Sequence Object
-seq = mocap_poseprocessor.load('data/sequences/squat_3/complete-session.json', 'Squat')
+seq = mocap_poseprocessor.load('data/sequences/squat_3_multi/complete-session.json', 'Squat')
 bp = seq.body_parts
+current_target_state = AngleTargetStates.END
+
+
+target_state = current_target_state
+switch_to_start_frames = []
+switch_to_end_frames = []
+prio_angles = get_prio_angles()
+local_tp = []
+common_tp = []
+
+
+
+ls = prio_angles[0][2][:100]
+for i, a in enumerate(ls):
+    print(f"[{i}]: {a}")
+maxima = argrelextrema(np.array(ls), np.greater, order=5)
+minima = argrelextrema(np.array(ls), np.less, order=5)
+print(maxima)
+print(minima)
+
+
+
+
+
+
 
 # ANGLE ANALYSIS
 shoulder_left_results = []
