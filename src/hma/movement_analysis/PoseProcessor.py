@@ -103,11 +103,11 @@ class PoseProcessor:
         positions = np.reshape(positions, (np.shape(positions)[0], int(np.shape(positions)[1]/3), 3))
 
         # Center Positions by subtracting the mean of each coordinate
-        positions[:, :,
-                  0] -= np.mean(positions[:, :, 0])
-        positions[:, :,
-                  1] -= np.mean(positions[:, :, 1])
-        positions[:, :,
-                  2] -= np.mean(positions[:, :, 2])
+        # positions[:, :,
+        #           0] -= np.mean(positions[:, :, 0])
+        # positions[:, :,
+        #           1] -= np.mean(positions[:, :, 1])
+        # positions[:, :,
+        #           2] -= np.mean(positions[:, :, 2])
 
         return Sequence(body_parts, positions, timestamps, self.poseformat, name=name)

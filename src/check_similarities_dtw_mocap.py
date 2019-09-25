@@ -57,3 +57,4 @@ seq_5_angles = get_dtw_angles_mocap(mocap_poseprocessor.load('data/sequences/no_
 # Compare sequences to ground truth sequence (squat)
 dtw_result = get_distances_dtw(seq_gt_angles, [seq_1_angles, seq_2_angles, seq_3_angles, seq_4_angles, seq_5_angles])
 print(dtw_result)
+

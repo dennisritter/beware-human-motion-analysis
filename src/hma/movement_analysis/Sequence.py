@@ -28,7 +28,7 @@ class Sequence:
         # NOTE: If angles have been computed, the stored value is a dictionary with at least one key "flexion_extension"
         #       and a "abduction_adduction" key for ball joints.
         # NOTE: If no angles have been computed for a particular joint, the stored value is None.
-        self.joint_angles = self._calc_joint_angles()
+        # self.joint_angles = self._calc_joint_angles()
         # Timestamps for when the positions have been tracked
         # Example: [<someTimestamp1>, <someTimestamp2>, <someTimestamp3>, ...]
         self.timestamps = np.array(timestamps)
