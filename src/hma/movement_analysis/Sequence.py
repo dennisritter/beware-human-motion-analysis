@@ -46,6 +46,12 @@ class Sequence:
 
 
     def __getitem__(self, item):
+        """
+        Returns the sub-sequence item. You can either specifiy one element by index or use numpy-like slicing.
+
+        Raises NotImplementedError if index is given as tuple.
+        Raises TypeError if item is not of type int or slice.
+        """
         if isinstance(item, slice):
             start, stop, step = item.indices(len(self))
             # return Seq([self[i] for i in range(start, stop, step)])
@@ -67,7 +73,7 @@ class Sequence:
             else:
                 joint_angles.append(None)
 
-        return Sequence(self.body_parts, self.positions[item], self.timestamps[item], self.poseformat, self.name, joint_angles)
+        return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.poseformat, self.name, joint_angles)
 
     def _calc_joint_angles(self):
         joint_angles = [None] * len(self.body_parts)
