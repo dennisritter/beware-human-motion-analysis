@@ -6,8 +6,9 @@ from hma.movement_analysis import angle_calculations as acm
 
 class Sequence:
 
-    def __init__(self, body_parts: dict, positions: list, timestamps: list, poseformat: PoseFormatEnum, name: str = 'sequence'):
+    def __init__(self, body_parts: dict, positions: list, timestamps: list, poseformat: PoseFormatEnum, name: str = 'sequence', joint_angles: list=None):
         self.name = name
+        self.poseformat = PoseFormatEnum  #! deprecated?!
         # Number, order and label of tracked body parts
         # Example: { "Head": 0, "RightShoulder": 1, ... }
         self.body_parts = body_parts
@@ -28,7 +29,7 @@ class Sequence:
         # NOTE: If angles have been computed, the stored value is a dictionary with at least one key "flexion_extension"
         #       and a "abduction_adduction" key for ball joints.
         # NOTE: If no angles have been computed for a particular joint, the stored value is None.
-        self.joint_angles = self._calc_joint_angles()
+        self.joint_angles = self._calc_joint_angles() if joint_angles is None else joint_angles
         # Timestamps for when the positions have been tracked
         # Example: [<someTimestamp1>, <someTimestamp2>, <someTimestamp3>, ...]
         self.timestamps = np.array(timestamps)
@@ -38,6 +39,35 @@ class Sequence:
         self.body_pairs = body_pairs
         """
         self.positions_2d = self.get_positions_2d()
+
+
+    def __len__(self):
+        return len(self.timestamps)
+
+
+    def __getitem__(self, item):
+        if isinstance(item, slice):
+            start, stop, step = item.indices(len(self))
+            # return Seq([self[i] for i in range(start, stop, step)])
+        elif isinstance(item, int):
+            start, stop, step = item, item+1, 1
+        elif isinstance(item, tuple):
+            raise NotImplementedError("Tuple as index")
+        else:
+            raise TypeError(f"Invalid argument type: {type(item)}")
+        
+        joint_angles = []
+        for idx, bp in enumerate(self.joint_angles):
+            if bp is not None:
+                bp_dict = {}
+                for key in bp:
+                    bp_dict[key] = self.joint_angles[idx][key][start:stop:step]
+                    # print(self.joint_angles[idx][key][start:stop:step])
+                joint_angles.append(bp_dict)
+            else:
+                joint_angles.append(None)
+
+        return Sequence(self.body_parts, self.positions[item], self.timestamps[item], self.poseformat, self.name, joint_angles)
 
     def _calc_joint_angles(self):
         joint_angles = [None] * len(self.body_parts)
