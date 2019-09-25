@@ -1,5 +1,5 @@
-from . import transformations
-from . import plotting
+from hma.movement_analysis import transformations
+from hma.movement_analysis import plotting
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import math

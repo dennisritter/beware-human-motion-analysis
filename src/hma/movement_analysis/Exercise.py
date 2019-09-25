@@ -1,8 +1,8 @@
 import warnings
 import math
 
-from .AngleTargetStates import AngleTargetStates
-from .AngleAnalysisResultStates import AngleAnalysisResultStates
+from hma.movement_analysis.AngleTargetStates import AngleTargetStates
+from hma.movement_analysis.AngleAnalysisResultStates import AngleAnalysisResultStates
 
 class Exercise:
 

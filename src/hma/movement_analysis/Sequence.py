@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.decomposition import PCA
-from .PoseFormatEnum import PoseFormatEnum
-from . import angle_calculations as acm
+from hma.movement_analysis.PoseFormatEnum import PoseFormatEnum
+from hma.movement_analysis import angle_calculations as acm
 
 
 class Sequence:
