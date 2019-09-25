@@ -97,6 +97,23 @@ class Sequence:
 
         return np.reshape(self.positions, (self.positions.shape[0], -1))
 
+    def merge(self, sequence: 'Sequence') -> 'Sequence':
+        """
+        Returns the merged two sequences.
+        """
+        # TODO: check if body_parts of both sequences are equal
+        self.positions = np.concatenate((self.positions, sequence.positions), axis=0)
+        self.timestamps = np.concatenate((self.timestamps, sequence.timestamps), axis=0)
+
+        #! untested and definitely not fail save
+        for idx, bp in enumerate(self.joint_angles):
+            if bp is not None:
+                for key in bp:
+                    self.joint_angles[idx][key].extend(sequence.joint_angles[idx][key])
+            else:
+                pass
+        return self
+
     def get_pcs(self, num_components: int = 3):
         """
         Calculates n principal components for the tracked positions of this sequence
