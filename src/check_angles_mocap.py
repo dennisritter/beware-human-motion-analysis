@@ -7,15 +7,12 @@ from hma.movement_analysis import exercise_loader
 from hma.movement_analysis import angle_calculations as acm
 from hma.movement_analysis import transformations
 from hma.movement_analysis import logging
-from hma.movement_analysis import exercise_evaluation
+from hma.movement_analysis.ExerciseEvaluator import ExerciseEvaluator
 import math
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import argrelextrema, savgol_filter
 
-# Get Exercise Object from json file
-ex = exercise_loader.load('data/exercises/kniebeuge.json')
-# ex = exercise_loader.load('data/exercises/overhead-press.json')
 # Get PoseProcessor instance for MOCAP sequences
 mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 # Convert mocap json string Positions to Sequence Object
@@ -35,7 +32,8 @@ seqs = []
 for i in range(0, math.floor(len(seq.positions)/30)):
     partial_seq = seq[i:i+30]
     seqs.append(partial_seq)
-    print(len(partial_seq.positions))
 
-
-# exercise_evaluation.evaluate(ex, seq1)
+# Get Exercise Object from json file
+ex = exercise_loader.load('data/exercises/kniebeuge.json')
+exval_squat = ExerciseEvaluator(ex)
+exval_squat.evaluate(seq)
