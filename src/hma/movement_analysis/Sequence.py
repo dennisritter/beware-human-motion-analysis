@@ -36,13 +36,9 @@ class Sequence:
         # NOTE: If no angles have been computed for a particular joint, the stored value is None.
         self.joint_angles = self._calc_joint_angles() if joint_angles is None else joint_angles
 
+        self.positions_2d = self.get_positions_2d()
 
-<< << << < HEAD
-   self.positions_2d = self.get_positions_2d()
-
-== == == =
->>>>>> > develop
-   def __len__(self):
+    def __len__(self):
         return len(self.timestamps)
 
     def __getitem__(self, item):
