@@ -100,18 +100,29 @@ class Sequence:
     def merge(self, sequence: 'Sequence') -> 'Sequence':
         """
         Returns the merged two sequences.
-        """
-        # TODO: check if body_parts of both sequences are equal
-        self.positions = np.concatenate((self.positions, sequence.positions), axis=0)
-        self.timestamps = np.concatenate((self.timestamps, sequence.timestamps), axis=0)
 
-        #! untested and definitely not fail save
+        Raises ValueError if either the body_parts, the poseformat or the body_parts and keys within the joint_angles do not match!
+        """
+        if not self.body_parts is sequence.body_parts:
+            raise ValueError('body_parts of both sequences do not match!')
+        if not self.poseformat is sequence.poseformat:
+            raise ValueError('poseformat of both sequences do not match!')
+
+        # iterate through joint angles and merge them
         for idx, bp in enumerate(self.joint_angles):
             if bp is not None:
                 for key in bp:
+                    if not key in sequence.joint_angles[idx]:
+                        raise ValueError(f"Given sequence do not contain key: {key}, but the method called sequence does.")
                     self.joint_angles[idx][key].extend(sequence.joint_angles[idx][key])
             else:
-                pass
+                if sequence.joint_angles[idx] is not None:
+                    raise ValueError(f"Given sequence has body_part, with index {idx}, which is not None. The method called sequence do not provide this body_part.")
+        
+        # concatenate positions and timestamps
+        self.positions = np.concatenate((self.positions, sequence.positions), axis=0)
+        self.timestamps = np.concatenate((self.timestamps, sequence.timestamps), axis=0)
+
         return self
 
     def get_pcs(self, num_components: int = 3):
