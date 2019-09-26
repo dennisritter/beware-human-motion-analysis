@@ -8,7 +8,7 @@ class Sequence:
 
     def __init__(self, body_parts: dict, positions: list, timestamps: list, poseformat: PoseFormatEnum, name: str = 'sequence', joint_angles: list = None):
         self.name = name
-        self.poseformat = poseformat  # ! deprecated?!
+        self.poseformat = poseformat
         # Number, order and label of tracked body parts
         # Example: { "Head": 0, "RightShoulder": 1, ... }
         self.body_parts = body_parts
@@ -36,9 +36,13 @@ class Sequence:
         # NOTE: If no angles have been computed for a particular joint, the stored value is None.
         self.joint_angles = self._calc_joint_angles() if joint_angles is None else joint_angles
 
-        self.positions_2d = self.get_positions_2d()
 
-    def __len__(self):
+<< << << < HEAD
+   self.positions_2d = self.get_positions_2d()
+
+== == == =
+>>>>>> > develop
+   def __len__(self):
         return len(self.timestamps)
 
     def __getitem__(self, item):
@@ -114,7 +118,7 @@ class Sequence:
             else:
                 if sequence.joint_angles[idx] is not None:
                     raise ValueError(f"Given sequence has body_part, with index {idx}, which is not None. The method called sequence do not provide this body_part.")
-        
+
         # concatenate positions and timestamps
         self.positions = np.concatenate((self.positions, sequence.positions), axis=0)
         self.timestamps = np.concatenate((self.timestamps, sequence.timestamps), axis=0)
