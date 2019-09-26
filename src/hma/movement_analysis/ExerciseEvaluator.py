@@ -11,14 +11,20 @@ class ExerciseEvaluator:
 
     def __init__(self, exercise: Exercise):
         self.exercise = exercise
+        self.iterations = np.array([])
+        self.global_minima = []
+        self.global_maxima = []
+        self.global_sequence = []
 
-    def evaluate(self, sequence: Sequence):
-        ex = self.exercise
-        seq = sequence
-        bp = sequence.body_parts
+    def find_iteration_keypoints(self, sequence: Sequence):
+        prio_angles = self.get_prio_angles(self.exercise, sequence)
 
-        prio_angles = self.get_prio_angles(ex, sequence)
-        for prio_joint in prio_angles:
+        if len(self.global_minima) == 0:
+            for i in range(0, len(prio_angles)):
+                self.global_maxima.append([])
+                self.global_minima.append([])
+
+        for prio_joint_idx, prio_joint in enumerate(prio_angles):
             joint_angles = prio_joint[0]
             ex_target_start = prio_joint[1]
             ex_target_end = prio_joint[2]
@@ -33,11 +39,56 @@ class ExerciseEvaluator:
             maxima = argrelextrema(joint_angles_smooth, np.greater, order=10)[0]
             minima = argrelextrema(joint_angles_smooth, np.less, order=10)[0]
 
-            plt.plot(range(0, len(joint_angles)), joint_angles, zorder=1)
-            plt.plot(range(0, len(joint_angles)), joint_angles_smooth, color='red', zorder=1)
-            plt.scatter(maxima, joint_angles_smooth[maxima], color='green', marker="^", zorder=2)
-            plt.scatter(minima, joint_angles_smooth[minima], color='green', marker="v", zorder=2)
-            plt.show()
+            ### Filter Extrema ###
+            # 1. Check whether local maxima/minima are closer to their desired target point than to the other target point
+            # target_end_greater_start -> Maxima = END state frames; Minima = START state frames
+            # target_end_less_start -> Minima = END state frames; Maxima = START state frames
+            target_end_greater_start = ex_target_end > ex_target_start
+            target_end_less_start = ex_target_end < ex_target_start
+            # target_end_is_zero = ex_target_end == ex_target_start
+            # TODO: Solve with map/lambda ?
+            for rel_max in maxima:
+                diff_to_start = abs(joint_angles[rel_max] - min(ex_target_start))
+                diff_to_end = abs(joint_angles[rel_max] - min(ex_target_end))
+                if target_end_greater_start:
+                    if diff_to_start > diff_to_end:
+                        self.global_maxima[prio_joint_idx].append(rel_max + len(self.global_sequence))
+                if target_end_less_start:
+                    if diff_to_start < diff_to_end:
+                        self.global_maxima[prio_joint_idx].append(rel_max + len(self.global_sequence))
+            for rel_min in minima:
+                diff_to_start = abs(joint_angles[rel_min] - min(ex_target_start))
+                diff_to_end = abs(joint_angles[rel_min] - min(ex_target_end))
+                if target_end_greater_start:
+                    if diff_to_start < diff_to_end:
+                        self.global_minima[prio_joint_idx].append(rel_min + len(self.global_sequence))
+                if target_end_less_start:
+                    if diff_to_start > diff_to_end:
+                        self.global_minima[prio_joint_idx].append(rel_min + len(self.global_sequence))
+            print(maxima, minima)
+            print(self.global_maxima, self.global_minima)
+
+        if len(self.global_sequence) == 0:
+            self.global_sequence = sequence
+        else:
+            self.global_sequence = self.global_sequence.merge(sequence)
+
+            # plt.plot(range(0, len(joint_angles)), joint_angles, zorder=1)
+            # plt.plot(range(0, len(joint_angles)), joint_angles_smooth, color='red', zorder=1)
+            # plt.scatter(maxima, joint_angles_smooth[maxima], color='green', marker="^", zorder=2)
+            # plt.scatter(minima, joint_angles_smooth[minima], color='green', marker="v", zorder=2)
+            # plt.show()
+
+    def evaluate(self, sequence: Sequence):
+        ex = self.exercise
+        seq = sequence
+        bp = sequence.body_parts
+
+        prio_angles = self.get_prio_angles(ex, sequence)
+        for prio_joint in prio_angles:
+            joint_angles = prio_joint[0]
+            ex_target_start = prio_joint[1]
+            ex_target_end = prio_joint[2]
 
             # ANGLE ANALYSIS
             shoulder_left_results = []

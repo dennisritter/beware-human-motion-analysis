@@ -36,4 +36,6 @@ for i in range(0, math.floor(len(seq.positions)/30)):
 # Get Exercise Object from json file
 ex = exercise_loader.load('data/exercises/kniebeuge.json')
 exval_squat = ExerciseEvaluator(ex)
-exval_squat.evaluate(seq)
+
+for i in range(0, 3):
+    exval_squat.find_iteration_keypoints(seqs[i])

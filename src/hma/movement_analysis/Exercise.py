@@ -4,6 +4,7 @@ import math
 from hma.movement_analysis.AngleTargetStates import AngleTargetStates
 from hma.movement_analysis.AngleAnalysisResultStates import AngleAnalysisResultStates
 
+
 class Exercise:
 
     HIGH_PRIO = 1.0
@@ -119,7 +120,6 @@ class Exercise:
 
         target_end = self.angles[AngleTargetStates.END.value]["shoulder_left"]["flexion_extension"]["angle"][1]
         target_start = self.angles[AngleTargetStates.START.value]["shoulder_left"]["flexion_extension"]["angle"][1]
-        # Determine whether movement from START to END is Extension, Flexion, or None
         target_min = min(self.angles[target_state.value]["shoulder_left"]["flexion_extension"]["angle"])
         target_max = max(self.angles[target_state.value]["shoulder_left"]["flexion_extension"]["angle"])
 
@@ -139,7 +139,6 @@ class Exercise:
 
         target_end = self.angles[AngleTargetStates.END.value]["shoulder_right"]["flexion_extension"]["angle"][1]
         target_start = self.angles[AngleTargetStates.START.value]["shoulder_right"]["flexion_extension"]["angle"][1]
-        # Determine whether movement from START to END is Extension, Flexion, or None
         target_min = min(self.angles[target_state.value]["shoulder_right"]["flexion_extension"]["angle"])
         target_max = max(self.angles[target_state.value]["shoulder_right"]["flexion_extension"]["angle"])
 
@@ -157,7 +156,6 @@ class Exercise:
             warnings.warn("The target_state parameter value is not present in the Exercises' angles attribute. Cancelng Analysis.")
             return []
 
-        # Determine whether movement from START to END is Extension, Flexion, or None
         target_end = self.angles[AngleTargetStates.END.value]["shoulder_left"]["abduction_adduction"]["angle"][1]
         target_start = self.angles[AngleTargetStates.START.value]["shoulder_left"]["abduction_adduction"]["angle"][1]
         target_min = min(self.angles[target_state.value]["shoulder_left"]["abduction_adduction"]["angle"])
@@ -177,7 +175,6 @@ class Exercise:
             warnings.warn("The target_state parameter value is not present in the Exercises' angles attribute. Cancelng Analysis.")
             return []
 
-        # Determine whether movement from START to END is Extension, Flexion, or None
         target_end = self.angles[AngleTargetStates.END.value]["shoulder_right"]["abduction_adduction"]["angle"][1]
         target_start = self.angles[AngleTargetStates.START.value]["shoulder_right"]["abduction_adduction"]["angle"][1]
         target_min = min(self.angles[target_state.value]["shoulder_right"]["abduction_adduction"]["angle"])
@@ -199,7 +196,6 @@ class Exercise:
 
         target_end = self.angles[AngleTargetStates.END.value]["hip_left"]["flexion_extension"]["angle"][1]
         target_start = self.angles[AngleTargetStates.START.value]["hip_left"]["flexion_extension"]["angle"][1]
-        # Determine whether movement from START to END is Extension, Flexion, or None
         target_min = min(self.angles[target_state.value]["hip_left"]["flexion_extension"]["angle"])
         target_max = max(self.angles[target_state.value]["hip_left"]["flexion_extension"]["angle"])
 
@@ -219,7 +215,6 @@ class Exercise:
 
         target_end = self.angles[AngleTargetStates.END.value]["hip_right"]["flexion_extension"]["angle"][1]
         target_start = self.angles[AngleTargetStates.START.value]["hip_right"]["flexion_extension"]["angle"][1]
-        # Determine whether movement from START to END is Extension, Flexion, or None
         target_min = min(self.angles[target_state.value]["hip_right"]["flexion_extension"]["angle"])
         target_max = max(self.angles[target_state.value]["hip_right"]["flexion_extension"]["angle"])
 
@@ -237,7 +232,6 @@ class Exercise:
             warnings.warn("The target_state parameter value is not present in the Exercises' angles attribute. Cancelng Analysis.")
             return []
 
-        # Determine whether movement from START to END is Extension, Flexion, or None
         target_end = self.angles[AngleTargetStates.END.value]["hip_left"]["abduction_adduction"]["angle"][1]
         target_start = self.angles[AngleTargetStates.START.value]["hip_left"]["abduction_adduction"]["angle"][1]
         target_min = min(self.angles[target_state.value]["hip_left"]["abduction_adduction"]["angle"])
@@ -257,7 +251,6 @@ class Exercise:
             warnings.warn("The target_state parameter value is not present in the Exercises' angles attribute. Cancelng Analysis.")
             return []
 
-        # Determine whether movement from START to END is Extension, Flexion, or None
         target_end = self.angles[AngleTargetStates.END.value]["hip_right"]["abduction_adduction"]["angle"][1]
         target_start = self.angles[AngleTargetStates.START.value]["hip_right"]["abduction_adduction"]["angle"][1]
         target_min = min(self.angles[target_state.value]["hip_right"]["abduction_adduction"]["angle"])
@@ -277,7 +270,6 @@ class Exercise:
             warnings.warn("The target_state parameter value is not present in the Exercises' angles attribute. Cancelng Analysis.")
             return []
 
-        # Determine whether movement from START to END is Extension, Flexion, or None
         target_end = self.angles[AngleTargetStates.END.value]["elbow_left"]["flexion_extension"]["angle"][1]
         target_start = self.angles[AngleTargetStates.START.value]["elbow_left"]["flexion_extension"]["angle"][1]
         target_min = min(self.angles[target_state.value]["elbow_left"]["flexion_extension"]["angle"])
@@ -297,7 +289,6 @@ class Exercise:
             warnings.warn("The target_state parameter value is not present in the Exercises' angles attribute. Cancelng Analysis.")
             return []
 
-        # Determine whether movement from START to END is Extension, Flexion, or None
         target_end = self.angles[AngleTargetStates.END.value]["elbow_right"]["flexion_extension"]["angle"][1]
         target_start = self.angles[AngleTargetStates.START.value]["elbow_right"]["flexion_extension"]["angle"][1]
         target_min = min(self.angles[target_state.value]["elbow_right"]["flexion_extension"]["angle"])
@@ -317,7 +308,6 @@ class Exercise:
             warnings.warn("The target_state parameter value is not present in the Exercises' angles attribute. Cancelng Analysis.")
             return []
 
-        # Determine whether movement from START to END is Extension, Flexion, or None
         target_end = self.angles[AngleTargetStates.END.value]["knee_left"]["flexion_extension"]["angle"][1]
         target_start = self.angles[AngleTargetStates.START.value]["knee_left"]["flexion_extension"]["angle"][1]
         target_min = min(self.angles[target_state.value]["knee_left"]["flexion_extension"]["angle"])
@@ -337,7 +327,6 @@ class Exercise:
             warnings.warn("The target_state parameter value is not present in the Exercises' angles attribute. Cancelng Analysis.")
             return []
 
-        # Determine whether movement from START to END is Extension, Flexion, or None
         target_end = self.angles[AngleTargetStates.END.value]["knee_right"]["flexion_extension"]["angle"][1]
         target_start = self.angles[AngleTargetStates.START.value]["knee_right"]["flexion_extension"]["angle"][1]
         target_min = min(self.angles[target_state.value]["knee_right"]["flexion_extension"]["angle"])
