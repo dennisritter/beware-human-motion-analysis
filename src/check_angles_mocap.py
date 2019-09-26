@@ -22,12 +22,20 @@ mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 # seq1 = mocap_poseprocessor.load('data/sequences/squat-dennis-1/complete-session.json', 'squat-dennis-multi-1')
 # seq2 = mocap_poseprocessor.load('data/sequences/squat_2/complete-session.json', 'squat-dennis-multi-2')
 # seq3 = mocap_poseprocessor.load('data/sequences/squat_3/complete-session.json', 'squat-dennis-multi-3')
-seq1 = mocap_poseprocessor.load('data/sequences/squat-dennis-multi-1/complete-session.json', 'squat-dennis-multi-1')
-seq2 = mocap_poseprocessor.load('data/sequences/squat-dennis-multi-2/complete-session.json', 'squat-dennis-multi-2')
-seq3 = mocap_poseprocessor.load('data/sequences/squat-dennis-multi-3/complete-session.json', 'squat-dennis-multi-3')
+# seq1 = mocap_poseprocessor.load('data/sequences/squat-dennis-multi-1/complete-session.json', 'squat-dennis-multi-1')
+# seq2 = mocap_poseprocessor.load('data/sequences/squat-dennis-multi-2/complete-session.json', 'squat-dennis-multi-2')
+# seq3 = mocap_poseprocessor.load('data/sequences/squat-dennis-multi-3/complete-session.json', 'squat-dennis-multi-3')
 # seq1 = mocap_poseprocessor.load('data/sequences/overheadpress-dennis-multi-1/complete-session.json', 'overheadpress-dennis-multi-1')
 # seq2 = mocap_poseprocessor.load('data/sequences/overheadpress-dennis-multi-2/complete-session.json', 'overheadpress-dennis-multi-2')
 # seq3 = mocap_poseprocessor.load('data/sequences/overheadpress-dennis-multi-3/complete-session.json', 'overheadpress-dennis-multi-3')
-seqs = [seq1, seq2, seq3]
+# seqs = [seq1, seq2, seq3]
 
-exercise_evaluation.evaluate(ex, seq1)
+seq = mocap_poseprocessor.load('data/sequences/squat-dennis-multi-1/complete-session.json', 'squat-dennis-multi-1')
+seqs = []
+for i in range(0, math.floor(len(seq.positions)/30)):
+    partial_seq = seq[i:i+30]
+    seqs.append(partial_seq)
+    print(len(partial_seq.positions))
+
+
+# exercise_evaluation.evaluate(ex, seq1)
