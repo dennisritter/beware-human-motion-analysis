@@ -1,4 +1,4 @@
-from .Exercise import Exercise
+from hma.movement_analysis.Exercise import Exercise
 import warnings
 import json
 
