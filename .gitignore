@@ -125,3 +125,9 @@ dmypy.json
 
 #VSCode
 .vscode
+
+
+data/sequences/dennis
+data/sequences/philippe
+data/sequences/levente
+

@@ -11,6 +11,8 @@ class Sequence:
         # Number, order and label of tracked body parts
         # Example: { "Head": 0, "RightShoulder": 1, ... }
         self.body_parts = body_parts
+
+        zero_frames_filter_list = self._filter_zero_frames(positions)
         # Defines positions of each bodypart
         # 1. Dimension = Time
         # 2. Dimension = Bodypart
@@ -21,22 +23,18 @@ class Sequence:
         #           ...
         #          ]
         # shape: (num_body_parts, num_keypoints, xyz)
-        self.positions = np.array(positions)
+        self.positions = np.array(positions)[zero_frames_filter_list]
 
+        # Timestamps for when the positions have been tracked
+        # Example: [<someTimestamp1>, <someTimestamp2>, <someTimestamp3>, ...]
+        self.timestamps = np.array(timestamps)[zero_frames_filter_list]
         # Stores joint angles for each frame
         # NOTE: Body part indices are the indices stored in self.body_parts.
         # NOTE: If angles have been computed, the stored value is a dictionary with at least one key "flexion_extension"
         #       and a "abduction_adduction" key for ball joints.
         # NOTE: If no angles have been computed for a particular joint, the stored value is None.
-        # self.joint_angles = self._calc_joint_angles()
-        # Timestamps for when the positions have been tracked
-        # Example: [<someTimestamp1>, <someTimestamp2>, <someTimestamp3>, ...]
-        self.timestamps = np.array(timestamps)
-        """ We need this at some point, maybe
-        # Skeleton connections between bodyparts
-        # Example: [["Head", "Neck"], ["Neck", "RShoulder"], ["RShoulder", "RElbow"], ["RElbow", "RWrist"], ...],
-        self.body_pairs = body_pairs
-        """
+        self.joint_angles = self._calc_joint_angles()
+
         self.positions_2d = self.get_positions_2d()
 
     def _calc_joint_angles(self):
@@ -68,3 +66,16 @@ class Sequence:
         pca = PCA(n_components=num_components)
         xPCA = pca.fit_transform(self.get_positions_2d())
         return xPCA
+
+    def _filter_zero_frames(self, positions: list) -> list:
+        """
+        Returns a list of booleans to filter numpy arrays by conditions. 
+        Checks whether the sum of all coordinates for a frame is 0.0
+            True -> keep this frame; 
+            False -> remove this frame
+        """
+        bool_list = []
+        for pos in positions:
+            bool_list.append(np.sum(pos) != 0)
+
+        return bool_list
