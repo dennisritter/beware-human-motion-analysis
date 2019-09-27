@@ -173,6 +173,17 @@ class ExerciseEvaluator:
                 knee_right_results.append(ex.check_angles_knee_right(knee_right_angle_flex_ex, current_target_state, 10))
                 # print(f"Knee Right Flexion: {ex.check_angles_knee_right(knee_right_angle_flex_ex, current_target_state, 10)['flexion_extension']}")
 
+            results = [None] * len(seq.body_parts)
+            results[bp["LeftShoulder"]] = shoulder_left_results
+            results[bp["RightShoulder"]] = shoulder_right_results
+            results[bp["LeftHip"]] = hip_left_results
+            results[bp["RightHip"]] = hip_right_results
+            results[bp["LeftElbow"]] = elbow_left_results
+            results[bp["RightElbow"]] = elbow_right_results
+            results[bp["LeftKnee"]] = knee_left_results
+            results[bp["RightKnee"]] = knee_right_results
+            return results
+
     def get_prio_angles(self, exercise: Exercise, sequence: Sequence):
         seq = sequence
         ex = exercise
