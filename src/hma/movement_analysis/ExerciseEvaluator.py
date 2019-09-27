@@ -85,7 +85,7 @@ class ExerciseEvaluator:
                         minmax_altering.append((self.global_minima[prio_joint_idx][i], "min"))
 
             # print(minmax_altering)
-            print(minmax_altering[0:3])
+            print(minmax_altering)
 
         if len(self.global_sequence) == 0:
             self.global_sequence = sequence
