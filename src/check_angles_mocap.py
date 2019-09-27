@@ -29,8 +29,8 @@ mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 
 seq = mocap_poseprocessor.load('data/sequences/squat-dennis-multi-1/complete-session.json', 'squat-dennis-multi-1')
 seqs = []
-for i in range(0, math.floor(len(seq.positions)/30)):
-    partial_seq = seq[i*30:i*30+30]
+for i in range(0, math.floor(len(seq.positions)/100)):
+    partial_seq = seq[i*100:i*100+100]
     seqs.append(partial_seq)
 
 # Get Exercise Object from json file
@@ -38,11 +38,17 @@ ex = exercise_loader.load('data/exercises/kniebeuge.json')
 exval_squat = ExerciseEvaluator(ex)
 
 mseq = None
-for i in range(0, 3):
-    # exval_squat.find_iteration_keypoints(seqs[i])
-    if mseq == None:
-        mseq = seqs[i]
-    else:
-        mseq = mseq.merge(seq[i])
+for i in range(0, len(seqs)):
+    exval_squat.find_iteration_keypoints(seqs[i])
 
-print(exval_squat.evaluate(mseq)[1])
+
+# ## Check evaluate method
+# mseq = None
+# for i in range(0, 3):
+#     # exval_squat.find_iteration_keypoints(seqs[i])
+#     if mseq == None:
+#         mseq = seqs[i]
+#     else:
+#         mseq = mseq.merge(seq[i])
+
+# print(exval_squat.evaluate(mseq)[1])

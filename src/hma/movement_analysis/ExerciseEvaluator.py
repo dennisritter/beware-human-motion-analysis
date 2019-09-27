@@ -33,7 +33,8 @@ class ExerciseEvaluator:
             # TODO: Find best value for window size
             savgol_window_max = 51
             savgol_window_generic = int(math.floor(len(joint_angles)/1.5)+1 if math.floor(len(joint_angles)/1.5) % 2 == 0 else math.floor(len(joint_angles)/1.5))
-            savgol_window = min(savgol_window_max, savgol_window_generic)
+            # savgol_window = min(savgol_window_max, savgol_window_generic)
+            savgol_window = 51
             joint_angles_smooth = savgol_filter(joint_angles, savgol_window, 3, mode="nearest")
 
             # TODO: Find best value for order parameter
@@ -49,8 +50,8 @@ class ExerciseEvaluator:
             # target_end_is_zero = ex_target_end == ex_target_start
             # TODO: Solve with map/lambda ?
             for rel_max in maxima:
-                diff_to_start = abs(joint_angles[rel_max] - min(ex_target_start))
-                diff_to_end = abs(joint_angles[rel_max] - min(ex_target_end))
+                diff_to_start = abs(joint_angles_smooth[rel_max] - min(ex_target_start))
+                diff_to_end = abs(joint_angles_smooth[rel_max] - min(ex_target_end))
                 if target_end_greater_start:
                     if diff_to_start > diff_to_end:
                         self.global_maxima[prio_joint_idx].append(rel_max + len(self.global_sequence))
@@ -58,31 +59,33 @@ class ExerciseEvaluator:
                     if diff_to_start < diff_to_end:
                         self.global_maxima[prio_joint_idx].append(rel_max + len(self.global_sequence))
             for rel_min in minima:
-                diff_to_start = abs(joint_angles[rel_min] - min(ex_target_start))
-                diff_to_end = abs(joint_angles[rel_min] - min(ex_target_end))
+                diff_to_start = abs(joint_angles_smooth[rel_min] - min(ex_target_start))
+                diff_to_end = abs(joint_angles_smooth[rel_min] - min(ex_target_end))
                 if target_end_greater_start:
                     if diff_to_start < diff_to_end:
                         self.global_minima[prio_joint_idx].append(rel_min + len(self.global_sequence))
                 if target_end_less_start:
                     if diff_to_start > diff_to_end:
                         self.global_minima[prio_joint_idx].append(rel_min + len(self.global_sequence))
-            # print(maxima, minima)
-            # print(self.global_maxima, self.global_minima)
 
             # Compare indices of min/max. The altering list must contain increasing index values. One sequence of min < max < min is one iteration.
             if target_end_greater_start:
-                minmax_altering = np.array([])
+                minmax_altering = []
                 for i in range(0, max(len(self.global_minima[prio_joint_idx]), len(self.global_maxima[prio_joint_idx]))):
                     if len(self.global_minima[prio_joint_idx]) > i:
-                        minmax_altering = np.append(minmax_altering, (self.global_minima[prio_joint_idx][i], "min"))
+                        minmax_altering.append((self.global_minima[prio_joint_idx][i], "min"))
                     if len(self.global_maxima[prio_joint_idx]) > i:
-                        minmax_altering = np.append(minmax_altering, (self.global_maxima[prio_joint_idx][i], "max"))
-                print(minmax_altering)
-
+                        minmax_altering.append((self.global_maxima[prio_joint_idx][i], "max"))
             if target_end_less_start:
+                minmax_altering = np.array([])
                 for i in range(0, max(len(self.global_minima[prio_joint_idx]), len(self.global_maxima[prio_joint_idx]))):
-                    self.global_minima[prio_joint_idx]
-                    self.global_maxima[prio_joint_idx]
+                    if len(self.global_maxima[prio_joint_idx]) > i:
+                        minmax_altering.append((self.global_maxima[prio_joint_idx][i], "max"))
+                    if len(self.global_minima[prio_joint_idx]) > i:
+                        minmax_altering.append((self.global_minima[prio_joint_idx][i], "min"))
+
+            # print(minmax_altering)
+            print(minmax_altering[0:3])
 
         if len(self.global_sequence) == 0:
             self.global_sequence = sequence
@@ -92,16 +95,17 @@ class ExerciseEvaluator:
             for i in range(0, len(prio_angles)):
                 np.append(self.global_prio_angles[i], prio_angles[i])
 
-        plt.plot(range(0, len(self.global_prio_angles[prio_joint_idx][0])), self.global_prio_angles[prio_joint_idx][0], zorder=1)
-        if len(self.global_maxima[prio_joint_idx]) > 0:
-            plt.scatter(np.array(self.global_maxima[prio_joint_idx]), np.array(self.global_prio_angles[prio_joint_idx][0])[np.array(self.global_maxima[prio_joint_idx])], color='green', marker="^", zorder=2)
-        if len(self.global_minima[prio_joint_idx]) > 0:
-            plt.scatter(np.array(self.global_minima[prio_joint_idx]), np.array(self.global_prio_angles[prio_joint_idx][0])[np.array(self.global_minima[prio_joint_idx])], color='green', marker="^", zorder=2)
-        plt.show()
         # plt.plot(range(0, len(joint_angles)), joint_angles, zorder=1)
         # plt.plot(range(0, len(joint_angles)), joint_angles_smooth, color='red', zorder=1)
         # plt.scatter(maxima, joint_angles_smooth[maxima], color='green', marker="^", zorder=2)
         # plt.scatter(minima, joint_angles_smooth[minima], color='green', marker="v", zorder=2)
+        # plt.show()
+
+        # plt.plot(range(0, len(self.global_prio_angles[prio_joint_idx][0])), self.global_prio_angles[prio_joint_idx][0], zorder=1)
+        # if len(self.global_maxima[prio_joint_idx]) > 0:
+        #     plt.scatter(np.array(self.global_maxima[prio_joint_idx]), np.array(self.global_prio_angles[prio_joint_idx][0])[np.array(self.global_maxima[prio_joint_idx])], color='green', marker="^", zorder=2)
+        # if len(self.global_minima[prio_joint_idx]) > 0:
+        #     plt.scatter(np.array(self.global_minima[prio_joint_idx]), np.array(self.global_prio_angles[prio_joint_idx][0])[np.array(self.global_minima[prio_joint_idx])], color='green', marker="v", zorder=2)
         # plt.show()
 
     def evaluate(self, sequence: Sequence):
