@@ -108,7 +108,7 @@ class ExerciseEvaluator:
         #     plt.scatter(np.array(self.global_minima[prio_joint_idx]), np.array(self.global_prio_angles[prio_joint_idx][0])[np.array(self.global_minima[prio_joint_idx])], color='green', marker="v", zorder=2)
         # plt.show()
 
-    def evaluate(self, sequence: Sequence):
+    def evaluate(self, sequence: Sequence, switch_state_idx: int):
         ex = self.exercise
         seq = sequence
         bp = sequence.body_parts
@@ -130,7 +130,9 @@ class ExerciseEvaluator:
             knee_right_results = []
 
             current_target_state = AngleTargetStates.END
-            for frame in range(0, len(seq.positions)):
+            for frame in range(0, len(seq)):
+                if frame == switch_state_idx:
+                    current_target_state = AngleTargetStates.START
                 shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add = self.process_ball_joint_angles(
                     seq.joint_angles[bp["LeftShoulder"]]["flexion_extension"][frame],
                     seq.joint_angles[bp["LeftShoulder"]]["abduction_adduction"][frame],
