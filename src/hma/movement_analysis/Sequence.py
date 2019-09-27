@@ -99,9 +99,9 @@ class Sequence:
 
         Raises ValueError if either the body_parts, the poseformat or the body_parts and keys within the joint_angles do not match!
         """
-        if not self.body_parts is sequence.body_parts:
+        if self.body_parts != sequence.body_parts:
             raise ValueError('body_parts of both sequences do not match!')
-        if not self.poseformat is sequence.poseformat:
+        if self.poseformat != sequence.poseformat:
             raise ValueError('poseformat of both sequences do not match!')
 
         # iterate through joint angles and merge them
