@@ -1,5 +1,6 @@
 from .Exercise import Exercise
 from .AngleTargetStates import AngleTargetStates
+from .AngleTypes import AngleTypes
 from .Sequence import Sequence
 import math
 import numpy as np
@@ -10,12 +11,57 @@ from scipy.signal import argrelextrema, savgol_filter
 class ExerciseEvaluator:
 
     def __init__(self, exercise: Exercise):
+        # The Exercise to evaluate
         self.exercise = exercise
+        # The target_angles for each body part
+        self.target_angles = None
+        # The prioritised body parts for self.exercise
+        self.prio_angles = None
+
         self.iterations = np.array([])
         self.global_minima = []
         self.global_maxima = []
         self.global_sequence = []
         self.global_prio_angles = []
+
+    def _get_prio_angles(self, ex: Exercise, seq: Sequence) -> list:
+        """
+        Returns a list of tuples containing a body part mapped in Sequence.body_parts and the AngleType for that body part which is prioritised.
+        Example: [(4, AngleType.FLEX_EX), (4, AngleType.AB_AD)]
+        """
+        HIGH_PRIO = 1.0
+        prio_angles = []
+        # Shoulders
+        if ex.angles[AngleTargetStates.START.value]["shoulder_left"]["flexion_extension"]["priority"] == HIGH_PRIO:
+            prio_angles.append((seq.body_parts["LeftShoulder"], AngleTypes.FLEX_EX))
+        if ex.angles[AngleTargetStates.START.value]["shoulder_left"]["abduction_adduction"]["priority"] == HIGH_PRIO:
+            prio_angles.append((seq.body_parts["LeftShoulder"], AngleTypes.AB_AD))
+        if ex.angles[AngleTargetStates.START.value]["shoulder_right"]["flexion_extension"]["priority"] == HIGH_PRIO:
+            prio_angles.append((seq.body_parts["RightShoulder"], AngleTypes.FLEX_EX))
+        if ex.angles[AngleTargetStates.START.value]["shoulder_right"]["abduction_adduction"]["priority"] == HIGH_PRIO:
+            prio_angles.append((seq.body_parts["RightShoulder"], AngleTypes.AB_AD))
+        # Hips
+        if ex.angles[AngleTargetStates.START.value]["hip_left"]["flexion_extension"]["priority"] == HIGH_PRIO:
+            prio_angles.append((seq.body_parts["LeftHip"], AngleTypes.FLEX_EX))
+        if ex.angles[AngleTargetStates.START.value]["hip_left"]["abduction_adduction"]["priority"] == HIGH_PRIO:
+            prio_angles.append((seq.body_parts["LeftHip"], AngleTypes.AB_AD))
+        if ex.angles[AngleTargetStates.START.value]["hip_right"]["flexion_extension"]["priority"] == HIGH_PRIO:
+            prio_angles.append((seq.body_parts["RightHip"], AngleTypes.FLEX_EX))
+        if ex.angles[AngleTargetStates.START.value]["hip_right"]["abduction_adduction"]["priority"] == HIGH_PRIO:
+            prio_angles.append((seq.body_parts["RightHip"], AngleTypes.AB_AD))
+        # Elbows
+        if ex.angles[AngleTargetStates.START.value]["elbow_left"]["flexion_extension"]["priority"] == HIGH_PRIO:
+            prio_angles.append((seq.body_parts["LeftElbow"], AngleTypes.FLEX_EX))
+        if ex.angles[AngleTargetStates.START.value]["elbow_right"]["flexion_extension"]["priority"] == HIGH_PRIO:
+            prio_angles.append((seq.body_parts["RightElbow"], AngleTypes.FLEX_EX))
+        # Knees
+        if ex.angles[AngleTargetStates.START.value]["knee_left"]["flexion_extension"]["priority"] == HIGH_PRIO:
+            prio_angles.append((seq.body_parts["LeftKnee"], AngleTypes.FLEX_EX))
+        if ex.angles[AngleTargetStates.START.value]["knee_right"]["flexion_extension"]["priority"] == HIGH_PRIO:
+            prio_angles.append((seq.body_parts["RightKnee"], AngleTypes.FLEX_EX))
+
+        self.prio_angles = prio_angles
+        return prio_angles
 
     def find_iteration_keypoints(self, sequence: Sequence):
         prio_angles = self.get_prio_angles(self.exercise, sequence)
@@ -190,94 +236,6 @@ class ExerciseEvaluator:
             results[bp["RightKnee"]] = knee_right_results
             return results
 
-    def get_prio_angles(self, exercise: Exercise, sequence: Sequence):
-        seq = sequence
-        ex = exercise
-        bp = seq.body_parts
-        HIGH_PRIO = 1.0
-        prio_angles = []
-        # prio_angles -> [([START.min, START.max], [END.min, END.max], [frame0, frame1, frame2, ...]), (...), ...]
-        if ex.angles[AngleTargetStates.START.value]["shoulder_left"]["flexion_extension"]["priority"] == HIGH_PRIO:
-            prio_angles.append((
-                seq.joint_angles[bp["LeftShoulder"]]["flexion_extension"],
-                ex.angles[AngleTargetStates.START.value]["shoulder_left"]["flexion_extension"]["angle"],
-                ex.angles[AngleTargetStates.END.value]["shoulder_left"]["flexion_extension"]["angle"],
-            ))
-        if ex.angles[AngleTargetStates.START.value]["shoulder_left"]["abduction_adduction"]["priority"] == HIGH_PRIO:
-            prio_angles.append((
-                seq.joint_angles[bp["LeftShoulder"]]["abduction_adduction"],
-                ex.angles[AngleTargetStates.START.value]["shoulder_left"]["abduction_adduction"]["angle"],
-                ex.angles[AngleTargetStates.END.value]["shoulder_left"]["abduction_adduction"]["angle"],
-            ))
-        if ex.angles[AngleTargetStates.START.value]["shoulder_right"]["flexion_extension"]["priority"] == HIGH_PRIO:
-            prio_angles.append((
-                seq.joint_angles[bp["RightShoulder"]]["flexion_extension"],
-                ex.angles[AngleTargetStates.START.value]["shoulder_right"]["flexion_extension"]["angle"],
-                ex.angles[AngleTargetStates.END.value]["shoulder_right"]["flexion_extension"]["angle"],
-            ))
-        if ex.angles[AngleTargetStates.START.value]["shoulder_right"]["abduction_adduction"]["priority"] == HIGH_PRIO:
-            prio_angles.append((
-                seq.joint_angles[bp["RightShoulder"]]["abduction_adduction"],
-                ex.angles[AngleTargetStates.START.value]["shoulder_right"]["abduction_adduction"]["angle"],
-                ex.angles[AngleTargetStates.END.value]["shoulder_right"]["abduction_adduction"]["angle"],
-            ))
-
-        if ex.angles[AngleTargetStates.START.value]["hip_left"]["flexion_extension"]["priority"] == HIGH_PRIO:
-            prio_angles.append((
-                seq.joint_angles[bp["LeftHip"]]["flexion_extension"],
-                ex.angles[AngleTargetStates.START.value]["hip_left"]["flexion_extension"]["angle"],
-                ex.angles[AngleTargetStates.END.value]["hip_left"]["flexion_extension"]["angle"],
-            ))
-        if ex.angles[AngleTargetStates.START.value]["hip_left"]["abduction_adduction"]["priority"] == HIGH_PRIO:
-            prio_angles.append((
-                seq.joint_angles[bp["LeftHip"]]["abduction_adduction"],
-                ex.angles[AngleTargetStates.START.value]["hip_left"]["abduction_adduction"]["angle"],
-                ex.angles[AngleTargetStates.END.value]["hip_left"]["abduction_adduction"]["angle"],
-            ))
-        if ex.angles[AngleTargetStates.START.value]["hip_right"]["flexion_extension"]["priority"] == HIGH_PRIO:
-            prio_angles.append((
-                seq.joint_angles[bp["RightHip"]]["flexion_extension"],
-                ex.angles[AngleTargetStates.START.value]["hip_right"]["flexion_extension"]["angle"],
-                ex.angles[AngleTargetStates.END.value]["hip_right"]["flexion_extension"]["angle"],
-            ))
-        if ex.angles[AngleTargetStates.START.value]["hip_right"]["abduction_adduction"]["priority"] == HIGH_PRIO:
-            prio_angles.append((
-                seq.joint_angles[bp["RightHip"]]["abduction_adduction"],
-                ex.angles[AngleTargetStates.START.value]["hip_right"]["fleabduction_adductionxion_extension"]["angle"],
-                ex.angles[AngleTargetStates.END.value]["hip_right"]["abduction_adduction"]["angle"],
-            ))
-
-        if ex.angles[AngleTargetStates.START.value]["elbow_left"]["flexion_extension"]["priority"] == HIGH_PRIO:
-            prio_angles.append((
-                seq.joint_angles[bp["LeftElbow"]]["flexion_extension"],
-                ex.angles[AngleTargetStates.START.value]["elbow_left"]["flexion_extension"]["angle"],
-                ex.angles[AngleTargetStates.END.value]["elbow_left"]["flexion_extension"]["angle"],
-            ))
-        if ex.angles[AngleTargetStates.START.value]["elbow_right"]["flexion_extension"]["priority"] == HIGH_PRIO:
-            prio_angles.append((
-                seq.joint_angles[bp["RightElbow"]]["flexion_extension"],
-                ex.angles[AngleTargetStates.START.value]["elbow_right"]["flexion_extension"]["angle"],
-                ex.angles[AngleTargetStates.END.value]["elbow_right"]["flexion_extension"]["angle"],
-            ))
-        if ex.angles[AngleTargetStates.START.value]["knee_left"]["flexion_extension"]["priority"] == HIGH_PRIO:
-            prio_angles.append((
-                seq.joint_angles[bp["LeftKnee"]]["flexion_extension"],
-                ex.angles[AngleTargetStates.START.value]["knee_left"]["flexion_extension"]["angle"],
-                ex.angles[AngleTargetStates.END.value]["knee_left"]["flexion_extension"]["angle"],
-            ))
-        if ex.angles[AngleTargetStates.START.value]["knee_right"]["flexion_extension"]["priority"] == HIGH_PRIO:
-            prio_angles.append((
-                seq.joint_angles[bp["RightKnee"]]["flexion_extension"],
-                ex.angles[AngleTargetStates.START.value]["knee_right"]["flexion_extension"]["angle"],
-                ex.angles[AngleTargetStates.END.value]["knee_right"]["flexion_extension"]["angle"],
-            ))
-        return prio_angles
-
-    # TODO: This function needs a review, whether the processing is correct.
-    # => Always altering abduction/adduction angles might be incorrect because in case of a flexion->abduction rotation order,
-    #    the abduction represents the horizontal abduction, which is actually limited to [-90, 90°]. In this case, adding 90° would be wrong.
-    #    Possible solution: Add 90° only if the prioritised angle is an abduction/adduction.
-
     def process_ball_joint_angles(
             self,
             angle_flex_ex: float,
@@ -286,6 +244,10 @@ class ExerciseEvaluator:
             target_angle_range_abd_add: list,
             ignore_flex_abd90_delta: int = 20,
             abd_add_motion_thresh: int = 45) -> tuple:
+        # TODO: This function needs a review, whether the processing is correct.
+        # => Always altering abduction/adduction angles might be incorrect because in case of a flexion->abduction rotation order,
+        #    the abduction represents the horizontal abduction, which is actually limited to [-90, 90°]. In this case, adding 90° would be wrong.
+        #    Possible solution: Add 90° only if the prioritised angle is an abduction/adduction.
 
         # Check if angle-vector.y is higher than origin and adjust abduction/adduction angles if conditions are met
         # If flexion angle is >90.0, angle-vector.y is higher than origin because flexion angle represents a rotation about the X-Axis
