@@ -34,9 +34,9 @@ class Sequence:
         # NOTE: If angles have been computed, the stored value is a dictionary with at least one key "flexion_extension"
         #       and a "abduction_adduction" key for ball joints.
         # NOTE: If no angles have been computed for a particular joint, the stored value is None.
-        self.joint_angles = self._calc_joint_angles() if joint_angles is None else joint_angles
+        self.joint_angles = self._calc_joint_angles() if joint_angles is None else np.array(joint_angles)
 
-        self.positions_2d = None  #self.get_positions_2d()
+        self.positions_2d = None  # self.get_positions_2d()
 
     def __len__(self):
         return len(self.timestamps)
@@ -58,31 +58,50 @@ class Sequence:
         else:
             raise TypeError(f"Invalid argument type: {type(item)}")
 
-        joint_angles = []
-        for idx, bp in enumerate(self.joint_angles):
-            if bp is not None:
-                bp_dict = {}
-                for key in bp:
-                    bp_dict[key] = self.joint_angles[idx][key][start:stop:step]
-                    # print(self.joint_angles[idx][key][start:stop:step])
-                joint_angles.append(bp_dict)
-            else:
-                joint_angles.append(None)
+        # TODO REMOVE
+        # joint_angles = []
+        # for idx, bp in enumerate(self.joint_angles):
+        #     if bp is not None:
+        #         bp_dict = {}
+        #         for key in bp:
+        #             bp_dict[key] = self.joint_angles[idx][key][start:stop:step]
+        #             # print(self.joint_angles[idx][key][start:stop:step])
+        #         joint_angles.append(bp_dict)
+        #     else:
+        #         joint_angles.append(None)
 
-        return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.poseformat, self.name, joint_angles)
+        return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.poseformat, self.name, self.joint_angles[start:stop:step])
 
-    def _calc_joint_angles(self):
-        joint_angles = [None] * len(self.body_parts)
+    """
+    Returns a 3-D list of joint angles for all frames, body parts and angle types.
+    """
 
+    def _calc_joint_angles(self) -> list:
+        n_frames = len(self.timestamps)
+        n_body_parts = len(self.body_parts)
+        n_angle_types = 3
         bp = self.body_parts
-        joint_angles[bp["LeftShoulder"]] = acm.calc_angles_shoulder_left(self.positions, bp["LeftShoulder"], bp["RightShoulder"], bp["Torso"], bp["LeftElbow"])
-        joint_angles[bp["RightShoulder"]] = acm.calc_angles_shoulder_right(self.positions, bp["RightShoulder"], bp["LeftShoulder"], bp["Torso"], bp["RightElbow"])
-        joint_angles[bp["LeftHip"]] = acm.calc_angles_hip_left(self.positions, bp["LeftHip"], bp["RightHip"], bp["Torso"], bp["LeftKnee"])
-        joint_angles[bp["RightHip"]] = acm.calc_angles_hip_right(self.positions, bp["RightHip"], bp["LeftHip"], bp["Torso"], bp["RightKnee"])
-        joint_angles[bp["LeftElbow"]] = acm.calc_angles_elbow(self.positions, bp["LeftElbow"], bp["LeftShoulder"], bp["LeftWrist"])
-        joint_angles[bp["RightElbow"]] = acm.calc_angles_elbow(self.positions, bp["RightElbow"], bp["RightShoulder"], bp["RightWrist"])
-        joint_angles[bp["LeftKnee"]] = acm.calc_angles_knee(self.positions, bp["LeftKnee"], bp["LeftHip"], bp["LeftAnkle"])
-        joint_angles[bp["RightKnee"]] = acm.calc_angles_knee(self.positions, bp["RightKnee"], bp["RightHip"], bp["RightAnkle"])
+
+        ls = acm.calc_angles_shoulder_left(self.positions, bp["LeftShoulder"], bp["RightShoulder"], bp["Torso"], bp["LeftElbow"])
+        rs = acm.calc_angles_shoulder_right(self.positions, bp["RightShoulder"], bp["LeftShoulder"], bp["Torso"], bp["RightElbow"])
+        lh = acm.calc_angles_hip_left(self.positions, bp["LeftHip"], bp["RightHip"], bp["Torso"], bp["LeftKnee"])
+        rh = acm.calc_angles_hip_right(self.positions, bp["RightHip"], bp["LeftHip"], bp["Torso"], bp["RightKnee"])
+        le = acm.calc_angles_elbow(self.positions, bp["LeftElbow"], bp["LeftShoulder"], bp["LeftWrist"])
+        re = acm.calc_angles_elbow(self.positions, bp["RightElbow"], bp["RightShoulder"], bp["RightWrist"])
+        lk = acm.calc_angles_knee(self.positions, bp["LeftKnee"], bp["LeftHip"], bp["LeftAnkle"])
+        rk = acm.calc_angles_knee(self.positions, bp["RightKnee"], bp["RightHip"], bp["RightAnkle"])
+
+        joint_angles = np.zeros((n_frames, n_body_parts, n_angle_types))
+        for frame in range(0, n_frames):
+            joint_angles[frame][bp["LeftShoulder"]] = ls[frame]
+            joint_angles[frame][bp["RightShoulder"]] = rs[frame]
+            joint_angles[frame][bp["LeftHip"]] = lh[frame]
+            joint_angles[frame][bp["RightHip"]] = rh[frame]
+            joint_angles[frame][bp["LeftElbow"]] = le[frame]
+            joint_angles[frame][bp["RightElbow"]] = re[frame]
+            joint_angles[frame][bp["LeftKnee"]] = lk[frame]
+            joint_angles[frame][bp["RightKnee"]] = rk[frame]
+
         return joint_angles
 
     def get_positions_2d(self):
