@@ -325,7 +325,7 @@ class ExerciseEvaluator:
 
     def _get_results_elbow_right(self, angle_flex_ex: float, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
         result = [None] * len(AngleTypes)
-        result[AngleTypes.FLEX_EX.value] = self._check_angle_elbow_left(angle_flex_ex, AngleTypes.FLEX_EX, target_state, tolerance)
+        result[AngleTypes.FLEX_EX.value] = self._check_angle_elbow_right(angle_flex_ex, AngleTypes.FLEX_EX, target_state, tolerance)
         return result
 
     def _get_results_knee_left(self, angle_flex_ex: float, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
@@ -335,7 +335,7 @@ class ExerciseEvaluator:
 
     def _get_results_knee_right(self, angle_flex_ex: float, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
         result = [None] * len(AngleTypes)
-        result[AngleTypes.FLEX_EX.value] = self._check_angle_knee_left(angle_flex_ex, AngleTypes.FLEX_EX, target_state, tolerance)
+        result[AngleTypes.FLEX_EX.value] = self._check_angle_knee_right(angle_flex_ex, AngleTypes.FLEX_EX, target_state, tolerance)
         return result
 
     def _check_angle_shoulder_left(self, angle: float, angle_type: AngleTypes, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
@@ -350,7 +350,7 @@ class ExerciseEvaluator:
             "angle_type": angle_type,
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state.value,
+            "target_state": target_state,
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -367,7 +367,7 @@ class ExerciseEvaluator:
             "angle_type": angle_type,
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state.value,
+            "target_state": target_state,
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -384,7 +384,7 @@ class ExerciseEvaluator:
             "angle_type": angle_type,
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state.value,
+            "target_state": target_state,
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -401,7 +401,7 @@ class ExerciseEvaluator:
             "angle_type": angle_type,
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state.value,
+            "target_state": target_state,
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -418,7 +418,7 @@ class ExerciseEvaluator:
             "angle_type": angle_type,
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state.value,
+            "target_state": target_state,
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -435,7 +435,7 @@ class ExerciseEvaluator:
             "angle_type": angle_type,
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state.value,
+            "target_state": target_state,
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -452,7 +452,7 @@ class ExerciseEvaluator:
             "angle_type": angle_type,
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state.value,
+            "target_state": target_state,
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -469,7 +469,7 @@ class ExerciseEvaluator:
             "angle_type": angle_type,
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state.value,
+            "target_state": target_state,
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
