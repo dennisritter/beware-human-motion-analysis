@@ -51,4 +51,9 @@ for i in range(0, 3):
     else:
         mseq = mseq.merge(seq[i])
 
-print(exval_squat.evaluate(mseq, 1))
+result = exval_squat.evaluate(mseq, 1)
+
+print(seq.body_parts)
+for bp in result[0]:
+    print(bp)
+    print("#######################")
