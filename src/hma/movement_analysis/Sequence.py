@@ -111,20 +111,10 @@ class Sequence:
         if self.poseformat != sequence.poseformat:
             raise ValueError('poseformat of both sequences do not match!')
 
-        # iterate through joint angles and merge them
-        for idx, bp in enumerate(self.joint_angles):
-            if bp is not None:
-                for key in bp:
-                    if not key in sequence.joint_angles[idx]:
-                        raise ValueError(f"Given sequence do not contain key: {key}, but the method called sequence does.")
-                    self.joint_angles[idx][key].extend(sequence.joint_angles[idx][key])
-            else:
-                if sequence.joint_angles[idx] is not None:
-                    raise ValueError(f"Given sequence has body_part, with index {idx}, which is not None. The method called sequence do not provide this body_part.")
-
-        # concatenate positions and timestamps
+        # concatenate positions, timestamps and angles
         self.positions = np.concatenate((self.positions, sequence.positions), axis=0)
         self.timestamps = np.concatenate((self.timestamps, sequence.timestamps), axis=0)
+        self.joint_angles = np.concatenate((self.joint_angles, sequence.joint_angles), axis=0)
 
         return self
 
