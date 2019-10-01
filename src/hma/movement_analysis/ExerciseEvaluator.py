@@ -71,7 +71,7 @@ class ExerciseEvaluator:
         The position in the third dimension represents the START (0) and END (1) state.
         The position in the fourth dimension represent the minimum value (0) and maximum value (1)
         """
-        target_angles = np.zeros((len(seq.body_parts), len(AngleTypes), len(AngleTargetStates, 2)))
+        target_angles = np.zeros((len(seq.body_parts), len(AngleTypes), len(AngleTargetStates), 2))
 
         # Shoulders
         target_angles[seq.body_parts["LeftShoulder"]][AngleTypes.FLEX_EX.value][0] = ex.angles[AngleTargetStates.START.value]["shoulder_left"]["flexion_extension"]["angle"]
@@ -102,6 +102,7 @@ class ExerciseEvaluator:
         target_angles[seq.body_parts["RightKnee"]][AngleTypes.FLEX_EX.value][0] = ex.angles[AngleTargetStates.START.value]["hip_left"]["flexion_extension"]["angle"]
         target_angles[seq.body_parts["RightKnee"]][AngleTypes.FLEX_EX.value][1] = ex.angles[AngleTargetStates.END.value]["hip_left"]["flexion_extension"]["angle"]
 
+        self.target_angles = target_angles
         return target_angles
 
     def find_iteration_keypoints(self, sequence: Sequence):
@@ -195,86 +196,69 @@ class ExerciseEvaluator:
         #     plt.scatter(np.array(self.global_minima[prio_joint_idx]), np.array(self.global_prio_angles[prio_joint_idx][0])[np.array(self.global_minima[prio_joint_idx])], color='green', marker="v", zorder=2)
         # plt.show()
 
-    def evaluate(self, sequence: Sequence, switch_state_idx: int):
+    def evaluate(self, seq: Sequence, switch_state_idx: int):
         ex = self.exercise
-        seq = sequence
-        bp = sequence.body_parts
+        bp = seq.body_parts
 
-        prio_angles = self.get_prio_angles(ex, sequence)
-        for prio_joint in prio_angles:
-            joint_angles = prio_joint[0]
-            ex_target_start = prio_joint[1]
-            ex_target_end = prio_joint[2]
+        if self.prio_angles == None:
+            self._get_prio_angles(ex, seq)
 
-            # ANGLE ANALYSIS
-            shoulder_left_results = []
-            shoulder_right_results = []
-            hip_left_results = []
-            hip_right_results = []
-            elbow_left_results = []
-            elbow_right_results = []
-            knee_left_results = []
-            knee_right_results = []
+        if self.target_angles == None:
+            self._get_target_angles(ex, seq)
 
-            current_target_state = AngleTargetStates.END
-            for frame in range(0, len(seq)):
-                if frame == switch_state_idx:
-                    current_target_state = AngleTargetStates.START
-                shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add = self.process_ball_joint_angles(
-                    seq.joint_angles[bp["LeftShoulder"]]["flexion_extension"][frame],
-                    seq.joint_angles[bp["LeftShoulder"]]["abduction_adduction"][frame],
-                    ex.angles[current_target_state.value]["shoulder_left"]["flexion_extension"]["angle"],
-                    ex.angles[current_target_state.value]["shoulder_left"]["abduction_adduction"]["angle"])
-                shoulder_left_results.append(ex.check_angles_shoulder_left(shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add, current_target_state, 10))
-                # print(f"Shoulder Left Flexion: {ex.check_angles_shoulder_left(shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add, current_target_state, 10)['flexion_extension']}")
-                # print(f"Shoulder Left Abduction: {ex.check_angles_shoulder_left(shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add, current_target_state, 10)['abduction_adduction']}")
-                shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add = self.process_ball_joint_angles(
-                    seq.joint_angles[bp["RightShoulder"]]["flexion_extension"][frame],
-                    seq.joint_angles[bp["RightShoulder"]]["abduction_adduction"][frame],
-                    ex.angles[current_target_state.value]["shoulder_right"]["flexion_extension"]["angle"],
-                    ex.angles[current_target_state.value]["shoulder_right"]["abduction_adduction"]["angle"])
-                shoulder_right_results.append(ex.check_angles_shoulder_right(shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add, current_target_state, 10))
-                # print(f"Shoulder Right Flexion: {ex.check_angles_shoulder_right(shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add, current_target_state, 10)['flexion_extension']}")
-                # print(f"Shoulder Right Abduction: {ex.check_angles_shoulder_right(shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add, current_target_state, 10)['abduction_adduction']}")
-                hip_left_angle_flex_ex, hip_left_angle_abd_add = self.process_ball_joint_angles(
-                    seq.joint_angles[bp["LeftHip"]]["flexion_extension"][frame],
-                    seq.joint_angles[bp["LeftHip"]]["abduction_adduction"][frame],
-                    ex.angles[current_target_state.value]["hip_left"]["flexion_extension"]["angle"],
-                    ex.angles[current_target_state.value]["hip_left"]["abduction_adduction"]["angle"])
-                hip_left_results.append(ex.check_angles_shoulder_left(hip_left_angle_flex_ex, hip_left_angle_abd_add, current_target_state, 10))
-                # print(f"Hip Left Flexion: {ex.check_angles_hip_left(hip_left_angle_flex_ex, hip_left_angle_abd_add, current_target_state, 10)['flexion_extension']}")
-                # print(f"Hip Left Abduction: {ex.check_angles_hip_left(hip_left_angle_flex_ex, hip_left_angle_abd_add, current_target_state, 10)['abduction_adduction']}")
-                hip_right_angle_flex_ex, hip_right_angle_abd_add = self.process_ball_joint_angles(
-                    seq.joint_angles[bp["RightHip"]]["flexion_extension"][frame],
-                    seq.joint_angles[bp["RightHip"]]["abduction_adduction"][frame],
-                    ex.angles[current_target_state.value]["hip_right"]["flexion_extension"]["angle"],
-                    ex.angles[current_target_state.value]["hip_right"]["abduction_adduction"]["angle"])
-                hip_right_results.append(ex.check_angles_shoulder_right(hip_right_angle_flex_ex, hip_right_angle_abd_add, current_target_state, 10))
-                # print(f"Hip Right Flexion: {ex.check_angles_hip_right(hip_right_angle_flex_ex, hip_right_angle_abd_add, current_target_state, 10)['flexion_extension']}")
-                # print(f"Hip Right Abduction: {ex.check_angles_hip_right(hip_right_angle_flex_ex, hip_right_angle_abd_add, current_target_state, 10)['abduction_adduction']}")
+        # results = np.zeros((len(seq), len(seq.body_parts), len(AngleTypes)))
+        results = [[[None] * len(AngleTypes)] * len(bp)] * len(seq)
+        current_target_state = AngleTargetStates.END
+        for frame in range(0, len(seq)):
+            if frame == switch_state_idx:
+                current_target_state = AngleTargetStates.START
 
-                elbow_left_angle_flex_ex = seq.joint_angles[bp["LeftElbow"]]["flexion_extension"][frame]
-                elbow_left_results.append(ex.check_angles_elbow_left(elbow_left_angle_flex_ex, current_target_state, 10))
-                # print(f"Elbow Left Flexion: {ex.check_angles_elbow_left(elbow_left_angle_flex_ex, current_target_state, 10)['flexion_extension']}")
-                elbow_right_angle_flex_ex = seq.joint_angles[bp["RightElbow"]]["flexion_extension"][frame]
-                elbow_right_results.append(ex.check_angles_elbow_right(elbow_right_angle_flex_ex, current_target_state, 10))
-                # print(f"Elbow Right Flexion: {ex.check_angles_elbow_right(elbow_right_angle_flex_ex, current_target_state, 10)['flexion_extension']}")
-                knee_left_angle_flex_ex = seq.joint_angles[bp["LeftKnee"]]["flexion_extension"][frame]
-                knee_left_results.append(ex.check_angles_knee_left(knee_left_angle_flex_ex, current_target_state, 10))
-                # print(f"Knee Left Flexion: {ex.check_angles_knee_left(knee_left_angle_flex_ex, current_target_state, 10)['flexion_extension']}")
-                knee_right_angle_flex_ex = seq.joint_angles[bp["RightKnee"]]["flexion_extension"][frame]
-                knee_right_results.append(ex.check_angles_knee_right(knee_right_angle_flex_ex, current_target_state, 10))
-                # print(f"Knee Right Flexion: {ex.check_angles_knee_right(knee_right_angle_flex_ex, current_target_state, 10)['flexion_extension']}")
+            # Shoulders
+            shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add = self.process_ball_joint_angles(
+                seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.FLEX_EX.value],
+                seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.AB_AD.value],
+                self.target_angles[bp["LeftShoulder"]][AngleTypes.FLEX_EX.value],
+                self.target_angles[bp["LeftShoulder"]][AngleTypes.AB_AD.value])
+            results[frame][bp["LeftShoulder"]] = ex.check_angles_shoulder_left(shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add, current_target_state, 10)
+            # shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add = self.process_ball_joint_angles(
+            #     seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.FLEX_EX.value],
+            #     seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.AB_AD.value],
+            #     self.target_angles[bp["RightShoulder"]][AngleTypes.FLEX_EX.value],
+            #     self.target_angles[bp["RightShoulder"]][AngleTypes.AB_AD.value])
+            # shoulder_right_results.append(ex.check_angles_shoulder_right(shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add, current_target_state, 10))
+            # # Hips
+            # hip_left_angle_flex_ex, hip_left_angle_abd_add = self.process_ball_joint_angles(
+            #     seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.FLEX_EX.value],
+            #     seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.AB_AD.value],
+            #     self.target_angles[bp["LeftHip"]][AngleTypes.FLEX_EX.value],
+            #     self.target_angles[bp["LeftHip"]][AngleTypes.AB_AD.value])
+            # hip_left_results.append(ex.check_angles_shoulder_left(hip_left_angle_flex_ex, hip_left_angle_abd_add, current_target_state, 10))
+            # hip_right_angle_flex_ex, hip_right_angle_abd_add = self.process_ball_joint_angles(
+            #     seq.joint_angles[frame][bp["RightHip"]][AngleTypes.FLEX_EX.value],
+            #     seq.joint_angles[frame][bp["RightHip"]][AngleTypes.AB_AD.value],
+            #     self.target_angles[bp["RightHip"]][AngleTypes.FLEX_EX.value],
+            #     self.target_angles[bp["RightHip"]][AngleTypes.AB_AD.value])
+            # hip_right_results.append(ex.check_angles_shoulder_right(hip_right_angle_flex_ex, hip_right_angle_abd_add, current_target_state, 10))
+            # # Elbows
+            # elbow_left_angle_flex_ex = seq.joint_angles[frame][bp["LeftElbow"]][AngleTypes.FLEX_EX.value]
+            # elbow_left_results.append(ex.check_angles_elbow_left(elbow_left_angle_flex_ex, current_target_state, 10))
+            # elbow_right_angle_flex_ex = seq.joint_angles[frame][bp["RightElbow"]][AngleTypes.AB_AD.value]
+            # elbow_right_results.append(ex.check_angles_elbow_right(elbow_right_angle_flex_ex, current_target_state, 10))
+            # # Knees
+            # knee_left_angle_flex_ex = seq.joint_angles[frame][bp["LeftKnee"]][AngleTypes.FLEX_EX.value]
+            # knee_left_results.append(ex.check_angles_knee_left(knee_left_angle_flex_ex, current_target_state, 10))
+            # knee_right_angle_flex_ex = seq.joint_angles[frame][bp["RightKnee"]][AngleTypes.AB_AD.value]
+            # knee_right_results.append(ex.check_angles_knee_right(knee_right_angle_flex_ex, current_target_state, 10))
 
-            results = [None] * len(seq.body_parts)
-            results[bp["LeftShoulder"]] = shoulder_left_results
-            results[bp["RightShoulder"]] = shoulder_right_results
-            results[bp["LeftHip"]] = hip_left_results
-            results[bp["RightHip"]] = hip_right_results
-            results[bp["LeftElbow"]] = elbow_left_results
-            results[bp["RightElbow"]] = elbow_right_results
-            results[bp["LeftKnee"]] = knee_left_results
-            results[bp["RightKnee"]] = knee_right_results
+            # results = [None] * len(seq.body_parts)
+            # results[bp["LeftShoulder"]] = shoulder_left_results
+            # results[bp["RightShoulder"]] = shoulder_right_results
+            # results[bp["LeftHip"]] = hip_left_results
+            # results[bp["RightHip"]] = hip_right_results
+            # results[bp["LeftElbow"]] = elbow_left_results
+            # results[bp["RightElbow"]] = elbow_right_results
+            # results[bp["LeftKnee"]] = knee_left_results
+            # results[bp["RightKnee"]] = knee_right_results
             return results
 
     def process_ball_joint_angles(

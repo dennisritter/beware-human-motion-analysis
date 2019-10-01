@@ -3,6 +3,7 @@ import math
 
 from hma.movement_analysis.AngleTargetStates import AngleTargetStates
 from hma.movement_analysis.AngleAnalysisResultStates import AngleAnalysisResultStates
+from hma.movement_analysis.AngleTypes import AngleTypes
 
 
 class Exercise:
@@ -22,10 +23,10 @@ class Exercise:
         self.description = description
 
     def check_angles_shoulder_left(self, angle_flex_ex: float, angle_abd_add: float, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
-        result = {
-            "flexion_extension": self._check_angle_shoulder_left_flexion_extension(angle_flex_ex, target_state, tolerance),
-            "abduction_adduction": self._check_angle_shoulder_left_abduction_adduction(angle_abd_add, target_state, tolerance)
-        }
+        result = [None] * len(AngleTypes)
+        result[AngleTypes.FLEX_EX.value] = self._check_angle_shoulder_left_flexion_extension(angle_flex_ex, target_state, tolerance)
+        result[AngleTypes.AB_AD.value] = self._check_angle_shoulder_left_abduction_adduction(angle_abd_add, target_state, tolerance)
+
         return result
 
     def check_angles_shoulder_right(self, angle_flex_ex: float, angle_abd_add: float, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
@@ -116,7 +117,7 @@ class Exercise:
     def _check_angle_shoulder_left_flexion_extension(self, angle: float, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
         if target_state.value not in self.angles.keys():
             warnings.warn("The target_state parameter value is not present in the Exercises' angles attribute. Cancelng Analysis.")
-            return []
+            return None
 
         target_end = self.angles[AngleTargetStates.END.value]["shoulder_left"]["flexion_extension"]["angle"][1]
         target_start = self.angles[AngleTargetStates.START.value]["shoulder_left"]["flexion_extension"]["angle"][1]
@@ -125,6 +126,7 @@ class Exercise:
 
         result = {
             "angle": angle,
+            "angle_type": AngleTypes.FLEX_EX,
             "target_min": target_min,
             "target_max": target_max,
             "target_state": target_state.value,
