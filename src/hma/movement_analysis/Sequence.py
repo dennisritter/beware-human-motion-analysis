@@ -58,18 +58,6 @@ class Sequence:
         else:
             raise TypeError(f"Invalid argument type: {type(item)}")
 
-        # TODO REMOVE
-        # joint_angles = []
-        # for idx, bp in enumerate(self.joint_angles):
-        #     if bp is not None:
-        #         bp_dict = {}
-        #         for key in bp:
-        #             bp_dict[key] = self.joint_angles[idx][key][start:stop:step]
-        #             # print(self.joint_angles[idx][key][start:stop:step])
-        #         joint_angles.append(bp_dict)
-        #     else:
-        #         joint_angles.append(None)
-
         return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.poseformat, self.name, self.joint_angles[start:stop:step])
 
     """
