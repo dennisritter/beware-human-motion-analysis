@@ -113,96 +113,66 @@ class ExerciseEvaluator:
         self.target_angles = target_angles
         return target_angles
 
-    def find_iteration_keypoints(self, sequence: Sequence):
-        prio_angles = self.get_prio_angles(self.exercise, sequence)
+    def find_iteration_keypoints(self, seq: Sequence):
+        ex = self.exercise
 
+        if self.prio_angles == None:
+            self._get_prio_angles(ex, seq)
+
+        if self.target_angles == None:
+            self._get_target_angles(ex, seq)
+
+        if self.body_part_indices == None:
+            self.body_part_indices = seq.body_parts
+
+        # TODO: Refactor
         if len(self.global_minima) == 0:
-            for i in range(0, len(prio_angles)):
+            for i in range(0, len(self.prio_angles)):
                 self.global_maxima.append([])
                 self.global_minima.append([])
 
-        for prio_joint_idx, prio_joint in enumerate(prio_angles):
-            joint_angles = prio_joint[0]
-            ex_target_start = prio_joint[1]
-            ex_target_end = prio_joint[2]
+        for body_part_idx, angle_type in self.prio_angles:
+            # (idx, AngleType)
+            # (1, AngleType.FLEX_EX)
+            
+            # Get calculated angles of a specific type for a specific body part for all frames  
+            angles = seq.joint_angles[:, body_part_idx, angle_type.value]
 
             # TODO: Find best value for window size
-            savgol_window_max = 51
-            savgol_window_generic = int(math.floor(len(joint_angles)/1.5)+1 if math.floor(len(joint_angles)/1.5) % 2 == 0 else math.floor(len(joint_angles)/1.5))
+            # Apply a Savitzky-Golay Filter to get a list of 'smoothed' angles.
+            # savgol_window_max = 51
+            # savgol_window_generic = int(math.floor(len(angles)/1.5)+1 if math.floor(len(angles)/1.5) % 2 == 0 else math.floor(len(angles)/1.5))
             # savgol_window = min(savgol_window_max, savgol_window_generic)
             savgol_window = 51
-            joint_angles_smooth = savgol_filter(joint_angles, savgol_window, 3, mode="nearest")
+            angles_savgol = savgol_filter(angles, savgol_window, 3, mode="nearest")
 
             # TODO: Find best value for order parameter
-            maxima = argrelextrema(joint_angles_smooth, np.greater, order=10)[0]
-            minima = argrelextrema(joint_angles_smooth, np.less, order=10)[0]
+            # Find Minima and Maxima of angles after applying a Savitzky-Golay Filter filter
+            maxima = argrelextrema(angles_savgol, np.greater, order=10)[0]
+            minima = argrelextrema(angles_savgol, np.less, order=10)[0]
 
-            ### Filter Extrema ###
-            # 1. Check whether local maxima/minima are closer to their desired target point than to the other target point
-            # target_end_greater_start -> Maxima = END state frames; Minima = START state frames
-            # target_end_less_start -> Minima = END state frames; Maxima = START state frames
-            target_end_greater_start = ex_target_end > ex_target_start
-            target_end_less_start = ex_target_end < ex_target_start
-            # target_end_is_zero = ex_target_end == ex_target_start
-            # TODO: Solve with map/lambda ?
-            for rel_max in maxima:
-                diff_to_start = abs(joint_angles_smooth[rel_max] - min(ex_target_start))
-                diff_to_end = abs(joint_angles_smooth[rel_max] - min(ex_target_end))
-                if target_end_greater_start:
-                    if diff_to_start > diff_to_end:
-                        self.global_maxima[prio_joint_idx].append(rel_max + len(self.global_sequence))
-                if target_end_less_start:
-                    if diff_to_start < diff_to_end:
-                        self.global_maxima[prio_joint_idx].append(rel_max + len(self.global_sequence))
-            for rel_min in minima:
-                diff_to_start = abs(joint_angles_smooth[rel_min] - min(ex_target_start))
-                diff_to_end = abs(joint_angles_smooth[rel_min] - min(ex_target_end))
-                if target_end_greater_start:
-                    if diff_to_start < diff_to_end:
-                        self.global_minima[prio_joint_idx].append(rel_min + len(self.global_sequence))
-                if target_end_less_start:
-                    if diff_to_start > diff_to_end:
-                        self.global_minima[prio_joint_idx].append(rel_min + len(self.global_sequence))
+            # Get Exercise targets for the current angle type 
+            ex_targets = self.target_angles[body_part_idx][angle_type.value]
+            # Check if Exercise targets of target state END are greater than targets of START
+            # We need this information to identify whether local MAXIMA or MINIMA represent start/end of a subsequence
+            target_end_greater_start = min(ex_targets[AngleTargetStates.END.value]) > min(ex_targets[AngleTargetStates.START.value])
 
-            # Compare indices of min/max. The altering list must contain increasing index values. One sequence of min < max < min is one iteration.
+            # Check if distance to Exercise START target angle is greater than Exercise END target angle
+            # in order to remove falsy maxima/minima
+            _dist_filter = lambda x: abs(angles_savgol[x] - min(ex_targets[AngleTargetStates.START.value])) > abs(angles_savgol[x] - min(ex_targets[AngleTargetStates.END.value]))
             if target_end_greater_start:
-                minmax_altering = []
-                for i in range(0, max(len(self.global_minima[prio_joint_idx]), len(self.global_maxima[prio_joint_idx]))):
-                    if len(self.global_minima[prio_joint_idx]) > i:
-                        minmax_altering.append((self.global_minima[prio_joint_idx][i], "min"))
-                    if len(self.global_maxima[prio_joint_idx]) > i:
-                        minmax_altering.append((self.global_maxima[prio_joint_idx][i], "max"))
-            if target_end_less_start:
-                minmax_altering = np.array([])
-                for i in range(0, max(len(self.global_minima[prio_joint_idx]), len(self.global_maxima[prio_joint_idx]))):
-                    if len(self.global_maxima[prio_joint_idx]) > i:
-                        minmax_altering.append((self.global_maxima[prio_joint_idx][i], "max"))
-                    if len(self.global_minima[prio_joint_idx]) > i:
-                        minmax_altering.append((self.global_minima[prio_joint_idx][i], "min"))
+                maxima = maxima[_dist_filter(maxima)]
+                minima = minima[np.invert(_dist_filter(minima))]
+            else:
+                maxima = maxima[np.invert(_dist_filter(maxima))]
+                minima = minima[_dist_filter(minima)]
 
-            # print(minmax_altering)
-            print(minmax_altering[0:3])
 
-        if len(self.global_sequence) == 0:
-            self.global_sequence = sequence
-            self.global_prio_angles = prio_angles
-        else:
-            self.global_sequence = self.global_sequence.merge(sequence)
-            for i in range(0, len(prio_angles)):
-                np.append(self.global_prio_angles[i], prio_angles[i])
-
-        # plt.plot(range(0, len(joint_angles)), joint_angles, zorder=1)
-        # plt.plot(range(0, len(joint_angles)), joint_angles_smooth, color='red', zorder=1)
-        # plt.scatter(maxima, joint_angles_smooth[maxima], color='green', marker="^", zorder=2)
-        # plt.scatter(minima, joint_angles_smooth[minima], color='green', marker="v", zorder=2)
-        # plt.show()
-
-        # plt.plot(range(0, len(self.global_prio_angles[prio_joint_idx][0])), self.global_prio_angles[prio_joint_idx][0], zorder=1)
-        # if len(self.global_maxima[prio_joint_idx]) > 0:
-        #     plt.scatter(np.array(self.global_maxima[prio_joint_idx]), np.array(self.global_prio_angles[prio_joint_idx][0])[np.array(self.global_maxima[prio_joint_idx])], color='green', marker="^", zorder=2)
-        # if len(self.global_minima[prio_joint_idx]) > 0:
-        #     plt.scatter(np.array(self.global_minima[prio_joint_idx]), np.array(self.global_prio_angles[prio_joint_idx][0])[np.array(self.global_minima[prio_joint_idx])], color='green', marker="v", zorder=2)
-        # plt.show()
+            plt.plot(range(0, len(angles)), angles, zorder=1)
+            plt.plot(range(0, len(angles)), angles_savgol, color='red', zorder=1)
+            plt.scatter(maxima, angles_savgol[maxima], color='green', marker="^", zorder=2)
+            plt.scatter(minima, angles_savgol[minima], color='green', marker="v", zorder=2)
+            plt.show()
 
     def evaluate(self, seq: Sequence, switch_state_idx: int):
         ex = self.exercise
