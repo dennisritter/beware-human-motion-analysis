@@ -5,26 +5,6 @@ import numpy as np
 
 
 class PoseProcessor:
-    # TODO: Remove?
-    OPENPOSE_MPI_BODY_PARTS = {"Head": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
-                               "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
-                               "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "Chest": 14,
-                               "Background": 15}
-    # TODO: Remove?
-    OPENPOSE_MPI_PAIRS = [["Head", "Neck"],
-                          ["Neck", "RShoulder"],
-                          ["RShoulder", "RElbow"],
-                          ["RElbow", "RWrist"],
-                          ["Neck", "LShoulder"],
-                          ["LShoulder", "LElbow"],
-                          ["LElbow", "LWrist"],
-                          ["Neck", "Chest"],
-                          ["Chest", "RHip"],
-                          ["RHip", "RKnee"],
-                          ["RKnee", "RAnkle"],
-                          ["Chest", "LHip"],
-                          ["LHip", "LKnee"],
-                          ["LKnee", "LAnkle"]]
 
     def __init__(self, poseformat: PoseFormatEnum):
         """ PoseProcessor Constructor
@@ -103,11 +83,11 @@ class PoseProcessor:
         positions = np.reshape(positions, (np.shape(positions)[0], int(np.shape(positions)[1]/3), 3))
 
         # Center Positions by subtracting the mean of each coordinate
-        # positions[:, :,
-        #           0] -= np.mean(positions[:, :, 0])
-        # positions[:, :,
-        #           1] -= np.mean(positions[:, :, 1])
-        # positions[:, :,
-        #           2] -= np.mean(positions[:, :, 2])
+        positions[:, :,
+                  0] -= np.mean(positions[:, :, 0])
+        positions[:, :,
+                  1] -= np.mean(positions[:, :, 1])
+        positions[:, :,
+                  2] -= np.mean(positions[:, :, 2])
 
         return Sequence(body_parts, positions, timestamps, self.poseformat, name=name)
