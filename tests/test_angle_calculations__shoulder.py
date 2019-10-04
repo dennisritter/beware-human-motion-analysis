@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from src.hma.movement_analysis import angle_calculations_medical as acm
+from src.hma.movement_analysis import angle_calculations as acm
 from src.hma.movement_analysis.Sequence import Sequence
 from src.hma.movement_analysis.PoseFormatEnum import PoseFormatEnum
 
