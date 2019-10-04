@@ -6,8 +6,8 @@ import numpy as np
 from hma.movement_analysis.Sequence import Sequence
 from hma.movement_analysis.PoseProcessor import PoseProcessor
 from hma.movement_analysis.PoseFormatEnum import PoseFormatEnum
+from hma.movement_analysis.AngleTypes import AngleTypes
 from hma.movement_analysis import angle_calculations as acm
-from hma.movement_analysis import logging
 from hma.movement_analysis import distance
 import tslearn.metrics as ts
 
@@ -15,20 +15,19 @@ import tslearn.metrics as ts
 # Calculating joint angles for a MOCAP sequence and returning a 2D-list containing all angles for each frame in consecutive order
 def get_minmax_angles_mocap(seq):
     bp = seq.body_parts
-
     minmax_angles = []
-    minmax_angles.append([np.min(seq.joint_angles[bp["LeftShoulder"]]["flexion_extension"]), np.max(seq.joint_angles[bp["LeftShoulder"]]["flexion_extension"])])
-    minmax_angles.append([np.min(seq.joint_angles[bp["LeftShoulder"]]["abduction_adduction"]), np.max(seq.joint_angles[bp["LeftShoulder"]]["abduction_adduction"])])
-    minmax_angles.append([np.min(seq.joint_angles[bp["RightShoulder"]]["flexion_extension"]), np.max(seq.joint_angles[bp["RightShoulder"]]["flexion_extension"])])
-    minmax_angles.append([np.min(seq.joint_angles[bp["RightShoulder"]]["abduction_adduction"]), np.max(seq.joint_angles[bp["RightShoulder"]]["abduction_adduction"])])
-    minmax_angles.append([np.min(seq.joint_angles[bp["LeftHip"]]["flexion_extension"]), np.max(seq.joint_angles[bp["LeftHip"]]["flexion_extension"])])
-    minmax_angles.append([np.min(seq.joint_angles[bp["LeftHip"]]["abduction_adduction"]), np.max(seq.joint_angles[bp["LeftHip"]]["abduction_adduction"])])
-    minmax_angles.append([np.min(seq.joint_angles[bp["RightHip"]]["flexion_extension"]), np.max(seq.joint_angles[bp["RightHip"]]["flexion_extension"])])
-    minmax_angles.append([np.min(seq.joint_angles[bp["RightHip"]]["abduction_adduction"]), np.max(seq.joint_angles[bp["RightHip"]]["abduction_adduction"])])
-    minmax_angles.append([np.min(seq.joint_angles[bp["LeftElbow"]]["flexion_extension"]), np.max(seq.joint_angles[bp["LeftElbow"]]["flexion_extension"])])
-    minmax_angles.append([np.min(seq.joint_angles[bp["RightElbow"]]["flexion_extension"]), np.max(seq.joint_angles[bp["RightElbow"]]["flexion_extension"])])
-    minmax_angles.append([np.min(seq.joint_angles[bp["LeftKnee"]]["flexion_extension"]), np.max(seq.joint_angles[bp["LeftKnee"]]["flexion_extension"])])
-    minmax_angles.append([np.min(seq.joint_angles[bp["RightKnee"]]["flexion_extension"]), np.max(seq.joint_angles[bp["RightKnee"]]["flexion_extension"])])
+    minmax_angles.append([np.min(seq.joint_angles[:, bp["LeftShoulder"], AngleTypes.FLEX_EX.value]), np.max(seq.joint_angles[:, bp["LeftShoulder"], AngleTypes.FLEX_EX.value])])
+    minmax_angles.append([np.min(seq.joint_angles[:, bp["LeftShoulder"], AngleTypes.AB_AD.value]), np.max(seq.joint_angles[:, bp["LeftShoulder"], AngleTypes.AB_AD.value])])
+    minmax_angles.append([np.min(seq.joint_angles[:, bp["RightShoulder"], AngleTypes.FLEX_EX.value]), np.max(seq.joint_angles[:, bp["RightShoulder"], AngleTypes.FLEX_EX.value])])
+    minmax_angles.append([np.min(seq.joint_angles[:, bp["RightShoulder"], AngleTypes.AB_AD.value]), np.max(seq.joint_angles[:, bp["RightShoulder"], AngleTypes.AB_AD.value])])
+    minmax_angles.append([np.min(seq.joint_angles[:, bp["LeftHip"], AngleTypes.FLEX_EX.value]), np.max(seq.joint_angles[:, bp["LeftHip"], AngleTypes.FLEX_EX.value])])
+    minmax_angles.append([np.min(seq.joint_angles[:, bp["LeftHip"], AngleTypes.AB_AD.value]), np.max(seq.joint_angles[:, bp["LeftHip"], AngleTypes.AB_AD.value])])
+    minmax_angles.append([np.min(seq.joint_angles[:, bp["RightHip"], AngleTypes.FLEX_EX.value]), np.max(seq.joint_angles[:, bp["RightHip"], AngleTypes.FLEX_EX.value])])
+    minmax_angles.append([np.min(seq.joint_angles[:, bp["RightHip"], AngleTypes.AB_AD.value]), np.max(seq.joint_angles[:, bp["RightHip"], AngleTypes.AB_AD.value])])
+    minmax_angles.append([np.min(seq.joint_angles[:, bp["LeftElbow"], AngleTypes.FLEX_EX.value]), np.max(seq.joint_angles[:, bp["LeftElbow"], AngleTypes.FLEX_EX.value])])
+    minmax_angles.append([np.min(seq.joint_angles[:, bp["RightElbow"], AngleTypes.FLEX_EX.value]), np.max(seq.joint_angles[:, bp["RightElbow"], AngleTypes.FLEX_EX.value])])
+    minmax_angles.append([np.min(seq.joint_angles[:, bp["LeftKnee"], AngleTypes.FLEX_EX.value]), np.max(seq.joint_angles[:, bp["LeftKnee"], AngleTypes.FLEX_EX.value])])
+    minmax_angles.append([np.min(seq.joint_angles[:, bp["RightKnee"], AngleTypes.FLEX_EX.value]), np.max(seq.joint_angles[:, bp["RightKnee"], AngleTypes.FLEX_EX.value])])
     return np.array(minmax_angles)
 
 
