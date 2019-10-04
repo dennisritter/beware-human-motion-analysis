@@ -13,6 +13,7 @@ class Sequence:
         # Example: { "Head": 0, "RightShoulder": 1, ... }
         self.body_parts = body_parts
 
+        # A Boolean ndarray mask to exclude all frames, where all positions are 0.0
         zero_frames_filter_list = self._filter_zero_frames(positions)
         # Defines positions of each bodypart
         # 1. Dimension = Time
@@ -128,7 +129,7 @@ class Sequence:
 
     def _filter_zero_frames(self, positions: list) -> list:
         """
-        Returns a list of booleans to filter numpy arrays by conditions. 
+        Returns a list of booleans. 
         Checks whether the sum of all coordinates for a frame is 0.0
             True -> keep this frame; 
             False -> remove this frame
