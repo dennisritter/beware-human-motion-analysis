@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class AngleTargetStates(Enum):
-    START = "start"
-    END = "end"
+    START = 0
+    END = 1

@@ -1,5 +1,6 @@
 from hma.movement_analysis import transformations
 from hma.movement_analysis import plotting
+from hma.movement_analysis.AngleTypes import AngleTypes
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import math
@@ -32,10 +33,10 @@ def calc_angles_hip_left(positions: list, hip_left_idx: int, hip_right_idx: int,
     Parameters
     ----------
     """
-    flexion_extension_arr = []
-    abduction_adduction_arr = []
-
-    for frame in range(0, len(positions)):
+    n_frames = len(positions)
+    n_angle_types = len(AngleTypes)
+    angles = np.zeros((n_frames, n_angle_types))
+    for frame in range(0, n_frames):
         # Move coordinate system to left Hip
         left_hip_aligned_positions = transformations.align_coordinates_to(hip_left_idx, hip_right_idx, torso_idx, positions, frame=frame)
         kx = left_hip_aligned_positions[knee_left_idx][0]
@@ -63,8 +64,8 @@ def calc_angles_hip_left(positions: list, hip_left_idx: int, hip_right_idx: int,
                 phi -= 360
         flexion_extension = phi
 
-        flexion_extension_arr.append(flexion_extension)
-        abduction_adduction_arr.append(abduction_adduction)
+        angles[frame][AngleTypes.FLEX_EX.value] = flexion_extension
+        angles[frame][AngleTypes.AB_AD.value] = abduction_adduction
 
         if log:
             print("\n##### HIP LEFT ANGLES #####")
@@ -72,10 +73,7 @@ def calc_angles_hip_left(positions: list, hip_left_idx: int, hip_right_idx: int,
             print(f"[{frame}] abduction_adduction angle: {abduction_adduction}")
         # plotting.plot_ball_joint_angle(left_hip_aligned_positions, hip_left_idx, knee_left_idx)
 
-    return {
-        "flexion_extension": flexion_extension_arr,
-        "abduction_adduction": abduction_adduction_arr,
-    }
+    return angles
 
 
 def calc_angles_hip_right(positions: list, hip_right_idx: int, hip_left_idx: int, torso_idx: int, knee_right_idx: int, log: bool = False) -> dict:
@@ -83,10 +81,10 @@ def calc_angles_hip_right(positions: list, hip_right_idx: int, hip_left_idx: int
     Parameters
     ----------
     """
-    flexion_extension_arr = []
-    abduction_adduction_arr = []
-
-    for frame in range(0, len(positions)):
+    n_frames = len(positions)
+    n_angle_types = len(AngleTypes)
+    angles = np.zeros((n_frames, n_angle_types))
+    for frame in range(0, n_frames):
         # Move coordinate system to right Hip
         right_hip_aligned_positions = transformations.align_coordinates_to(hip_right_idx, hip_left_idx, torso_idx, positions, frame=frame)
 
@@ -115,8 +113,8 @@ def calc_angles_hip_right(positions: list, hip_right_idx: int, hip_left_idx: int
                 phi -= 360
         flexion_extension = phi
 
-        flexion_extension_arr.append(flexion_extension)
-        abduction_adduction_arr.append(abduction_adduction)
+        angles[frame][AngleTypes.FLEX_EX.value] = flexion_extension
+        angles[frame][AngleTypes.AB_AD.value] = abduction_adduction
 
         if log:
             print("\n##### HIP RIGHT ANGLES #####")
@@ -124,10 +122,7 @@ def calc_angles_hip_right(positions: list, hip_right_idx: int, hip_left_idx: int
             print(f"[{frame}] abduction_adduction angle: {abduction_adduction}")
         # plotting.plot_ball_joint_angle(right_hip_aligned_positions, hip_right_idx, knee_right_idx)
 
-    return {
-        "flexion_extension": flexion_extension_arr,
-        "abduction_adduction": abduction_adduction_arr,
-    }
+    return angles
 
 
 def calc_angles_knee(positions: list, knee_idx: int, hip_idx: int, ankle_idx: int) -> dict:
@@ -138,14 +133,14 @@ def calc_angles_knee(positions: list, knee_idx: int, hip_idx: int, ankle_idx: in
     knee = positions[:, knee_idx, :]
     hip = positions[:, hip_idx, :]
     ankle = positions[:, ankle_idx, :]
-    angles = []
-    for i in range(len(knee)):
-        # Substract angle from 180 because 'Normal Standing' is defined as 0°
-        angles.append(180 - calc_angle(knee[i], hip[i], ankle[i]))
 
-    return {
-        "flexion_extension": angles
-    }
+    n_frames = len(knee)
+    angles = np.zeros((n_frames, len(AngleTypes)))
+    for frame in range(n_frames):
+        # Substract angle from 180 because 'Normal Standing' is defined as 0°
+        angles[frame][AngleTypes.FLEX_EX.value] = 180 - calc_angle(knee[frame], hip[frame], ankle[frame])
+
+    return angles
 
 
 def calc_angles_shoulder_left(positions: list, shoulder_left_idx: int, shoulder_right_idx: int, torso_idx: int, elbow_left_idx: int, log: bool = False) -> dict:
@@ -153,10 +148,10 @@ def calc_angles_shoulder_left(positions: list, shoulder_left_idx: int, shoulder_
     Parameters
     ----------
     """
-    flexion_extension_arr = []
-    abduction_adduction_arr = []
-
-    for frame in range(0, len(positions)):
+    n_frames = len(positions)
+    n_angle_types = len(AngleTypes)
+    angles = np.zeros((n_frames, n_angle_types))
+    for frame in range(0, n_frames):
 
         # Move coordinate system to left Shoulder
         left_shoulder_aligned_positions = transformations.align_coordinates_to(shoulder_left_idx, shoulder_right_idx, torso_idx, positions, frame=frame)
@@ -186,8 +181,8 @@ def calc_angles_shoulder_left(positions: list, shoulder_left_idx: int, shoulder_
                 phi -= 360.0
         flexion_extension = phi
 
-        flexion_extension_arr.append(flexion_extension)
-        abduction_adduction_arr.append(abduction_adduction)
+        angles[frame][AngleTypes.FLEX_EX.value] = flexion_extension
+        angles[frame][AngleTypes.AB_AD.value] = abduction_adduction
 
         if log:
             print("\n##### SHOULDER LEFT ANGLES #####")
@@ -195,21 +190,18 @@ def calc_angles_shoulder_left(positions: list, shoulder_left_idx: int, shoulder_
             print(f"[{frame}] abduction_adduction angle: {abduction_adduction}")
         # plotting.plot_ball_joint_angle(left_shoulder_aligned_positions, shoulder_left_idx, elbow_left_idx)
 
-    return {
-        "flexion_extension": flexion_extension_arr,
-        "abduction_adduction": abduction_adduction_arr,
-    }
+    return angles
 
 
 def calc_angles_shoulder_right(positions: list, shoulder_right_idx: int, shoulder_left_idx: int, torso_idx: int, elbow_right_idx: int, log: bool = False) -> dict:
-    """ Calculates Right Shoulder angles 
+    """ Calculates Right Shoulder angles
     Parameters
     ----------
     """
-    flexion_extension_arr = []
-    abduction_adduction_arr = []
-
-    for frame in range(0, len(positions)):
+    n_frames = len(positions)
+    n_angle_types = len(AngleTypes)
+    angles = np.zeros((n_frames, n_angle_types))
+    for frame in range(0, n_frames):
         # Move coordinate system to right shoulder
         right_shoulder_aligned_positions = transformations.align_coordinates_to(shoulder_right_idx, shoulder_left_idx, torso_idx, positions, frame=frame)
 
@@ -239,8 +231,8 @@ def calc_angles_shoulder_right(positions: list, shoulder_right_idx: int, shoulde
                 phi -= 360
         flexion_extension = phi
 
-        flexion_extension_arr.append(flexion_extension)
-        abduction_adduction_arr.append(abduction_adduction)
+        angles[frame][AngleTypes.FLEX_EX.value] = flexion_extension
+        angles[frame][AngleTypes.AB_AD.value] = abduction_adduction
 
         if log:
             print("\n##### SHOULDER RIGHT ANGLES #####")
@@ -248,10 +240,7 @@ def calc_angles_shoulder_right(positions: list, shoulder_right_idx: int, shoulde
             print(f"[{frame}] abduction_adduction angle: {abduction_adduction}")
         # plotting.plot_ball_joint_angle(right_shoulder_aligned_positions, shoulder_right_idx, elbow_right_idx)
 
-    return {
-        "flexion_extension": flexion_extension_arr,
-        "abduction_adduction": abduction_adduction_arr,
-    }
+    return angles
 
 
 def calc_angles_elbow(positions: list, elbow_idx: int, shoulder_idx: int, wrist_idx: int) -> dict:
@@ -262,11 +251,11 @@ def calc_angles_elbow(positions: list, elbow_idx: int, shoulder_idx: int, wrist_
     elbow = positions[:, elbow_idx, :]
     wrist = positions[:, wrist_idx, :]
     shoulder = positions[:, shoulder_idx, :]
-    angles = []
-    for i in range(len(elbow)):
-        # Substract angle from 180 because 'Normal Standing' (straight arm) is defined as 0°
-        angles.append(180 - calc_angle(elbow[i], wrist[i], shoulder[i]))
 
-    return {
-        "flexion_extension": angles
-    }
+    n_frames = len(elbow)
+    angles = np.zeros((n_frames, len(AngleTypes)))
+    for frame in range(n_frames):
+        # Substract angle from 180 because 'Normal Standing' (straight arm down) is defined as 0°
+        angles[frame][AngleTypes.FLEX_EX.value] = (180 - calc_angle(elbow[frame], wrist[frame], shoulder[frame]))
+
+    return angles
