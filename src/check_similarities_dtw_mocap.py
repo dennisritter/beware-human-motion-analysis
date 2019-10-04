@@ -7,8 +7,8 @@ from hma.movement_analysis.Sequence import Sequence
 from hma.movement_analysis.PoseProcessor import PoseProcessor
 from hma.movement_analysis.PoseFormatEnum import PoseFormatEnum
 from hma.movement_analysis import angle_calculations as acm
-from hma.movement_analysis import logging
 from hma.movement_analysis import distance
+from hma.movement_analysis.AngleTypes import AngleTypes
 import tslearn.metrics as ts
 
 
@@ -16,21 +16,22 @@ import tslearn.metrics as ts
 def get_dtw_angles_mocap(seq):
     bp = seq.body_parts
     dtw_angles = []
-    for frame in range(0, len(seq.positions)):
+    for frame in range(0, len(seq)):
         seq_frame_angles = []
-        seq_frame_angles.append(seq.joint_angles[bp["LeftShoulder"]]["flexion_extension"][frame])
-        seq_frame_angles.append(seq.joint_angles[bp["LeftShoulder"]]["abduction_adduction"][frame])
-        seq_frame_angles.append(seq.joint_angles[bp["RightShoulder"]]["flexion_extension"][frame])
-        seq_frame_angles.append(seq.joint_angles[bp["RightShoulder"]]["abduction_adduction"][frame])
-        seq_frame_angles.append(seq.joint_angles[bp["LeftHip"]]["flexion_extension"][frame])
-        seq_frame_angles.append(seq.joint_angles[bp["LeftHip"]]["abduction_adduction"][frame])
-        seq_frame_angles.append(seq.joint_angles[bp["RightHip"]]["flexion_extension"][frame])
-        seq_frame_angles.append(seq.joint_angles[bp["RightHip"]]["abduction_adduction"][frame])
-        seq_frame_angles.append(seq.joint_angles[bp["LeftElbow"]]["flexion_extension"][frame])
-        seq_frame_angles.append(seq.joint_angles[bp["RightElbow"]]["flexion_extension"][frame])
-        seq_frame_angles.append(seq.joint_angles[bp["LeftKnee"]]["flexion_extension"][frame])
-        seq_frame_angles.append(seq.joint_angles[bp["RightKnee"]]["flexion_extension"][frame])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.FLEX_EX.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.AB_AD.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.FLEX_EX.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.AB_AD.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.FLEX_EX.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.AB_AD.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["RightHip"]][AngleTypes.FLEX_EX.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["RightHip"]][AngleTypes.AB_AD.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["LeftElbow"]][AngleTypes.FLEX_EX.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["RightElbow"]][AngleTypes.FLEX_EX.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["LeftKnee"]][AngleTypes.FLEX_EX.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["RightKnee"]][AngleTypes.FLEX_EX.value])
         dtw_angles.append(seq_frame_angles)
+        print(seq_frame_angles)
     return np.array(dtw_angles)
 
 
@@ -57,4 +58,3 @@ seq_5_angles = get_dtw_angles_mocap(mocap_poseprocessor.load('data/sequences/no_
 # Compare sequences to ground truth sequence (squat)
 dtw_result = get_distances_dtw(seq_gt_angles, [seq_1_angles, seq_2_angles, seq_3_angles, seq_4_angles, seq_5_angles])
 print(dtw_result)
-
