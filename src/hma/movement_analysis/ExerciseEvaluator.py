@@ -134,8 +134,8 @@ class ExerciseEvaluator:
         for body_part_idx, angle_type in self.prio_angles:
             # (idx, AngleType)
             # (1, AngleType.FLEX_EX)
-            
-            # Get calculated angles of a specific type for a specific body part for all frames  
+
+            # Get calculated angles of a specific type for a specific body part for all frames
             angles = seq.joint_angles[:, body_part_idx, angle_type.value]
 
             # TODO: Find best value for window size
@@ -151,7 +151,7 @@ class ExerciseEvaluator:
             maxima = argrelextrema(angles_savgol, np.greater, order=10)[0]
             minima = argrelextrema(angles_savgol, np.less, order=10)[0]
 
-            # Get Exercise targets for the current angle type 
+            # Get Exercise targets for the current angle type
             ex_targets = self.target_angles[body_part_idx][angle_type.value]
             # Check if Exercise targets of target state END are greater than targets of START
             # We need this information to identify whether local MAXIMA or MINIMA represent start/end of a subsequence
@@ -159,14 +159,13 @@ class ExerciseEvaluator:
 
             # Check if distance to Exercise START target angle is greater than Exercise END target angle
             # in order to remove falsy maxima/minima
-            _dist_filter = lambda x: abs(angles_savgol[x] - min(ex_targets[AngleTargetStates.START.value])) > abs(angles_savgol[x] - min(ex_targets[AngleTargetStates.END.value]))
+            def _dist_filter(x): return abs(angles_savgol[x] - min(ex_targets[AngleTargetStates.START.value])) > abs(angles_savgol[x] - min(ex_targets[AngleTargetStates.END.value]))
             if target_end_greater_start:
                 maxima = maxima[_dist_filter(maxima)]
                 minima = minima[np.invert(_dist_filter(minima))]
             else:
                 maxima = maxima[np.invert(_dist_filter(maxima))]
                 minima = minima[_dist_filter(minima)]
-
 
             plt.plot(range(0, len(angles)), angles, zorder=1)
             plt.plot(range(0, len(angles)), angles_savgol, color='red', zorder=1)
@@ -187,7 +186,6 @@ class ExerciseEvaluator:
         if self.body_part_indices == None:
             self.body_part_indices = seq.body_parts
 
-        # results = np.zeros((len(seq), len(seq.body_parts), len(AngleTypes)))
         results = [[[None] * len(AngleTypes)] * len(bp)] * len(seq)
         current_target_state = AngleTargetStates.END
         for frame in range(0, len(seq)):
