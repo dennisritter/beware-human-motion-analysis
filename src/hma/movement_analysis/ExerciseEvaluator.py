@@ -109,7 +109,7 @@ class ExerciseEvaluator:
         return target_angles
 
     # TODO: Check given sequence for iteration -> return (true, (from, mid, to)) or (false)
-        def find_iteration_keypoints(self, seq: Sequence):
+    def find_iteration_keypoints(self, seq: Sequence):
         ex = self.exercise
 
         if self.prio_angles == None:
@@ -190,16 +190,39 @@ class ExerciseEvaluator:
         confirm_extrema_thresh = len(self.prio_angles) - 1
         # Window size
         w_size = 10
-        confirmed_start_frames = self.confirm_extrema(start_frame_matrix, w_size, confirm_extrema_thresh)
-        confirmed_turning_frames = self.confirm_extrema(turning_frame_matrix, w_size, confirm_extrema_thresh)
+        confirmed_start_frames = self._confirm_extrema(start_frame_matrix, w_size, confirm_extrema_thresh)
+        confirmed_turning_frames = self._confirm_extrema(turning_frame_matrix, w_size, confirm_extrema_thresh)
         print(f"confirmed_start_frames: {confirmed_start_frames}")
         print(f"confirmed_turning_frames: {confirmed_turning_frames}")
 
+        iterations = []
+        # We Don't need to iterate over the last element because this can't be the start of a iteration anymore. 
+        for sf_idx in range(0, len(confirmed_start_frames)-1):
+            # Only keep turning frames that occur later than the current start frame
+            start_frame = confirmed_start_frames[sf_idx]
+            confirmed_turning_frames = confirmed_turning_frames[start_frame < confirmed_turning_frames]
+            # If there is no element in confirmed_turning_frames that is greater the current start_frame,
+            # we can exit the loop since following start_frames will be even higher
+            if len(confirmed_turning_frames) == 0:
+                break
+            # If there are still elements left in confirmed_turning_frames, take the smallest one as our turning point
+            else:
+                turning_frame = confirmed_turning_frames[0]
+                confirmed_end_frames = confirmed_start_frames[turning_frame < confirmed_start_frames]
+                if len(confirmed_end_frames) == 0:
+                    break
+                # If there are still elements left in confirmed_end_frames, take the smallest one as our end point
+                else: 
+                    end_frame = confirmed_end_frames[0]
+                    iterations.append([start_frame, turning_frame, end_frame])
 
 
+            print(np.array(iterations))
+            
+        return np.array(iterations)
 
 
-    def confirm_extrema(self, extrema_matrix: np.ndarray, w_size: int, confirm_extrema_thresh: int) -> np.ndarray:
+    def _confirm_extrema(self, extrema_matrix: np.ndarray, w_size: int, confirm_extrema_thresh: int) -> np.ndarray:
         """
         Returns a 1-D numpy ndarray of extrema (minima or maxima).
 
