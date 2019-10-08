@@ -109,7 +109,7 @@ class ExerciseEvaluator:
         return target_angles
 
     # TODO: Check given sequence for iteration -> return (true, (from, mid, to)) or (false)
-    def find_iteration_keypoints(self, seq: Sequence):
+        def find_iteration_keypoints(self, seq: Sequence):
         ex = self.exercise
 
         if self.prio_angles == None:
@@ -157,7 +157,6 @@ class ExerciseEvaluator:
             # in order to remove falsy maxima/minima
             def _dist_filter(x): return abs(angles_savgol[x] - min(ex_targets[AngleTargetStates.START.value])) > abs(angles_savgol[x] - min(ex_targets[AngleTargetStates.END.value]))
             if target_end_greater_start:
-
                 maxima = maxima[_dist_filter(maxima)]
                 minima = minima[np.invert(_dist_filter(minima))]
             else:
@@ -179,7 +178,8 @@ class ExerciseEvaluator:
             plt.scatter(minima, angles_savgol[minima], color='green', marker="v", zorder=2)
             plt.show()
 
-        # NOTE: What if we have only two prioritised angles? -> 100% must be correct? 
+        # TODO: What if some angles body part movements are a flexion and some others are a extension? Minima of one body part would be maxima of other body part and vice versa. 
+        # TODO: What if we have only two prioritised angles? -> 100% must be correct? 
         confirm_extrema_thresh = len(self.prio_angles) - 1
         # Window size
         w_size = 10
@@ -187,6 +187,9 @@ class ExerciseEvaluator:
         confirmed_maxima = self.confirm_extrema(maxima_matrix, w_size, confirm_extrema_thresh)
         print(f"confirmed_minima: {confirmed_minima}")
         print(f"confirmed_maxima: {confirmed_maxima}")
+
+        # If target END angle > target START angle -> flexion, abduction
+        if target_end_greater_start
 
 
     def confirm_extrema(self, extrema_matrix: np.ndarray, w_size: int, confirm_extrema_thresh: int) -> np.ndarray:

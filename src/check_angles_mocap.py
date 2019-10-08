@@ -27,7 +27,7 @@ mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 # seqs = [seq1, seq2, seq3]
 
 seq = mocap_poseprocessor.load(
-    'data/sequences/squat-dennis-multi-1/complete-session.json', 'squat-dennis-multi-1')
+    'data/sequences/squat-dennis-multi-3/complete-session.json', 'squat-dennis-multi-1')
 ex = exercise_loader.load('data/exercises/kniebeuge.json')
 exval_squat = ExerciseEvaluator(ex)
 
