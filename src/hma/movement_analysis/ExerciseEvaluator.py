@@ -125,8 +125,8 @@ class ExerciseEvaluator:
         # Rows = prioritised angle (bodypart and angle type)
         # Columns = Frames
         # 0 means no minimum/maximum; 1 means minimum/maximum found
-        minima_matrix = np.zeros((len(self.prio_angles), len(seq)))
-        maxima_matrix = np.zeros((len(self.prio_angles), len(seq)))
+        start_frame_matrix = np.zeros((len(self.prio_angles), len(seq)))
+        turning_frame_matrix = np.zeros((len(self.prio_angles), len(seq)))
         for prio_idx, (body_part_idx, angle_type) in enumerate(self.prio_angles):
             # (idx, AngleType)
             # (1, AngleType.FLEX_EX)
@@ -163,24 +163,19 @@ class ExerciseEvaluator:
                 maxima = maxima[np.invert(_dist_filter(maxima))]
                 minima = minima[_dist_filter(minima)]
 
-            # Add 1.0 values to frames where a minimum/maximum has been found
-            # NOTE: HACK:   Changing minima to maxima and vice verse when target_end_greater_start is false (Extension, Adduction) to be able!
-            #               -> Prevents confirmation errors when body parts have different movements
-            #               -> Prevents necessity to switch extrema order when identifying iterations. (min,max,min)
-            # TODO: Either change the naming of matrices or the method solving the hack. 
-            #       Example for renaming:   minima_matrix -> start_frame_matrix 
-            #                               maxima_matrix -> turning_frame_matrix 
+            # Add 1 values to frames where a minimum/maximum has been found.
+            # If movement type is a extension/adduction (target_end_greater_start == false), 
+            # add minima to turning frames matrix and maxima to starting frames matrix
             for minimum in minima:
                 if target_end_greater_start:
-                    minima_matrix[prio_idx][minimum] = 1.0
+                    start_frame_matrix[prio_idx][minimum] = 1.0
                 else:
-                    maxima_matrix[prio_idx][minimum] = 1.0
+                    turning_frame_matrix[prio_idx][minimum] = 1.0
             for maximum in maxima:
                 if target_end_greater_start:
-                    maxima_matrix[prio_idx][maximum] = 1.0
+                    turning_frame_matrix[prio_idx][maximum] = 1.0
                 else:
-                    # HACK: 
-                    minima_matrix[prio_idx][minimum] = 1.0
+                    start_frame_matrix[prio_idx][minimum] = 1.0
 
             print(f"minima [{prio_idx}]{minima}")
             print(f"maxima [{prio_idx}]{maxima}")
@@ -195,10 +190,10 @@ class ExerciseEvaluator:
         confirm_extrema_thresh = len(self.prio_angles) - 1
         # Window size
         w_size = 10
-        confirmed_minima = self.confirm_extrema(minima_matrix, w_size, confirm_extrema_thresh)
-        confirmed_maxima = self.confirm_extrema(maxima_matrix, w_size, confirm_extrema_thresh)
-        print(f"confirmed_maxima: {confirmed_maxima}")
-        print(f"confirmed_minima: {confirmed_minima}")
+        confirmed_start_frames = self.confirm_extrema(start_frame_matrix, w_size, confirm_extrema_thresh)
+        confirmed_turning_frames = self.confirm_extrema(turning_frame_matrix, w_size, confirm_extrema_thresh)
+        print(f"confirmed_start_frames: {confirmed_start_frames}")
+        print(f"confirmed_turning_frames: {confirmed_turning_frames}")
 
 
 
@@ -223,7 +218,7 @@ class ExerciseEvaluator:
             w_end = w_start + w_size
             window = extrema_matrix[:, w_start:w_end]
 
-            # Check how many window rows include at least one minimum
+            # Check how many window rows include at least one extremum
             w_row_extrema = 0
             for w_row in window:
                 w_row_extrema += 1 if (np.sum(w_row) >= 1.0) else 0
@@ -231,7 +226,7 @@ class ExerciseEvaluator:
             if w_row_extrema >= confirm_extrema_thresh:
                 # Add a minimum to the list of confirmed minima
                 confirmed_extrema.append(int(w_start + w_size/2))
-                # Remove all 1.0 values from the current window slice of the minima_matrix
+                # Remove all 1.0 values from the current window slice of the extrema_matrix
                 extrema_matrix[:, w_start:w_end] = np.zeros(window.shape)
 
         return np.array(confirmed_extrema)
