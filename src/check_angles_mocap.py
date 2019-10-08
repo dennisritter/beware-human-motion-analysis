@@ -39,3 +39,4 @@ exval_squat = ExerciseEvaluator(ex)
 # for i in range(0, len(seqs)):
 #     exval_squat.find_iteration_keypoints(seqs[i])
 exval_squat.find_iteration_keypoints(seq)
+# (10, 35, 60)

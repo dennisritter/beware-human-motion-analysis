@@ -27,12 +27,6 @@ class ExerciseEvaluator:
         # A Dictionary that maps body part indices of a sequences positions to names body parts represented by String values (Sequence.body_parts attribute)
         self.body_part_indices = None
 
-        self.iterations = np.array([])
-        self.global_minima = []
-        self.global_maxima = []
-        self.global_sequence = []
-        self.global_prio_angles = []
-
     def _get_prio_angles(self, ex: Exercise, seq: Sequence) -> list:
         """
         Returns a list of tuples containing a body part mapped in Sequence.body_parts and the AngleType for that body part which is prioritised.
@@ -114,6 +108,7 @@ class ExerciseEvaluator:
         self.target_angles = target_angles
         return target_angles
 
+    # TODO: Check given sequence for iteration -> return (true, (from, mid, to)) or (false)
     def find_iteration_keypoints(self, seq: Sequence):
         ex = self.exercise
 
@@ -125,13 +120,7 @@ class ExerciseEvaluator:
 
         if self.body_part_indices == None:
             self.body_part_indices = seq.body_parts
-
-        # TODO: Refactor
-        if len(self.global_minima) == 0:
-            for i in range(0, len(self.prio_angles)):
-                self.global_maxima.append([])
-                self.global_minima.append([])
-
+        
         for body_part_idx, angle_type in self.prio_angles:
             # (idx, AngleType)
             # (1, AngleType.FLEX_EX)
@@ -169,11 +158,14 @@ class ExerciseEvaluator:
                 maxima = maxima[np.invert(_dist_filter(maxima))]
                 minima = minima[_dist_filter(minima)]
 
+
             plt.plot(range(0, len(angles)), angles, zorder=1)
             plt.plot(range(0, len(angles)), angles_savgol, color='red', zorder=1)
             plt.scatter(maxima, angles_savgol[maxima], color='green', marker="^", zorder=2)
             plt.scatter(minima, angles_savgol[minima], color='green', marker="v", zorder=2)
             plt.show()
+        
+
 
     def evaluate(self, seq: Sequence, switch_state_idx: int):
         ex = self.exercise
