@@ -191,14 +191,16 @@ class ExerciseEvaluator:
             plt.scatter(minima, angles_savgol[minima], color='green', marker="v", zorder=2)
             plt.show()
 
-        # TODO: What if we have only two prioritised angles? -> 100% must be correct? 
+        # TODO: What if we have only two prioritised angles? -> 100% must be correct? 50% must be correct? Something better? 
         confirm_extrema_thresh = len(self.prio_angles) - 1
         # Window size
         w_size = 10
         confirmed_minima = self.confirm_extrema(minima_matrix, w_size, confirm_extrema_thresh)
         confirmed_maxima = self.confirm_extrema(maxima_matrix, w_size, confirm_extrema_thresh)
-        print(f"confirmed_minima: {confirmed_minima}")
         print(f"confirmed_maxima: {confirmed_maxima}")
+        print(f"confirmed_minima: {confirmed_minima}")
+
+
 
 
 
