@@ -171,6 +171,7 @@ class ExerciseEvaluator:
                 maxima_matrix[prio_idx][maximum] = 1.0
 
             print(f"minima [{prio_idx}]{minima}")
+            print(f"maxima [{prio_idx}]{maxima}")
 
             plt.plot(range(0, len(angles)), angles, zorder=1)
             plt.plot(range(0, len(angles)), angles_savgol, color='red', zorder=1)
@@ -178,30 +179,47 @@ class ExerciseEvaluator:
             plt.scatter(minima, angles_savgol[minima], color='green', marker="v", zorder=2)
             plt.show()
 
-
-        confirmed_minima = []
-        # All but one body part angles must have an extrema in the window range
         # NOTE: What if we have only two prioritised angles? -> 100% must be correct? 
         confirm_extrema_thresh = len(self.prio_angles) - 1
         # Window size
         w_size = 10
-        for column_idx in range(0, minima_matrix.shape[1]):
+        confirmed_minima = self.confirm_extrema(minima_matrix, w_size, confirm_extrema_thresh)
+        confirmed_maxima = self.confirm_extrema(maxima_matrix, w_size, confirm_extrema_thresh)
+        print(f"confirmed_minima: {confirmed_minima}")
+        print(f"confirmed_maxima: {confirmed_maxima}")
+
+
+    def confirm_extrema(self, extrema_matrix: np.ndarray, w_size: int, confirm_extrema_thresh: int) -> np.ndarray:
+        """
+        Returns a 1-D numpy ndarray of extrema (minima or maxima).
+
+        Params: 
+            extrema_matrix: np.ndarray - A 2-D matrix of 0 and 1 where each row represents all frames for some angle.
+                 Each 1 represents a extremum for the respective angle and frame.
+            w_size: int - The window size. Determines how many frames are going to be summarized 
+                when determining whether a extremum can be accounted to all bodyparts (can be confirmed).
+            confirm_extrema_thresh: int - Determines how many angles (rows) of the window must contain at least
+                one extremum so the extremum will be confirmed.
+        """
+        confirmed_extrema = []
+
+        for column_idx in range(0, extrema_matrix.shape[1]):
             w_start = column_idx
             w_end = w_start + w_size
-            window = minima_matrix[:,w_start:w_end]
+            window = extrema_matrix[:, w_start:w_end]
 
             # Check how many window rows include at least one minimum
-            w_row_minima = 0
+            w_row_extrema = 0
             for w_row in window:
-                w_row_minima += 1 if (np.sum(w_row) >= 1.0) else 0
+                w_row_extrema += 1 if (np.sum(w_row) >= 1.0) else 0
             # If enough window rows include an extremum
-            if w_row_minima >= confirm_extrema_thresh:
+            if w_row_extrema >= confirm_extrema_thresh:
                 # Add a minimum to the list of confirmed minima
-                confirmed_minima.append(int(w_start + w_size/2))
+                confirmed_extrema.append(int(w_start + w_size/2))
                 # Remove all 1.0 values from the current window slice of the minima_matrix
-                minima_matrix[:, w_start:w_end] = np.zeros(window.shape)
+                extrema_matrix[:, w_start:w_end] = np.zeros(window.shape)
 
-        print(f"confirmed minima: {confirmed_minima}")
+        return np.array(confirmed_extrema)
 
 
     def evaluate(self, seq: Sequence, switch_state_idx: int):
