@@ -164,10 +164,23 @@ class ExerciseEvaluator:
                 minima = minima[_dist_filter(minima)]
 
             # Add 1.0 values to frames where a minimum/maximum has been found
+            # NOTE: HACK:   Changing minima to maxima and vice verse when target_end_greater_start is false (Extension, Adduction) to be able!
+            #               -> Prevents confirmation errors when body parts have different movements
+            #               -> Prevents necessity to switch extrema order when identifying iterations. (min,max,min)
+            # TODO: Either change the naming of matrices or the method solving the hack. 
+            #       Example for renaming:   minima_matrix -> start_frame_matrix 
+            #                               maxima_matrix -> turning_frame_matrix 
             for minimum in minima:
-                minima_matrix[prio_idx][minimum] = 1.0
+                if target_end_greater_start:
+                    minima_matrix[prio_idx][minimum] = 1.0
+                else:
+                    maxima_matrix[prio_idx][minimum] = 1.0
             for maximum in maxima:
-                maxima_matrix[prio_idx][maximum] = 1.0
+                if target_end_greater_start:
+                    maxima_matrix[prio_idx][maximum] = 1.0
+                else:
+                    # HACK: 
+                    minima_matrix[prio_idx][minimum] = 1.0
 
             print(f"minima [{prio_idx}]{minima}")
             print(f"maxima [{prio_idx}]{maxima}")
@@ -178,7 +191,6 @@ class ExerciseEvaluator:
             plt.scatter(minima, angles_savgol[minima], color='green', marker="v", zorder=2)
             plt.show()
 
-        # TODO: What if some angles body part movements are a flexion and some others are a extension? Minima of one body part would be maxima of other body part and vice versa. 
         # TODO: What if we have only two prioritised angles? -> 100% must be correct? 
         confirm_extrema_thresh = len(self.prio_angles) - 1
         # Window size
@@ -188,8 +200,6 @@ class ExerciseEvaluator:
         print(f"confirmed_minima: {confirmed_minima}")
         print(f"confirmed_maxima: {confirmed_maxima}")
 
-        # If target END angle > target START angle -> flexion, abduction
-        if target_end_greater_start
 
 
     def confirm_extrema(self, extrema_matrix: np.ndarray, w_size: int, confirm_extrema_thresh: int) -> np.ndarray:
