@@ -121,7 +121,13 @@ class ExerciseEvaluator:
         if self.body_part_indices == None:
             self.body_part_indices = seq.body_parts
         
-        for body_part_idx, angle_type in self.prio_angles:
+        # Store all minima/maxima in a matrix of 0/1
+        # Rows = prioritised angle (bodypart and angle type)
+        # Columns = Frames
+        # 0 means no minimum/maximum; 1 means minimum/maximum found
+        minima_matrix = np.zeros((len(self.prio_angles), len(seq)))
+        maxima_matrix = np.zeros((len(self.prio_angles), len(seq)))
+        for prio_idx, (body_part_idx, angle_type) in enumerate(self.prio_angles):
             # (idx, AngleType)
             # (1, AngleType.FLEX_EX)
 
@@ -158,13 +164,44 @@ class ExerciseEvaluator:
                 maxima = maxima[np.invert(_dist_filter(maxima))]
                 minima = minima[_dist_filter(minima)]
 
+            # Add 1.0 values to frames where a minimum/maximum has been found
+            for minimum in minima:
+                minima_matrix[prio_idx][minimum] = 1.0
+            for maximum in maxima:
+                maxima_matrix[prio_idx][maximum] = 1.0
+
+            print(f"minima [{prio_idx}]{minima}")
 
             plt.plot(range(0, len(angles)), angles, zorder=1)
             plt.plot(range(0, len(angles)), angles_savgol, color='red', zorder=1)
             plt.scatter(maxima, angles_savgol[maxima], color='green', marker="^", zorder=2)
             plt.scatter(minima, angles_savgol[minima], color='green', marker="v", zorder=2)
             plt.show()
-        
+
+
+        confirmed_minima = []
+        # All but one body part angles must have an extrema in the window range
+        # NOTE: What if we have only two prioritised angles? -> 100% must be correct? 
+        confirm_extrema_thresh = len(self.prio_angles) - 1
+        # Window size
+        w_size = 10
+        for column_idx in range(0, minima_matrix.shape[1]):
+            w_start = column_idx
+            w_end = w_start + w_size
+            window = minima_matrix[:,w_start:w_end]
+
+            # Check how many window rows include at least one minimum
+            w_row_minima = 0
+            for w_row in window:
+                w_row_minima += 1 if (np.sum(w_row) >= 1.0) else 0
+            # If enough window rows include an extremum
+            if w_row_minima >= confirm_extrema_thresh:
+                # Add a minimum to the list of confirmed minima
+                confirmed_minima.append(int(w_start + w_size/2))
+                # Remove all 1.0 values from the current window slice of the minima_matrix
+                minima_matrix[:, w_start:w_end] = np.zeros(window.shape)
+
+        print(f"confirmed minima: {confirmed_minima}")
 
 
     def evaluate(self, seq: Sequence, switch_state_idx: int):
