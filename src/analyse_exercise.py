@@ -31,7 +31,6 @@ g_seq = mocap_poseprocessor.load(
 ex = exercise_loader.load('data/exercises/kniebeuge.json')
 exval_squat = ExerciseEvaluator(ex)
 
-
 seqs = []
 # Split long sequence for testing
 for i in range(0, math.floor(len(g_seq.positions)/30)):
