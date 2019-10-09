@@ -256,7 +256,7 @@ class ExerciseEvaluator:
 
         return np.array(confirmed_extrema)
 
-
+    # TODO: Check result calculation -> is it calculated per frame or value?!
     def evaluate(self, seq: Sequence, switch_state_idx: int):
         ex = self.exercise
         bp = seq.body_parts
