@@ -321,13 +321,28 @@ class ExerciseEvaluator:
 
         Checks whether the current position is more likely a abduction/adductio or flexion/extension.
         For that, the abd_add_motion_thresh parameter value determines the minimum abduction value to
-        treat the movement as an abduction. Since abduction/adduction angles value range after initial 
-        calculation is [-90, 90], but the range of motion is [-180,180], the value must be extended 
+        treat the movement as an abduction. Since abduction/adduction angles range after initial 
+        calculation is [-90, 90] degrees, but the range of motion is [-180,180] degrees, the value must be extended 
         by -90/90 degrees whenever the flexion angle is greater 90 or less than -90.
         The operation resets the flexion/extension angle to zero(0) whenever the abduction/adduction
         angles distance is less than the ignore_flex_abd90_delta parameters value from 90 degrees.
         Because flexion/extension angles are very sensitive and error prone when close to the X-Axis 
         because it represents a rotation around it.
+
+        Args:
+            angle_flex_ex (float): 
+            angle_abd_add (float):
+            target_angle_range_flex_ex (list):
+            target_angle_range_abd_add (list):
+            ignore_flex_abd90_delta (int): 
+                Default=45;             
+            abd_add_motion_thresh (int): 
+                Determines the minimum abduction value to treat the movement as an abduction.
+                Default=20;
+                
+        Returns:
+            A tuple containing the processed flexion/extension angle as first element and the processed
+            abduction/adduction angle as second value.
         """
         
         # Check if angle-vector.y is higher than origin and adjust abduction/adduction angles if conditions are met
