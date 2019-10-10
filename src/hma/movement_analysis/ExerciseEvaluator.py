@@ -175,10 +175,7 @@ class ExerciseEvaluator:
                 if target_end_greater_start:
                     turning_frame_matrix[prio_idx][maximum] = 1.0
                 else:
-                    start_frame_matrix[prio_idx][minimum] = 1.0
-
-            print(f"minima [{prio_idx}]{minima}")
-            print(f"maxima [{prio_idx}]{maxima}")
+                    start_frame_matrix[prio_idx][maximum] = 1.0
 
             if plot:
                 plt.plot(range(0, len(angles)), angles, zorder=1)
@@ -193,8 +190,6 @@ class ExerciseEvaluator:
         w_size = 10
         confirmed_start_frames = self._confirm_extrema(start_frame_matrix, w_size, confirm_extrema_thresh)
         confirmed_turning_frames = self._confirm_extrema(turning_frame_matrix, w_size, confirm_extrema_thresh)
-        print(f"confirmed_start_frames: {confirmed_start_frames}")
-        print(f"confirmed_turning_frames: {confirmed_turning_frames}")
 
         iterations = []
         # We Don't need to iterate over the last element because this can't be the start of a iteration anymore.
@@ -216,8 +211,6 @@ class ExerciseEvaluator:
                 else:
                     end_frame = confirmed_end_frames[0]
                     iterations.append([start_frame, turning_frame, end_frame])
-
-        #print(f"Identified iterations: {np.array(iterations)}")
 
         return iterations
 
