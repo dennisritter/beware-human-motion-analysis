@@ -74,12 +74,12 @@ prio_angles = exval_squat.prio_angles
 for i, iteration_seq in enumerate(iteration_seqs):
     result = exval_squat.evaluate(iteration_seq, iterations[i][1])
     print(f"########## Evaluation results for iteration [{i}] ##########")
-    print(f"START FRAME [0]")
+    print(f"START FRAME [{iterations[i][0]}]")
     for angle in prio_angles:
-        print(f"{result[0][angle[0]][angle[1].value]}")
+        print(f"{result[iterations[i][0]][angle[0]][angle[1].value]}")
     print(f"TURNING FRAME [{iterations[i][1]}]")
     for angle in prio_angles:
         print(f"{result[iterations[i][1]][angle[0]][angle[1].value]}")
-    print(f"END FRAME [{len(iteration_seq) - 1}]")
+    print(f"END FRAME [{iterations[i][1]}]")
     for angle in prio_angles:
-        print(f"{result[len(iteration_seq) - 1][angle[0]][angle[1].value]}")
+        print(f"{result[iterations[i][2]][angle[0]][angle[1].value]}")
