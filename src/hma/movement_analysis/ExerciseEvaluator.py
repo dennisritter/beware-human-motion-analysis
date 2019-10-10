@@ -7,6 +7,7 @@ import warnings
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 from scipy.signal import argrelextrema, savgol_filter
 
 
@@ -20,17 +21,11 @@ class ExerciseEvaluator:
         # The Exercise to evaluate
         self.exercise = exercise
         # The target_angles for each body part
-        self.target_angles = None
+        self.target_angles = []
         # The prioritised body parts and angles: [(<body_part_index>, <AngleType.KEY>)]
-        self.prio_angles = None
+        self.prio_angles = []
         # A Dictionary that maps body part indices of a sequences positions to names body parts represented by String values (Sequence.body_parts attribute)
         self.body_part_indices = None
-
-        self.iterations = np.array([])
-        self.global_minima = []
-        self.global_maxima = []
-        self.global_sequence = []
-        self.global_prio_angles = []
 
     def _get_prio_angles(self, ex: Exercise, seq: Sequence) -> list:
         """
@@ -113,25 +108,26 @@ class ExerciseEvaluator:
         self.target_angles = target_angles
         return target_angles
 
-    def find_iteration_keypoints(self, seq: Sequence):
+    # TODO: Check given sequence for iteration -> return (true, (from, mid, to)) or (false)
+    def find_iteration_keypoints(self, seq: Sequence, plot=False):
         ex = self.exercise
 
-        if self.prio_angles == None:
+        if len(self.prio_angles) == 0:
             self._get_prio_angles(ex, seq)
 
-        if self.target_angles == None:
+        if len(self.target_angles) == 0:
             self._get_target_angles(ex, seq)
 
         if self.body_part_indices == None:
             self.body_part_indices = seq.body_parts
 
-        # TODO: Refactor
-        if len(self.global_minima) == 0:
-            for i in range(0, len(self.prio_angles)):
-                self.global_maxima.append([])
-                self.global_minima.append([])
-
-        for body_part_idx, angle_type in self.prio_angles:
+        # Store all minima/maxima in a matrix of 0/1
+        # Rows = prioritised angle (bodypart and angle type)
+        # Columns = Frames
+        # 0 means no minimum/maximum; 1 means minimum/maximum found
+        start_frame_matrix = np.zeros((len(self.prio_angles), len(seq)))
+        turning_frame_matrix = np.zeros((len(self.prio_angles), len(seq)))
+        for prio_idx, (body_part_idx, angle_type) in enumerate(self.prio_angles):
             # (idx, AngleType)
             # (1, AngleType.FLEX_EX)
 
@@ -167,69 +163,158 @@ class ExerciseEvaluator:
                 maxima = maxima[np.invert(_dist_filter(maxima))]
                 minima = minima[_dist_filter(minima)]
 
-            plt.plot(range(0, len(angles)), angles, zorder=1)
-            plt.plot(range(0, len(angles)), angles_savgol, color='red', zorder=1)
-            plt.scatter(maxima, angles_savgol[maxima], color='green', marker="^", zorder=2)
-            plt.scatter(minima, angles_savgol[minima], color='green', marker="v", zorder=2)
-            plt.show()
+            # Add 1 values to frames where a minimum/maximum has been found.
+            # If movement type is a extension/adduction (target_end_greater_start == false),
+            # add minima to turning frames matrix and maxima to starting frames matrix
+            for minimum in minima:
+                if target_end_greater_start:
+                    start_frame_matrix[prio_idx][minimum] = 1.0
+                else:
+                    turning_frame_matrix[prio_idx][minimum] = 1.0
+            for maximum in maxima:
+                if target_end_greater_start:
+                    turning_frame_matrix[prio_idx][maximum] = 1.0
+                else:
+                    start_frame_matrix[prio_idx][minimum] = 1.0
 
+            print(f"minima [{prio_idx}]{minima}")
+            print(f"maxima [{prio_idx}]{maxima}")
+
+            if plot:
+                plt.plot(range(0, len(angles)), angles, zorder=1)
+                plt.plot(range(0, len(angles)), angles_savgol, color='red', zorder=1)
+                plt.scatter(maxima, angles_savgol[maxima], color='green', marker="^", zorder=2)
+                plt.scatter(minima, angles_savgol[minima], color='green', marker="v", zorder=2)
+                plt.show()
+
+        # TODO: What if we have only two prioritised angles? -> 100% must be correct? 50% must be correct? Something better?
+        confirm_extrema_thresh = len(self.prio_angles) - 1
+        # Window size
+        w_size = 10
+        confirmed_start_frames = self._confirm_extrema(start_frame_matrix, w_size, confirm_extrema_thresh)
+        confirmed_turning_frames = self._confirm_extrema(turning_frame_matrix, w_size, confirm_extrema_thresh)
+        print(f"confirmed_start_frames: {confirmed_start_frames}")
+        print(f"confirmed_turning_frames: {confirmed_turning_frames}")
+
+        iterations = []
+        # We Don't need to iterate over the last element because this can't be the start of a iteration anymore.
+        for sf_idx in range(0, len(confirmed_start_frames)-1):
+            # Only keep turning frames that occur later than the current start frame
+            start_frame = confirmed_start_frames[sf_idx]
+            confirmed_turning_frames = confirmed_turning_frames[start_frame < confirmed_turning_frames]
+            # If there is no element in confirmed_turning_frames that is greater the current start_frame,
+            # we can exit the loop since following start_frames will be even higher
+            if len(confirmed_turning_frames) == 0:
+                break
+            # If there are still elements left in confirmed_turning_frames, take the smallest one as our turning point
+            else:
+                turning_frame = confirmed_turning_frames[0]
+                confirmed_end_frames = confirmed_start_frames[turning_frame < confirmed_start_frames]
+                if len(confirmed_end_frames) == 0:
+                    break
+                # If there are still elements left in confirmed_end_frames, take the smallest one as our end point
+                else:
+                    end_frame = confirmed_end_frames[0]
+                    iterations.append([start_frame, turning_frame, end_frame])
+
+        #print(f"Identified iterations: {np.array(iterations)}")
+
+        return iterations
+
+    def _confirm_extrema(self, extrema_matrix: np.ndarray, w_size: int, confirm_extrema_thresh: int) -> np.ndarray:
+        """
+        Returns a 1-D numpy ndarray of extrema (minima or maxima).
+
+        Params: 
+            extrema_matrix: np.ndarray - A 2-D matrix of 0 and 1 where each row represents all frames for some angle.
+                 Each 1 represents a extremum for the respective angle and frame.
+            w_size: int - The window size. Determines how many frames are going to be summarized 
+                when determining whether a extremum can be accounted to all bodyparts (can be confirmed).
+            confirm_extrema_thresh: int - Determines how many angles (rows) of the window must contain at least
+                one extremum so the extremum will be confirmed.
+        """
+        confirmed_extrema = []
+
+        for column_idx in range(0, extrema_matrix.shape[1]):
+            w_start = column_idx
+            w_end = w_start + w_size
+            window = extrema_matrix[:, w_start:w_end]
+
+            # Check how many window rows include at least one extremum
+            w_row_extrema = 0
+            for w_row in window:
+                w_row_extrema += 1 if (np.sum(w_row) >= 1.0) else 0
+            # If enough window rows include an extremum
+            if w_row_extrema >= confirm_extrema_thresh:
+                # Add a minimum to the list of confirmed minima
+                # TODO: Optimize extrema position determination
+                confirmed_extrema.append(int(w_start + w_size/2))
+                # Remove all 1.0 values from the current window slice of the extrema_matrix
+                extrema_matrix[:, w_start:w_end] = np.zeros(window.shape)
+
+        return np.array(confirmed_extrema)
+
+    # TODO: Check result calculation -> is it calculated per frame or value?!
     def evaluate(self, seq: Sequence, switch_state_idx: int):
         ex = self.exercise
         bp = seq.body_parts
 
-        if self.prio_angles == None:
+        if len(self.prio_angles) == 0:
             self._get_prio_angles(ex, seq)
 
-        if self.target_angles == None:
+        if len(self.target_angles) == 0:
             self._get_target_angles(ex, seq)
 
         if self.body_part_indices == None:
             self.body_part_indices = seq.body_parts
 
-        results = [[[None] * len(AngleTypes)] * len(bp)] * len(seq)
+        results = []
         current_target_state = AngleTargetStates.END
-        for frame in range(0, len(seq)):
-            if frame == switch_state_idx:
+        for frame in range(len(seq)):
+            if frame == switch_state_idx + 1:
                 current_target_state = AngleTargetStates.START
-
             # Shoulders
             shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add = self.process_ball_joint_angles(
                 seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.FLEX_EX.value],
                 seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.AB_AD.value],
                 self.target_angles[bp["LeftShoulder"]][AngleTypes.FLEX_EX.value],
                 self.target_angles[bp["LeftShoulder"]][AngleTypes.AB_AD.value])
-            results[frame][bp["LeftShoulder"]] = self._get_results_shoulder_left(shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add, current_target_state, 10)
             shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add = self.process_ball_joint_angles(
                 seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.FLEX_EX.value],
                 seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.AB_AD.value],
                 self.target_angles[bp["RightShoulder"]][AngleTypes.FLEX_EX.value],
                 self.target_angles[bp["RightShoulder"]][AngleTypes.AB_AD.value])
-            results[frame][bp["RightShoulder"]] = self._get_results_shoulder_right(shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add, current_target_state, 10)
-            # # Hips
+            # Hips
             hip_left_angle_flex_ex, hip_left_angle_abd_add = self.process_ball_joint_angles(
                 seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.FLEX_EX.value],
                 seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.AB_AD.value],
                 self.target_angles[bp["LeftHip"]][AngleTypes.FLEX_EX.value],
                 self.target_angles[bp["LeftHip"]][AngleTypes.AB_AD.value])
-            results[frame][bp["LeftHip"]] = self._get_results_hip_left(hip_left_angle_flex_ex, hip_left_angle_abd_add, current_target_state, 10)
             hip_right_angle_flex_ex, hip_right_angle_abd_add = self.process_ball_joint_angles(
                 seq.joint_angles[frame][bp["RightHip"]][AngleTypes.FLEX_EX.value],
                 seq.joint_angles[frame][bp["RightHip"]][AngleTypes.AB_AD.value],
                 self.target_angles[bp["RightHip"]][AngleTypes.FLEX_EX.value],
                 self.target_angles[bp["RightHip"]][AngleTypes.AB_AD.value])
-            results[frame][bp["RightHip"]] = self._get_results_hip_right(hip_right_angle_flex_ex, hip_right_angle_abd_add, current_target_state, 10)
             # # Elbows
             elbow_left_angle_flex_ex = seq.joint_angles[frame][bp["LeftElbow"]][AngleTypes.FLEX_EX.value]
-            results[frame][bp["LeftElbow"]] = self._get_results_elbow_left(elbow_left_angle_flex_ex, current_target_state, 10)
             elbow_right_angle_flex_ex = seq.joint_angles[frame][bp["RightElbow"]][AngleTypes.FLEX_EX.value]
-            results[frame][bp["RightElbow"]] = self._get_results_elbow_right(elbow_right_angle_flex_ex, current_target_state, 10)
             # # Knees
             knee_left_angle_flex_ex = seq.joint_angles[frame][bp["LeftKnee"]][AngleTypes.FLEX_EX.value]
-            results[frame][bp["LeftKnee"]] = self._get_results_knee_left(knee_left_angle_flex_ex, current_target_state, 10)
             knee_right_angle_flex_ex = seq.joint_angles[frame][bp["RightKnee"]][AngleTypes.FLEX_EX.value]
-            results[frame][bp["RightKnee"]] = self._get_results_knee_right(knee_right_angle_flex_ex, current_target_state, 10)
 
-            return results
+            # Everything gets overridden? WHY?
+            frame_result = [None]*len(self.body_part_indices)
+            frame_result[bp["LeftShoulder"]] = self._get_results_shoulder_left(shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add, current_target_state, 10)
+            frame_result[bp["RightShoulder"]] = self._get_results_shoulder_right(shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add, current_target_state, 10)
+            frame_result[bp["LeftHip"]] = self._get_results_hip_left(hip_left_angle_flex_ex, hip_left_angle_abd_add, current_target_state, 10)
+            frame_result[bp["RightHip"]] = self._get_results_hip_right(hip_right_angle_flex_ex, hip_right_angle_abd_add, current_target_state, 10)
+            frame_result[bp["LeftElbow"]] = self._get_results_elbow_left(elbow_left_angle_flex_ex, current_target_state, 10)
+            frame_result[bp["RightElbow"]] = self._get_results_elbow_right(elbow_right_angle_flex_ex, current_target_state, 10)
+            frame_result[bp["LeftKnee"]] = self._get_results_knee_left(knee_left_angle_flex_ex, current_target_state, 10)
+            frame_result[bp["RightKnee"]] = self._get_results_knee_right(knee_right_angle_flex_ex, current_target_state, 10)
+            results.append(frame_result)
+
+        return results
 
     def process_ball_joint_angles(
             self,
