@@ -322,7 +322,7 @@ class ExerciseEvaluator:
         #    the abduction represents the horizontal abduction, which is actually limited to [-90, 90°]. In this case, adding 90° would be wrong.
         #    Possible solution: Add 90° only if the prioritised angle is an abduction/adduction.
 
-        # Check if angle-vector.y is higher than origin and adjust abduction/adduction angles if conditions are met
+        # Check if angle-vector.y is higher than origin and adjust abduction/adduction angles if conditions are met.
         # If flexion angle is >90.0, angle-vector.y is higher than origin because flexion angle represents a rotation about the X-Axis
         if angle_flex_ex > 90.0:
             # If motion is considered an Abduction, add 90 degrees to the current angle to meet the expected abduction range [0,180] and not only [0,90]
