@@ -14,12 +14,12 @@ from scipy.signal import argrelextrema, savgol_filter
 class ExerciseEvaluator:
     """This class evaluates analyses motion sequences with respect to an Exercise.
 
-       Attributes:
-            exercise (Exercise):    The exercise to evaluate motion sequences for.
-            target_angles (list):   A list of target angles defined in the given exercise.
-            prio_angles(list):      A list of prioritised body parts and angletypes for the given exercise.
-            body_part_indices:      A dictionary that maps body part String keys to an index int to retrieve
-                                    information for that specific body part.
+    Attributes:
+        exercise (Exercise):    The exercise to evaluate motion sequences for.
+        target_angles (list):   A list of target angles defined in the given exercise.
+        prio_angles(list):      A list of prioritised body parts and angletypes for the given exercise.
+        body_part_indices:      A dictionary that maps body part String keys to an index int to retrieve
+                                information for that specific body part.
     """
 
     # Definitions of high, mid, low priorities as floats
@@ -43,8 +43,8 @@ class ExerciseEvaluator:
         """Returns a list of tuples containing a body part mapped in Sequence.body_parts and the AngleType for that body part which is prioritised.
            Example: [(4, AngleType.FLEX_EX), (4, AngleType.AB_AD)]
 
-           Attributes:
-                seq (Sequence): The sequence to get body part indices from.
+        Attributes:
+            seq (Sequence): The sequence to get body part indices from.
         """
         ex = self.exercise
         prio_angles = []
@@ -80,14 +80,19 @@ class ExerciseEvaluator:
         self.prio_angles = prio_angles
         return prio_angles
 
-    def _get_target_angles(self, ex: Exercise, seq: Sequence) -> list:
-        """
-        Returns a 4-D ndarray which contain the Exercises' range of target angles for all body_parts, angle types and target states as minimum/maximum .
+    def _get_target_angles(self, seq: Sequence) -> list:
+        """Returns target angles for the exercise of this ExerciseEvaluator instance.
+
+        Returns a 4-D ndarray which contain the Exercises' range of target angles for all body_parts, angle types and target states as minimum/maximum.
         The position of each body part in the returned list is mapped in the body_part attribute of the given sequence (seq.body_parts).
         The positions of the second dimension represents an angle type of the AngleTypes enum.
         The position in the third dimension represents the START (0) and END (1) state.
-        The position in the fourth dimension represent the minimum value (0) and maximum value (1)
+        The position in the fourth dimension represent the minimum value (0) and maximum value (1).
+
+        Attributes:
+            seq (Sequence): The sequence to get body parts from.
         """
+        ex = self.exercise
         target_angles = np.zeros((len(seq.body_parts), len(AngleTypes), len(AngleTargetStates), 2))
 
         # Shoulders
@@ -130,7 +135,7 @@ class ExerciseEvaluator:
             self._get_prio_angles(seq)
 
         if len(self.target_angles) == 0:
-            self._get_target_angles(ex, seq)
+            self._get_target_angles(seq)
 
         if self.body_part_indices == None:
             self.body_part_indices = seq.body_parts
@@ -263,14 +268,13 @@ class ExerciseEvaluator:
 
     # TODO: Check result calculation -> is it calculated per frame or value?!
     def evaluate(self, seq: Sequence, switch_state_idx: int):
-        ex = self.exercise
         bp = seq.body_parts
 
         if len(self.prio_angles) == 0:
             self._get_prio_angles(seq)
 
         if len(self.target_angles) == 0:
-            self._get_target_angles(ex, seq)
+            self._get_target_angles(seq)
 
         if self.body_part_indices == None:
             self.body_part_indices = seq.body_parts
