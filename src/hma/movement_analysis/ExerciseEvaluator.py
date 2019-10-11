@@ -10,6 +10,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.signal import argrelextrema, savgol_filter
 
+# TODO: Check whether Sequence parameter for some function are really necessary.
+# Some of them only use the sequences body_part attribute, which is also a attribute in the ExerciseEvaluator class.
+# Either remove the ExerciseEvaluator.body_part_indices attribute or use it instead of sequence.body_parts in some functions.
+
 
 class ExerciseEvaluator:
     """This class evaluates analyses motion sequences with respect to an Exercise.
