@@ -22,11 +22,14 @@ class ExerciseEvaluator:
                                     information for that specific body part.
     """
 
+    # Definitions of high, mid, low priorities as floats
     HIGH_PRIO = 1.0
     MEDIUM_PRIO = 0.5
     LOW_PRIO = 0.0
 
     def __init__(self, exercise: Exercise):
+        """Inits ExerciseEvaluator class with the given Exercise"""
+
         # The Exercise to evaluate
         self.exercise = exercise
         # The target_angles for each body part
@@ -36,40 +39,39 @@ class ExerciseEvaluator:
         # A Dictionary that maps body part indices of a sequences positions to names body parts represented by String values (Sequence.body_parts attribute)
         self.body_part_indices = None
 
-    def _get_prio_angles(self, ex: Exercise, seq: Sequence) -> list:
+    def _get_prio_angles(self, seq: Sequence) -> list:
+        """Returns a list of tuples containing a body part mapped in Sequence.body_parts and the AngleType for that body part which is prioritised.
+            Example: [(4, AngleType.FLEX_EX), (4, AngleType.AB_AD)]
         """
-        Returns a list of tuples containing a body part mapped in Sequence.body_parts and the AngleType for that body part which is prioritised.
-        Example: [(4, AngleType.FLEX_EX), (4, AngleType.AB_AD)]
-        """
-        HIGH_PRIO = 1.0
+        ex = self.exercise
         prio_angles = []
         # Shoulders
-        if ex.angles["start"]["shoulder_left"]["flexion_extension"]["priority"] == HIGH_PRIO:
+        if ex.angles["start"]["shoulder_left"]["flexion_extension"]["priority"] == self.HIGH_PRIO:
             prio_angles.append((seq.body_parts["LeftShoulder"], AngleTypes.FLEX_EX))
-        if ex.angles["start"]["shoulder_left"]["abduction_adduction"]["priority"] == HIGH_PRIO:
+        if ex.angles["start"]["shoulder_left"]["abduction_adduction"]["priority"] == self.HIGH_PRIO:
             prio_angles.append((seq.body_parts["LeftShoulder"], AngleTypes.AB_AD))
-        if ex.angles["start"]["shoulder_right"]["flexion_extension"]["priority"] == HIGH_PRIO:
+        if ex.angles["start"]["shoulder_right"]["flexion_extension"]["priority"] == self.HIGH_PRIO:
             prio_angles.append((seq.body_parts["RightShoulder"], AngleTypes.FLEX_EX))
-        if ex.angles["start"]["shoulder_right"]["abduction_adduction"]["priority"] == HIGH_PRIO:
+        if ex.angles["start"]["shoulder_right"]["abduction_adduction"]["priority"] == self.HIGH_PRIO:
             prio_angles.append((seq.body_parts["RightShoulder"], AngleTypes.AB_AD))
         # Hips
-        if ex.angles["start"]["hip_left"]["flexion_extension"]["priority"] == HIGH_PRIO:
+        if ex.angles["start"]["hip_left"]["flexion_extension"]["priority"] == self.HIGH_PRIO:
             prio_angles.append((seq.body_parts["LeftHip"], AngleTypes.FLEX_EX))
-        if ex.angles["start"]["hip_left"]["abduction_adduction"]["priority"] == HIGH_PRIO:
+        if ex.angles["start"]["hip_left"]["abduction_adduction"]["priority"] == self.HIGH_PRIO:
             prio_angles.append((seq.body_parts["LeftHip"], AngleTypes.AB_AD))
-        if ex.angles["start"]["hip_right"]["flexion_extension"]["priority"] == HIGH_PRIO:
+        if ex.angles["start"]["hip_right"]["flexion_extension"]["priority"] == self.HIGH_PRIO:
             prio_angles.append((seq.body_parts["RightHip"], AngleTypes.FLEX_EX))
-        if ex.angles["start"]["hip_right"]["abduction_adduction"]["priority"] == HIGH_PRIO:
+        if ex.angles["start"]["hip_right"]["abduction_adduction"]["priority"] == self.HIGH_PRIO:
             prio_angles.append((seq.body_parts["RightHip"], AngleTypes.AB_AD))
         # Elbows
-        if ex.angles["start"]["elbow_left"]["flexion_extension"]["priority"] == HIGH_PRIO:
+        if ex.angles["start"]["elbow_left"]["flexion_extension"]["priority"] == self.HIGH_PRIO:
             prio_angles.append((seq.body_parts["LeftElbow"], AngleTypes.FLEX_EX))
-        if ex.angles["start"]["elbow_right"]["flexion_extension"]["priority"] == HIGH_PRIO:
+        if ex.angles["start"]["elbow_right"]["flexion_extension"]["priority"] == self.HIGH_PRIO:
             prio_angles.append((seq.body_parts["RightElbow"], AngleTypes.FLEX_EX))
         # Knees
-        if ex.angles["start"]["knee_left"]["flexion_extension"]["priority"] == HIGH_PRIO:
+        if ex.angles["start"]["knee_left"]["flexion_extension"]["priority"] == self.HIGH_PRIO:
             prio_angles.append((seq.body_parts["LeftKnee"], AngleTypes.FLEX_EX))
-        if ex.angles["start"]["knee_right"]["flexion_extension"]["priority"] == HIGH_PRIO:
+        if ex.angles["start"]["knee_right"]["flexion_extension"]["priority"] == self.HIGH_PRIO:
             prio_angles.append((seq.body_parts["RightKnee"], AngleTypes.FLEX_EX))
 
         self.prio_angles = prio_angles
@@ -122,7 +124,7 @@ class ExerciseEvaluator:
         ex = self.exercise
 
         if len(self.prio_angles) == 0:
-            self._get_prio_angles(ex, seq)
+            self._get_prio_angles(seq)
 
         if len(self.target_angles) == 0:
             self._get_target_angles(ex, seq)
@@ -262,7 +264,7 @@ class ExerciseEvaluator:
         bp = seq.body_parts
 
         if len(self.prio_angles) == 0:
-            self._get_prio_angles(ex, seq)
+            self._get_prio_angles(seq)
 
         if len(self.target_angles) == 0:
             self._get_target_angles(ex, seq)
