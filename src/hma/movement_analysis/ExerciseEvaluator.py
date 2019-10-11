@@ -41,7 +41,10 @@ class ExerciseEvaluator:
 
     def _get_prio_angles(self, seq: Sequence) -> list:
         """Returns a list of tuples containing a body part mapped in Sequence.body_parts and the AngleType for that body part which is prioritised.
-            Example: [(4, AngleType.FLEX_EX), (4, AngleType.AB_AD)]
+           Example: [(4, AngleType.FLEX_EX), (4, AngleType.AB_AD)]
+
+           Attributes:
+                seq (Sequence): The sequence to get body part indices from.
         """
         ex = self.exercise
         prio_angles = []
