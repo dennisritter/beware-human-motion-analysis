@@ -309,6 +309,7 @@ class ExerciseEvaluator:
 
         return results
 
+    # TODO: Either use target_angle_range_flex_ex, target_angle_range_abd_add parameters or remove them from the function.
     def process_ball_joint_angles(
             self,
             angle_flex_ex: float,
@@ -317,14 +318,41 @@ class ExerciseEvaluator:
             target_angle_range_abd_add: list,
             ignore_flex_abd90_delta: int = 20,
             abd_add_motion_thresh: int = 45) -> tuple:
-        # TODO: This function needs a review, whether the processing is correct.
-        # => Always altering abduction/adduction angles might be incorrect because in case of a flexion->abduction rotation order,
-        #    the abduction represents the horizontal abduction, which is actually limited to [-90, 90°]. In this case, adding 90° would be wrong.
-        #    Possible solution: Add 90° only if the prioritised angle is an abduction/adduction.
+        """Processes ball joint angles to improve clinical representation of those.
+
+        Checks whether the current position is more likely a abduction/adductio or flexion/extension.
+        For that, the abd_add_motion_thresh parameter value determines the minimum abduction value to
+        treat the movement as an abduction. Since abduction/adduction angles range after initial 
+        calculation is [-90, 90] degrees, but the range of motion is [-180,180] degrees, the value must be extended 
+        by -90/90 degrees whenever the flexion angle is greater 90 or less than -90.
+        The operation resets the flexion/extension angle to zero(0) whenever the abduction/adduction
+        angles distance is less than the ignore_flex_abd90_delta parameters value from 90 degrees.
+        Because flexion/extension angles are very sensitive and error prone when close to the X-Axis 
+        because it represents a rotation around it.
+
+        Args:
+            angle_flex_ex (float): 
+                The flexion/extension angle to process.
+            angle_abd_add (float):
+                The abduction/adduction angle to process.
+            target_angle_range_flex_ex (list):
+            target_angle_range_abd_add (list):
+            ignore_flex_abd90_delta (int): 
+                Determines the maximum distance to a 90 degrees abduction/adduction angle, from where the flexion/extension angle is ignored.
+                Default=20;
+            abd_add_motion_thresh (int): 
+                Determines the minimum abduction value to treat the movement as an abduction.
+                Default=45;             
+
+        Returns:
+            A tuple containing the processed flexion/extension angle as first element and the processed
+            abduction/adduction angle as second element.
+            Example: (85.0, 11.0)
+        """
 
         # Check if angle-vector.y is higher than origin and adjust abduction/adduction angles if conditions are met.
         # If flexion angle is >90.0, angle-vector.y is higher than origin because flexion angle represents a rotation about the X-Axis
-        if angle_flex_ex > 90.0:
+        if angle_flex_ex > 90.0 or angle_flex_ex < -90:
             # If motion is considered an Abduction, add 90 degrees to the current angle to meet the expected abduction range [0,180] and not only [0,90]
             if angle_abd_add > abd_add_motion_thresh:
                 angle_abd_add += 90
