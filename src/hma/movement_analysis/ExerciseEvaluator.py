@@ -250,16 +250,18 @@ class ExerciseEvaluator:
         return iterations
 
     def _confirm_extrema(self, extrema_matrix: np.ndarray, w_size: int, confirm_extrema_thresh: int) -> np.ndarray:
-        """
-        Returns a 1-D numpy ndarray of extrema (minima or maxima).
+        """Returns a 1-D numpy ndarray of extrema (minima or maxima).
 
-        Params: 
+        Args: 
             extrema_matrix: np.ndarray - A 2-D matrix of 0 and 1 where each row represents all frames for some angle.
                  Each 1 represents a extremum for the respective angle and frame.
             w_size: int - The window size. Determines how many frames are going to be summarized 
                 when determining whether a extremum can be accounted to all bodyparts (can be confirmed).
             confirm_extrema_thresh: int - Determines how many angles (rows) of the window must contain at least
                 one extremum so the extremum will be confirmed.
+
+        Returns:
+            A 1-D numpy ndarray of extrema (minima or maxima).
         """
         confirmed_extrema = []
 
@@ -282,8 +284,17 @@ class ExerciseEvaluator:
 
         return np.array(confirmed_extrema)
 
-    # TODO: Check result calculation -> is it calculated per frame or value?!
-    def evaluate(self, seq: Sequence, switch_state_idx: int):
+    def evaluate(self, seq: Sequence, switch_state_idx: int) -> list:
+        """Evaluates the given sequence with respect to the Exercise of this ExerciseEvaluator instance.
+
+        Args:
+            seq (Sequence):         The motion sequence to evaluate.
+            switch_state_idx (int): The sequence index where the target state to evaluate against changes from END to START 
+
+        Returns:
+            A list of evaluation results containing: Frames -> body_parts -> AngleTypes -> Result dictionaries
+            Example indexing of a specific result: result[<frame>][<body_part_index>][<angle_type.value>]
+        """
         bp = seq.body_parts
 
         if len(self.prio_angles) == 0:
