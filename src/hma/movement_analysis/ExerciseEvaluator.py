@@ -747,6 +747,19 @@ class ExerciseEvaluator:
                                          target_min: float,
                                          target_max: float,
                                          tolerance: int) -> AngleAnalysisResultStates:
+        """Returns a AngleAnalysisResultStates value that represents the result of the evaluation of a specific angle.
+
+            Args:
+                angle (float):                      The angle to evaluate.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                target_start (list):                The specified target angle range for the START target state.
+                target_end (list):                  The specified target angle range for the END target state.2
+                target_min (float):                 The minimum value of the target angle range. 
+                target_max (float):                 The maximum value of the target angle range.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A AngleAnalysisResultStates value that represents the result of the evaluation of a specific angle.       	
+        """
 
         target_end_is_flexion = target_end[1] > target_start[1]
         target_end_is_extension = target_end[1] < target_start[1]
