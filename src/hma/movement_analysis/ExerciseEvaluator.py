@@ -403,46 +403,122 @@ class ExerciseEvaluator:
 
         return angle_flex_ex, angle_abd_add
 
-    def _get_results_shoulder_left(self, angle_flex_ex: float, angle_abd_add: float, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
+    def _get_results_shoulder_left(self, angle_flex_ex: float, angle_abd_add: float, target_state: AngleTargetStates, tolerance: int = 10) -> list:
+        """Returns a list of evaluation result dictionaries of all AngleTypes for the left shoulder joint.
+
+            Args:
+                angle_flex_ex (float):              The flexion/extension angle.
+                angle_abd_add (float):              The abduction/adduction angle.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A list of evaluation result dictionaries of all AngleTypes for the left shoulder joint.
+        """
         result = [None] * len(AngleTypes)
         result[AngleTypes.FLEX_EX.value] = self._check_angle_shoulder_left(angle_flex_ex, AngleTypes.FLEX_EX, target_state, tolerance)
         result[AngleTypes.AB_AD.value] = self._check_angle_shoulder_left(angle_abd_add, AngleTypes.AB_AD, target_state, tolerance)
         return result
 
-    def _get_results_shoulder_right(self, angle_flex_ex: float, angle_abd_add: float, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
+    def _get_results_shoulder_right(self, angle_flex_ex: float, angle_abd_add: float, target_state: AngleTargetStates, tolerance: int = 10) -> list:
+        """Returns a list of evaluation result dictionaries of all AngleTypes for the right shoulder joint.
+
+            Args:
+                angle_flex_ex (float):              The flexion/extension angle.
+                angle_abd_add (float):              The abduction/adduction angle.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A list of evaluation result dictionaries of all AngleTypes for the right shoulder joint.
+        """
         result = [None] * len(AngleTypes)
         result[AngleTypes.FLEX_EX.value] = self._check_angle_shoulder_right(angle_flex_ex, AngleTypes.FLEX_EX, target_state, tolerance)
         result[AngleTypes.AB_AD.value] = self._check_angle_shoulder_right(angle_abd_add, AngleTypes.AB_AD, target_state, tolerance)
         return result
 
-    def _get_results_hip_left(self, angle_flex_ex: float, angle_abd_add: float, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
+    def _get_results_hip_left(self, angle_flex_ex: float, angle_abd_add: float, target_state: AngleTargetStates, tolerance: int = 10) -> list:
+        """Returns a list of evaluation result dictionaries of all AngleTypes for the left hip joint.
+
+            Args:
+                angle_flex_ex (float):              The flexion/extension angle.
+                angle_abd_add (float):              The abduction/adduction angle.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A list of evaluation result dictionaries of all AngleTypes for the left hip joint.
+        """
         result = [None] * len(AngleTypes)
         result[AngleTypes.FLEX_EX.value] = self._check_angle_hip_left(angle_flex_ex, AngleTypes.FLEX_EX, target_state, tolerance)
         result[AngleTypes.AB_AD.value] = self._check_angle_hip_left(angle_abd_add, AngleTypes.AB_AD, target_state, tolerance)
         return result
 
-    def _get_results_hip_right(self, angle_flex_ex: float, angle_abd_add: float, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
+    def _get_results_hip_right(self, angle_flex_ex: float, angle_abd_add: float, target_state: AngleTargetStates, tolerance: int = 10) -> list:
+        """Returns a list of evaluation result dictionaries of all AngleTypes for the right hip joint.
+
+            Args:
+                angle_flex_ex (float):              The flexion/extension angle.
+                angle_abd_add (float):              The abduction/adduction angle.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A list of evaluation result dictionaries of all AngleTypes for the right hip joint.
+        """
         result = [None] * len(AngleTypes)
         result[AngleTypes.FLEX_EX.value] = self._check_angle_hip_right(angle_flex_ex, AngleTypes.FLEX_EX, target_state, tolerance)
         result[AngleTypes.AB_AD.value] = self._check_angle_hip_right(angle_abd_add, AngleTypes.AB_AD, target_state, tolerance)
         return result
 
-    def _get_results_elbow_left(self, angle_flex_ex: float, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
+    def _get_results_elbow_left(self, angle_flex_ex: float, target_state: AngleTargetStates, tolerance: int = 10) -> list:
+        """Returns a list of evaluation result dictionaries of all AngleTypes for the left elbow joint.
+
+            Args:
+                angle_flex_ex (float):              The flexion/extension angle.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A list of evaluation result dictionaries of all AngleTypes for the left elbow joint.
+        """
         result = [None] * len(AngleTypes)
         result[AngleTypes.FLEX_EX.value] = self._check_angle_elbow_left(angle_flex_ex, AngleTypes.FLEX_EX, target_state, tolerance)
         return result
 
-    def _get_results_elbow_right(self, angle_flex_ex: float, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
+    def _get_results_elbow_right(self, angle_flex_ex: float, target_state: AngleTargetStates, tolerance: int = 10) -> list:
+        """Returns a list of evaluation result dictionaries of all AngleTypes for the right elbow joint.
+
+            Args:
+                angle_flex_ex (float):              The flexion/extension angle.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A list of evaluation result dictionaries of all AngleTypes for the right elbow joint.
+        """
         result = [None] * len(AngleTypes)
         result[AngleTypes.FLEX_EX.value] = self._check_angle_elbow_right(angle_flex_ex, AngleTypes.FLEX_EX, target_state, tolerance)
         return result
 
-    def _get_results_knee_left(self, angle_flex_ex: float, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
+    def _get_results_knee_left(self, angle_flex_ex: float, target_state: AngleTargetStates, tolerance: int = 10) -> list:
+        """Returns a list of evaluation result dictionaries of all AngleTypes for the left knee joint.
+
+            Args:
+                angle_flex_ex (float):              The flexion/extension angle.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A list of evaluation result dictionaries of all AngleTypes for the left knee joint.
+        """
         result = [None] * len(AngleTypes)
         result[AngleTypes.FLEX_EX.value] = self._check_angle_knee_left(angle_flex_ex, AngleTypes.FLEX_EX, target_state, tolerance)
         return result
 
-    def _get_results_knee_right(self, angle_flex_ex: float, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
+    def _get_results_knee_right(self, angle_flex_ex: float, target_state: AngleTargetStates, tolerance: int = 10) -> list:
+        """Returns a list of evaluation result dictionaries of all AngleTypes for the right knee joint.
+
+            Args:
+                angle_flex_ex (float):              The flexion/extension angle.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A list of evaluation result dictionaries of all AngleTypes for the right knee joint.
+        """
         result = [None] * len(AngleTypes)
         result[AngleTypes.FLEX_EX.value] = self._check_angle_knee_right(angle_flex_ex, AngleTypes.FLEX_EX, target_state, tolerance)
         return result
