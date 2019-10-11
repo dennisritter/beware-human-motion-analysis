@@ -12,6 +12,15 @@ from scipy.signal import argrelextrema, savgol_filter
 
 
 class ExerciseEvaluator:
+    """This class evaluates analyses motion sequences with respect to an Exercise.
+
+       Attributes:
+            exercise (Exercise):    The exercise to evaluate motion sequences for.
+            target_angles (list):   A list of target angles defined in the given exercise.
+            prio_angles(list):      A list of prioritised body parts and angletypes for the given exercise.
+            body_part_indices:      A dictionary that maps body part String keys to an index int to retrieve
+                                    information for that specific body part.
+    """
 
     HIGH_PRIO = 1.0
     MEDIUM_PRIO = 0.5
