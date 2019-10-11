@@ -309,6 +309,7 @@ class ExerciseEvaluator:
 
         return results
 
+    # TODO: Either use target_angle_range_flex_ex, target_angle_range_abd_add parameters or remove them from the function.
     def process_ball_joint_angles(
             self,
             angle_flex_ex: float,
@@ -331,20 +332,24 @@ class ExerciseEvaluator:
 
         Args:
             angle_flex_ex (float): 
+                The flexion/extension angle to process.
             angle_abd_add (float):
+                The abduction/adduction angle to process.
             target_angle_range_flex_ex (list):
             target_angle_range_abd_add (list):
             ignore_flex_abd90_delta (int): 
-                Default=45;             
+                Determines the maximum distance to a 90 degrees abduction/adduction angle, from where the flexion/extension angle is ignored.
+                Default=20;
             abd_add_motion_thresh (int): 
                 Determines the minimum abduction value to treat the movement as an abduction.
-                Default=20;
-                
+                Default=45;             
+
         Returns:
             A tuple containing the processed flexion/extension angle as first element and the processed
-            abduction/adduction angle as second value.
+            abduction/adduction angle as second element.
+            Example: (85.0, 11.0)
         """
-        
+
         # Check if angle-vector.y is higher than origin and adjust abduction/adduction angles if conditions are met
         # If flexion angle is >90.0, angle-vector.y is higher than origin because flexion angle represents a rotation about the X-Axis
         if angle_flex_ex > 90.0 or angle_flex_ex < -90:
