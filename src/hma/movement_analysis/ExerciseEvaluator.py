@@ -43,8 +43,12 @@ class ExerciseEvaluator:
         """Returns a list of tuples containing a body part mapped in Sequence.body_parts and the AngleType for that body part which is prioritised.
            Example: [(4, AngleType.FLEX_EX), (4, AngleType.AB_AD)]
 
-        Attributes:
+        Args:
             seq (Sequence): The sequence to get body part indices from.
+
+        Returns:
+            A list of tuples containing body part indices and angle types. 
+            Example: [(4, AngleType.FLEX_EX), (4, AngleType.AB_AD)]
         """
         ex = self.exercise
         prio_angles = []
@@ -89,8 +93,11 @@ class ExerciseEvaluator:
         The position in the third dimension represents the START (0) and END (1) state.
         The position in the fourth dimension represent the minimum value (0) and maximum value (1).
 
-        Attributes:
+        Args:
             seq (Sequence): The sequence to get body parts from.
+
+        Returns:
+            Returns a 4-D ndarray which contain the Exercises' range of target angles for all body_parts, angle types and target states as minimum/maximum.
         """
         ex = self.exercise
         target_angles = np.zeros((len(seq.body_parts), len(AngleTypes), len(AngleTargetStates), 2))
@@ -127,10 +134,19 @@ class ExerciseEvaluator:
         self.target_angles = target_angles
         return target_angles
 
-    # TODO: Check given sequence for iteration -> return (true, (from, mid, to)) or (false)
-    def find_iteration_keypoints(self, seq: Sequence, plot=False):
-        ex = self.exercise
+    # TODO: Identify anad create sub functions to shrink the length of this function and increase overview.
+    def find_iteration_keypoints(self, seq: Sequence, plot=False) -> list:
+        """Finds iterations of a movement in a motion sequence.
 
+        The function identifies Start, Mid and End positions of iterations in a motion sequence 
+        based on shared minimum and maximum values of prioritised body part angles.
+
+        Args:
+            seq (Sequence): The sequence to find iterations in.
+
+        Returns:
+            A 2-D list of frame indices of the given sequence that represent start, mid and end frames of an iteration. 
+        """
         if len(self.prio_angles) == 0:
             self._get_prio_angles(seq)
 
@@ -140,20 +156,20 @@ class ExerciseEvaluator:
         if self.body_part_indices == None:
             self.body_part_indices = seq.body_parts
 
-        # Store all minima/maxima in a matrix of 0/1
-        # Rows = prioritised angle (bodypart and angle type)
-        # Columns = Frames
+        # Store all minima/maxima in a matrix of [0,1]
+        # Rows represent prioritised angle (bodypart and angle type)
+        # Columns represent Frames
         # 0 means no minimum/maximum; 1 means minimum/maximum found
         start_frame_matrix = np.zeros((len(self.prio_angles), len(seq)))
         turning_frame_matrix = np.zeros((len(self.prio_angles), len(seq)))
+
+        # self.prio_angles element example format (idx, AngleType) -> (1, AngleType.FLEX_EX)
         for prio_idx, (body_part_idx, angle_type) in enumerate(self.prio_angles):
-            # (idx, AngleType)
-            # (1, AngleType.FLEX_EX)
 
             # Get calculated angles of a specific type for a specific body part for all frames
             angles = seq.joint_angles[:, body_part_idx, angle_type.value]
 
-            # TODO: Find best value for window size
+            # TODO: Find best value for window size (51 seems to work well)
             # Apply a Savitzky-Golay Filter to get a list of 'smoothed' angles.
             # savgol_window_max = 51
             # savgol_window_generic = int(math.floor(len(angles)/1.5)+1 if math.floor(len(angles)/1.5) % 2 == 0 else math.floor(len(angles)/1.5))
@@ -161,7 +177,7 @@ class ExerciseEvaluator:
             savgol_window = 51
             angles_savgol = savgol_filter(angles, savgol_window, 3, mode="nearest")
 
-            # TODO: Find best value for order parameter
+            # TODO: Find best value for order parameter (10 seems to work well)
             # Find Minima and Maxima of angles after applying a Savitzky-Golay Filter filter
             maxima = argrelextrema(angles_savgol, np.greater, order=10)[0]
             minima = argrelextrema(angles_savgol, np.less, order=10)[0]
@@ -205,7 +221,7 @@ class ExerciseEvaluator:
 
         # TODO: What if we have only two prioritised angles? -> 100% must be correct? 50% must be correct? Something better?
         confirm_extrema_thresh = len(self.prio_angles) - 1
-        # Window size
+        # Window size that determines the range of frames minima/maxima of different body parts belong to each other.
         w_size = 10
         confirmed_start_frames = self._confirm_extrema(start_frame_matrix, w_size, confirm_extrema_thresh)
         confirmed_turning_frames = self._confirm_extrema(turning_frame_matrix, w_size, confirm_extrema_thresh)
