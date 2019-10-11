@@ -524,6 +524,16 @@ class ExerciseEvaluator:
         return result
 
     def _check_angle_shoulder_left(self, angle: float, angle_type: AngleTypes, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
+        """Returns a dictionary that represents the result evaluation of the given AngleTypes for the left shoulder joint with respect to the given AngleTargetState.
+
+            Args:
+                angle (float):                      The angle to evaluate.
+                angle_type (AngleTypes):            The type of angle.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A dictionary that represents the result evaluation of the given AngleTypes for the left shoulder joint with respect to the given AngleTargetState.
+        """
         target_start = self.target_angles[self.body_part_indices["LeftShoulder"]][angle_type.value][AngleTargetStates.START.value]
         target_end = self.target_angles[self.body_part_indices["LeftShoulder"]][angle_type.value][AngleTargetStates.END.value]
         target_min = min(self.target_angles[self.body_part_indices["LeftShoulder"]][angle_type.value][target_state.value])
@@ -541,6 +551,16 @@ class ExerciseEvaluator:
         return result
 
     def _check_angle_shoulder_right(self, angle: float, angle_type: AngleTypes, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
+        """Returns a dictionary that represents the result evaluation of the given AngleTypes for the right shoulder joint with respect to the given AngleTargetState.
+
+            Args:
+                angle (float):                      The angle to evaluate.
+                angle_type (AngleTypes):            The type of angle.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A dictionary that represents the result evaluation of the given AngleTypes for the right shoulder joint with respect to the given AngleTargetState.
+        """
         target_start = self.target_angles[self.body_part_indices["RightShoulder"]][angle_type.value][AngleTargetStates.START.value]
         target_end = self.target_angles[self.body_part_indices["RightShoulder"]][angle_type.value][AngleTargetStates.END.value]
         target_min = min(self.target_angles[self.body_part_indices["RightShoulder"]][angle_type.value][target_state.value])
@@ -558,6 +578,16 @@ class ExerciseEvaluator:
         return result
 
     def _check_angle_hip_left(self, angle: float, angle_type: AngleTypes, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
+        """Returns a dictionary that represents the result evaluation of the given AngleTypes for the left hip joint with respect to the given AngleTargetState.
+
+            Args:
+                angle (float):                      The angle to evaluate.
+                angle_type (AngleTypes):            The type of angle.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A dictionary that represents the result evaluation of the given AngleTypes for the left hip joint with respect to the given AngleTargetState.
+        """
         target_start = self.target_angles[self.body_part_indices["LeftHip"]][angle_type.value][AngleTargetStates.START.value]
         target_end = self.target_angles[self.body_part_indices["LeftHip"]][angle_type.value][AngleTargetStates.END.value]
         target_min = min(self.target_angles[self.body_part_indices["LeftHip"]][angle_type.value][target_state.value])
@@ -575,6 +605,16 @@ class ExerciseEvaluator:
         return result
 
     def _check_angle_hip_right(self, angle: float, angle_type: AngleTypes, target_state: AngleTargetStates, tolerance: int = 10) -> dict:
+        """Returns a dictionary that represents the result evaluation of the given AngleTypes for the right hip joint with respect to the given AngleTargetState.
+
+            Args:
+                angle (float):                      The angle to evaluate.
+                angle_type (AngleTypes):            The type of angle.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A dictionary that represents the result evaluation of the given AngleTypes for the left right hip with respect to the given AngleTargetState.
+        """
         target_start = self.target_angles[self.body_part_indices["RightHip"]][angle_type.value][AngleTargetStates.START.value]
         target_end = self.target_angles[self.body_part_indices["RightHip"]][angle_type.value][AngleTargetStates.END.value]
         target_min = min(self.target_angles[self.body_part_indices["RightHip"]][angle_type.value][target_state.value])
@@ -592,6 +632,16 @@ class ExerciseEvaluator:
         return result
 
     def _check_angle_elbow_left(self, angle: float, angle_type: AngleTypes, target_state: AngleTargetStates, tolerance: int = 10):
+        """Returns a dictionary that represents the result evaluation of the given AngleTypes for the left elbow joint with respect to the given AngleTargetState.
+
+            Args:
+                angle (float):                      The angle to evaluate.
+                angle_type (AngleTypes):            The type of angle.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A dictionary that represents the result evaluation of the given AngleTypes for the left elbow joint with respect to the given AngleTargetState.
+        """
         target_start = self.target_angles[self.body_part_indices["LeftElbow"]][angle_type.value][AngleTargetStates.START.value]
         target_end = self.target_angles[self.body_part_indices["LeftElbow"]][angle_type.value][AngleTargetStates.END.value]
         target_min = min(self.target_angles[self.body_part_indices["LeftElbow"]][angle_type.value][target_state.value])
@@ -609,6 +659,16 @@ class ExerciseEvaluator:
         return result
 
     def _check_angle_elbow_right(self, angle: float, angle_type: AngleTypes, target_state: AngleTargetStates, tolerance: int = 10):
+        """Returns a dictionary that represents the result evaluation of the given AngleTypes for the right elbow joint with respect to the given AngleTargetState.
+
+            Args:
+                angle (float):                      The angle to evaluate.
+                angle_type (AngleTypes):            The type of angle.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A dictionary that represents the result evaluation of the given AngleTypes for the right elbow joint with respect to the given AngleTargetState.
+        """
         target_start = self.target_angles[self.body_part_indices["RightElbow"]][angle_type.value][AngleTargetStates.START.value]
         target_end = self.target_angles[self.body_part_indices["RightElbow"]][angle_type.value][AngleTargetStates.END.value]
         target_min = min(self.target_angles[self.body_part_indices["RightElbow"]][angle_type.value][target_state.value])
@@ -626,6 +686,16 @@ class ExerciseEvaluator:
         return result
 
     def _check_angle_knee_left(self, angle: float, angle_type: AngleTypes, target_state: AngleTargetStates, tolerance: int = 10):
+        """Returns a dictionary that represents the result evaluation of the given AngleTypes for the left knee joint with respect to the given AngleTargetState.
+
+            Args:
+                angle (float):                      The angle to evaluate.
+                angle_type (AngleTypes):            The type of angle.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A dictionary that represents the result evaluation of the given AngleTypes for the left knee joint with respect to the given AngleTargetState.
+        """
         target_start = self.target_angles[self.body_part_indices["LeftKnee"]][angle_type.value][AngleTargetStates.START.value]
         target_end = self.target_angles[self.body_part_indices["LeftKnee"]][angle_type.value][AngleTargetStates.END.value]
         target_min = min(self.target_angles[self.body_part_indices["LeftKnee"]][angle_type.value][target_state.value])
@@ -643,6 +713,16 @@ class ExerciseEvaluator:
         return result
 
     def _check_angle_knee_right(self, angle: float, angle_type: AngleTypes, target_state: AngleTargetStates, tolerance: int = 10):
+        """Returns a dictionary that represents the result evaluation of the given AngleTypes for the right shoulder joint with respect to the given AngleTargetState.
+
+            Args:
+                angle (float):                      The angle to evaluate.
+                angle_type (AngleTypes):            The type of angle.
+                target_state (AngleTargetStates):   The target state of the class instances Exercise to evaluate against.
+                tolerance (int):                    The tolerance of angles to be treated as in range of the target (Default=10).
+
+            Returns: A dictionary that represents the result evaluation of the given AngleTypes for the right shoulder joint with respect to the given AngleTargetState.
+        """
         target_start = self.target_angles[self.body_part_indices["RightKnee"]][angle_type.value][AngleTargetStates.START.value]
         target_end = self.target_angles[self.body_part_indices["RightKnee"]][angle_type.value][AngleTargetStates.END.value]
         target_min = min(self.target_angles[self.body_part_indices["RightKnee"]][angle_type.value][target_state.value])
