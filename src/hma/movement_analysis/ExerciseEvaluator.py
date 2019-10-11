@@ -314,25 +314,17 @@ class ExerciseEvaluator:
             # Shoulders
             shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add = self.process_ball_joint_angles(
                 seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.FLEX_EX.value],
-                seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.AB_AD.value],
-                self.target_angles[bp["LeftShoulder"]][AngleTypes.FLEX_EX.value],
-                self.target_angles[bp["LeftShoulder"]][AngleTypes.AB_AD.value])
+                seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.AB_AD.value])
             shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add = self.process_ball_joint_angles(
                 seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.FLEX_EX.value],
-                seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.AB_AD.value],
-                self.target_angles[bp["RightShoulder"]][AngleTypes.FLEX_EX.value],
-                self.target_angles[bp["RightShoulder"]][AngleTypes.AB_AD.value])
+                seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.AB_AD.value])
             # Hips
             hip_left_angle_flex_ex, hip_left_angle_abd_add = self.process_ball_joint_angles(
                 seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.FLEX_EX.value],
-                seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.AB_AD.value],
-                self.target_angles[bp["LeftHip"]][AngleTypes.FLEX_EX.value],
-                self.target_angles[bp["LeftHip"]][AngleTypes.AB_AD.value])
+                seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.AB_AD.value])
             hip_right_angle_flex_ex, hip_right_angle_abd_add = self.process_ball_joint_angles(
                 seq.joint_angles[frame][bp["RightHip"]][AngleTypes.FLEX_EX.value],
-                seq.joint_angles[frame][bp["RightHip"]][AngleTypes.AB_AD.value],
-                self.target_angles[bp["RightHip"]][AngleTypes.FLEX_EX.value],
-                self.target_angles[bp["RightHip"]][AngleTypes.AB_AD.value])
+                seq.joint_angles[frame][bp["RightHip"]][AngleTypes.AB_AD.value])
             # # Elbows
             elbow_left_angle_flex_ex = seq.joint_angles[frame][bp["LeftElbow"]][AngleTypes.FLEX_EX.value]
             elbow_right_angle_flex_ex = seq.joint_angles[frame][bp["RightElbow"]][AngleTypes.FLEX_EX.value]
@@ -359,8 +351,6 @@ class ExerciseEvaluator:
             self,
             angle_flex_ex: float,
             angle_abd_add: float,
-            target_angle_range_flex_ex: list,
-            target_angle_range_abd_add: list,
             ignore_flex_abd90_delta: int = 20,
             abd_add_motion_thresh: int = 45) -> tuple:
         """Processes ball joint angles to improve clinical representation of those.
