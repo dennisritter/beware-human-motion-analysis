@@ -1,6 +1,6 @@
 from hma.movement_analysis.Sequence import Sequence
 from hma.movement_analysis.PoseProcessor import PoseProcessor
-from hma.movement_analysis.PoseFormatEnum import PoseFormatEnum
+from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
 from hma.movement_analysis import distance
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
