@@ -3,7 +3,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import tslearn.metrics as ts
 import seaborn as sns
 import numpy as np
-from hma.movement_analysis.Sequence import Sequence
+from hma.movement_analysis.sequence import Sequence
 from hma.movement_analysis.pose_processor import PoseProcessor
 from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
 from hma.movement_analysis import angle_calculations as acm

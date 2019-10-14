@@ -2,7 +2,7 @@ from .exercise import Exercise
 from .enums.angle_target_states import AngleTargetStates
 from .enums.angle_types import AngleTypes
 from .enums.angle_analysis_result_states import AngleAnalysisResultStates
-from .Sequence import Sequence
+from .sequence import Sequence
 import warnings
 import math
 import numpy as np

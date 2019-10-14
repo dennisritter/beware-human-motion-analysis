@@ -1,5 +1,5 @@
 from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
-from hma.movement_analysis.Sequence import Sequence
+from hma.movement_analysis.sequence import Sequence
 import json
 import numpy as np
 

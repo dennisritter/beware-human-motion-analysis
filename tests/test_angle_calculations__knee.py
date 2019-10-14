@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 
 from src.hma.movement_analysis import angle_calculations as acm
-from src.hma.movement_analysis.Sequence import Sequence
+from src.hma.movement_analysis.sequence import Sequence
 from src.hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
 
 
