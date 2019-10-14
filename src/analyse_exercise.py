@@ -27,7 +27,7 @@ mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 # seqs = [seq1, seq2, seq3]
 
 g_seq = mocap_poseprocessor.load(
-    'data/sequences/squat-dennis-multi-1/complete-session.json', 'squat-dennis-multi-1')
+    'data/sequences/unique_iterations/complete-session.json', 'squat-dennis-multi-1')
 ex = exercise_loader.load('data/exercises/kniebeuge.json')
 exval_squat = ExerciseEvaluator(ex)
 
@@ -70,16 +70,16 @@ print(f"Iterations found result (LOCAL): {iterations}")
 g_iterations = exval_squat.find_iteration_keypoints(g_seq, True)
 print(f"Iterations for complete sequence [{len(g_seq)} Frames]{g_iterations}")
 
-prio_angles = exval_squat.prio_angles
-for i, iteration_seq in enumerate(iteration_seqs):
-    result = exval_squat.evaluate(iteration_seq, iterations[i][1])
-    print(f"########## Evaluation results for iteration [{i}] ##########")
-    print(f"START FRAME [{iterations[i][0]}]")
-    for angle in prio_angles:
-        print(f"{result[iterations[i][0]][angle[0]][angle[1].value]}")
-    print(f"TURNING FRAME [{iterations[i][1]}]")
-    for angle in prio_angles:
-        print(f"{result[iterations[i][1]][angle[0]][angle[1].value]}")
-    print(f"END FRAME [{iterations[i][1]}]")
-    for angle in prio_angles:
-        print(f"{result[iterations[i][2]][angle[0]][angle[1].value]}")
+# prio_angles = exval_squat.prio_angles
+# for i, iteration_seq in enumerate(iteration_seqs):
+#     result = exval_squat.evaluate(iteration_seq, iterations[i][1])
+#     print(f"########## Evaluation results for iteration [{i}] ##########")
+#     print(f"START FRAME [{iterations[i][0]}]")
+#     for angle in prio_angles:
+#         print(f"{result[iterations[i][0]][angle[0]][angle[1].value]}")
+#     print(f"TURNING FRAME [{iterations[i][1]}]")
+#     for angle in prio_angles:
+#         print(f"{result[iterations[i][1]][angle[0]][angle[1].value]}")
+#     print(f"END FRAME [{iterations[i][1]}]")
+#     for angle in prio_angles:
+#         print(f"{result[iterations[i][2]][angle[0]][angle[1].value]}")
