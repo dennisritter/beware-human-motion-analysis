@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
 from hma.movement_analysis import angle_calculations as acm
+from matplotlib import pyplot as plt
 
 
 class Sequence:
@@ -126,6 +127,9 @@ class Sequence:
         pca = PCA(n_components=num_components)
         xPCA = pca.fit_transform(self.get_positions_2d())
         return xPCA
+
+    def visualise(self):
+        pass
 
     def _filter_zero_frames(self, positions: list) -> list:
         """
