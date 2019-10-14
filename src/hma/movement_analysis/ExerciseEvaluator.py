@@ -1,4 +1,4 @@
-from .Exercise import Exercise
+from .exercise import Exercise
 from .enums.angle_target_states import AngleTargetStates
 from .enums.angle_types import AngleTypes
 from .enums.angle_analysis_result_states import AngleAnalysisResultStates

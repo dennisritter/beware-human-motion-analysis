@@ -1,4 +1,4 @@
-from hma.movement_analysis.Exercise import Exercise
+from hma.movement_analysis.exercise import Exercise
 from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
 from hma.movement_analysis.enums.angle_target_states import AngleTargetStates
 from hma.movement_analysis.Sequence import Sequence
