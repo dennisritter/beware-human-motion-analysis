@@ -1,7 +1,7 @@
 from .Exercise import Exercise
 from .AngleTargetStates import AngleTargetStates
 from .AngleTypes import AngleTypes
-from .AngleAnalysisResultStates import AngleAnalysisResultStates
+from .enums.angle_analysis_result_states import AngleAnalysisResultStates
 from .Sequence import Sequence
 import warnings
 import math
