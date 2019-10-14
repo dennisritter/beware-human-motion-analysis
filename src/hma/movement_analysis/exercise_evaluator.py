@@ -226,13 +226,18 @@ class ExerciseEvaluator:
         # TODO: What if we have only two prioritised angles? -> 100% must be correct? 50% must be correct? Something better?
         confirm_extrema_thresh = len(self.prio_angles) - 1
         # Window size that determines the range of frames minima/maxima of different body parts belong to each other.
-        w_size = 10
+        w_size = 20
         confirmed_start_frames = self._confirm_extrema(start_frame_matrix, w_size, confirm_extrema_thresh)
         confirmed_turning_frames = self._confirm_extrema(turning_frame_matrix, w_size, confirm_extrema_thresh)
+        print(f"confirmed_start_frames: {confirmed_start_frames}")
+        print(f"confirmed_turning_frames: {confirmed_turning_frames}")
 
         iterations = []
+        last_end_frame = None
         # We Don't need to iterate over the last element because this can't be the start of a iteration anymore.
         for sf_idx in range(0, len(confirmed_start_frames)-1):
+            if last_end_frame is not None and last_end_frame > confirmed_start_frames[sf_idx]:
+                continue
             # Only keep turning frames that occur later than the current start frame
             start_frame = confirmed_start_frames[sf_idx]
             confirmed_turning_frames = confirmed_turning_frames[start_frame < confirmed_turning_frames]
@@ -249,6 +254,7 @@ class ExerciseEvaluator:
                 # If there are still elements left in confirmed_end_frames, take the smallest one as our end point
                 else:
                     end_frame = confirmed_end_frames[0]
+                    last_end_frame = end_frame
                     iterations.append([start_frame, turning_frame, end_frame])
 
         return iterations
