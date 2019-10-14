@@ -1,12 +1,12 @@
-from hma.movement_analysis.Exercise import Exercise
-from hma.movement_analysis.PoseFormatEnum import PoseFormatEnum
-from hma.movement_analysis.AngleTargetStates import AngleTargetStates
-from hma.movement_analysis.Sequence import Sequence
-from hma.movement_analysis.PoseProcessor import PoseProcessor
+from hma.movement_analysis.exercise import Exercise
+from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
+from hma.movement_analysis.enums.angle_target_states import AngleTargetStates
+from hma.movement_analysis.sequence import Sequence
+from hma.movement_analysis.pose_processor import PoseProcessor
 from hma.movement_analysis import exercise_loader
 from hma.movement_analysis import angle_calculations as acm
 from hma.movement_analysis import transformations
-from hma.movement_analysis.ExerciseEvaluator import ExerciseEvaluator
+from hma.movement_analysis.exercise_evaluator import ExerciseEvaluator
 import math
 import matplotlib.pyplot as plt
 import numpy as np

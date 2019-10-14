@@ -1,9 +1,9 @@
-from hma.movement_analysis.Exercise import Exercise
+from hma.movement_analysis.exercise import Exercise
 import warnings
 import json
 
 REQUIRED_KEYS = ["name", "description", "angles", "userId"]
-OPTIONAL_KEYS = []  # TODO: How to apply Optional parameters to the constructor without 1000 if statements?
+OPTIONAL_KEYS = []
 
 
 def load(path: str):
