@@ -1,6 +1,6 @@
 from .Exercise import Exercise
 from .enums.angle_target_states import AngleTargetStates
-from .AngleTypes import AngleTypes
+from .enums.angle_types import AngleTypes
 from .enums.angle_analysis_result_states import AngleAnalysisResultStates
 from .Sequence import Sequence
 import warnings
