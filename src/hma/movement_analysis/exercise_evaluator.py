@@ -238,8 +238,6 @@ class ExerciseEvaluator:
         w_size = 30
         confirmed_start_frames = self._confirm_extrema(start_frame_matrix, w_size, confirm_extrema_thresh)
         confirmed_turning_frames = self._confirm_extrema(turning_frame_matrix, w_size, confirm_extrema_thresh)
-        print(f"confirmed_start_frames: {confirmed_start_frames}")
-        print(f"confirmed_turning_frames: {confirmed_turning_frames}")
 
         if plot:
             for prio_idx in range(len(angles_savgol_all_bps)):
