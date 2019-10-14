@@ -1,5 +1,5 @@
 from .Exercise import Exercise
-from .AngleTargetStates import AngleTargetStates
+from .enums.angle_target_states import AngleTargetStates
 from .AngleTypes import AngleTypes
 from .enums.angle_analysis_result_states import AngleAnalysisResultStates
 from .Sequence import Sequence
