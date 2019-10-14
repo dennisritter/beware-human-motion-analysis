@@ -306,9 +306,13 @@ class ExerciseEvaluator:
                 w_row_extrema += 1 if (np.sum(w_row) >= 1.0) else 0
             # If enough window rows include an extremum
             if w_row_extrema >= confirm_extrema_thresh:
-                # Add a minimum to the list of confirmed minima
-                # TODO: Optimize extrema position determination
-                confirmed_extrema.append(int(w_start + w_size/2))
+                # Find first extremum in window
+                extrema_in_window = np.argwhere(window > 0)
+                first_window_extremum = np.min(extrema_in_window[:, 1])
+                last_window_extremum = np.max(extrema_in_window[:, 1])
+                # Use average index between first and last extremum in window as confirmed extremum index
+                confirmed_extremum = int((first_window_extremum + last_window_extremum)/2) + w_start
+                confirmed_extrema.append(confirmed_extremum)
                 # Remove all 1.0 values from the current window slice of the extrema_matrix
                 extrema_matrix[:, w_start:w_end] = np.zeros(window.shape)
 
