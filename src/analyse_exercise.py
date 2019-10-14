@@ -6,7 +6,7 @@ from hma.movement_analysis.PoseProcessor import PoseProcessor
 from hma.movement_analysis import exercise_loader
 from hma.movement_analysis import angle_calculations as acm
 from hma.movement_analysis import transformations
-from hma.movement_analysis.ExerciseEvaluator import ExerciseEvaluator
+from hma.movement_analysis.exercise_evaluator import ExerciseEvaluator
 import math
 import matplotlib.pyplot as plt
 import numpy as np
