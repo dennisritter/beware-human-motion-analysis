@@ -139,7 +139,7 @@ class ExerciseEvaluator:
         return target_angles
 
     # TODO: Identify anad create sub functions to shrink the length of this function and increase overview.
-    def find_iteration_keypoints(self, seq: Sequence, plot=False) -> list:
+    def find_iteration_keypoints(self, seq: Sequence, start_frame_min_dist=5, end_frame_min_dist=5, plot=False) -> list:
         """Finds iterations of a movement in a motion sequence.
 
         The function identifies Start, Mid and End positions of iterations in a motion sequence 
@@ -192,6 +192,22 @@ class ExerciseEvaluator:
             # Find Minima and Maxima of angles after applying a Savitzky-Golay Filter filter
             maxima = argrelextrema(angles_savgol, np.greater, order=10)[0]
             minima = argrelextrema(angles_savgol, np.less, order=10)[0]
+
+            # Add minimum to first and last frame if start_frame_min_dist/end_frame_min_dist
+            # param value is not less than the actual distance to the target angle
+            angles_savgol = np.array(angles_savgol)
+            target_start_range = self.target_angles[body_part_idx][angle_type.value][AngleTargetStates.START.value]
+            if (min(target_start_range) < angles_savgol[0] < max(target_start_range) or
+                start_frame_min_dist > abs(angles_savgol[0]-target_start_range[0]) or
+                    start_frame_min_dist > abs(angles_savgol[0]-target_start_range[1])):
+                minima = np.insert(minima, 0, 0)
+            if (min(target_start_range) < angles_savgol[-1] < max(target_start_range) or
+                end_frame_min_dist > abs(angles_savgol[-1]-target_start_range[0]) or
+                    end_frame_min_dist > abs(angles_savgol[-1]-target_start_range[1])):
+                minima = np.append(minima, len(angles_savgol)-1)
+
+            print(minima)
+            print(maxima)
 
             # Get Exercise targets for the current angle type
             ex_targets = self.target_angles[body_part_idx][angle_type.value]

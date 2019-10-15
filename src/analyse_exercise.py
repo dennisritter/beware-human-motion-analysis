@@ -48,8 +48,9 @@ for seq in seqs:
         merged_seq = seq
     else:
         merged_seq.merge(seq)
-    part_iterations_biased = exval_squat.find_iteration_keypoints(merged_seq)
-    part_iterations = exval_squat.find_iteration_keypoints(merged_seq)
+    part_iterations_biased = exval_squat.find_iteration_keypoints(
+        merged_seq, 20, 20)
+    part_iterations = exval_squat.find_iteration_keypoints(merged_seq, 20, 20)
     # If at least one iteration found
     if len(part_iterations) >= 1:
         # Store the sequence in a list
@@ -67,7 +68,7 @@ for seq in seqs:
 
 print(f"Iterations found result (GLOBAL): {g_iterations}")
 print(f"Iterations found result (LOCAL): {iterations}")
-g_iterations = exval_squat.find_iteration_keypoints(g_seq, True)
+g_iterations = exval_squat.find_iteration_keypoints(g_seq, 20, 20, plot=True)
 print(f"Iterations for complete sequence [{len(g_seq)} Frames]{g_iterations}")
 
 # prio_angles = exval_squat.prio_angles
