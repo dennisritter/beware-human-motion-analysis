@@ -37,6 +37,8 @@ class ExerciseEvaluator:
         self.exercise = exercise
         # The sequence to evaluate
         self.sequence = sequence
+        # Hold the unprocessed angles in case the exercise changes
+        self.unprocessed_sequence = sequence
         # The target_angles for each body part
         self.target_angles = self._get_target_angles()
         # The prioritised body parts and angles: [(<body_part_index>, <AngleType.KEY>)]
@@ -50,12 +52,28 @@ class ExerciseEvaluator:
         """Assigns the given sequence to the sequence attribute and performs necessary recalculations.
 
         Args:
-            sequence (Sequence): The new sequence to set as sequence attribute.
+            seq (Sequence): The new sequence to set as sequence attribute.
         """
         self.sequence = seq
         # As the sequence attribute has changed, we have to recalculate target_angles and prio_angles.
         self.target_angles = self._get_target_angles()
         self.prio_angles = self._get_prio_angles()
+        # And finally process the sequences' ball joint angles again.
+        # NOTE: Will change the Sequences angles!
+        self._process_sequence_ball_joint_angles()
+
+    def set_exercise(self, ex: Exercise):
+        """Assigns the given exercise to the exercise attribute and performs necessary recalculations.
+
+        Args:
+            ex (Sequence): The new exercise to set as exercise attribute.
+        """
+        self.exercise = ex
+        # As the sequence attribute has changed, we have to recalculate target_angles and prio_angles.
+        self.target_angles = self._get_target_angles()
+        self.prio_angles = self._get_prio_angles()
+        # Assign unprocessed sequence to sequence to process the original (unprocessed) angles.
+        self.sequence = self.unprocessed_sequence
         # And finally process the sequences' ball joint angles again.
         # NOTE: Will change the Sequences angles!
         self._process_sequence_ball_joint_angles()
@@ -388,6 +406,7 @@ class ExerciseEvaluator:
 
         return results
 
+    # TODO: There should be a better, clearer way to process the sequences angles that doesnt change the sequence implicitly. 
     def _process_sequence_ball_joint_angles(self, ignore_flex_abd90_delta: int = 20):
         """Processes this ExerciseEvaluators sequences' ball joint angles for all ball joints and applies changes to the sequence. 
         
