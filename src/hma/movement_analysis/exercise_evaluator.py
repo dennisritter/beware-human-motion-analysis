@@ -138,15 +138,15 @@ class ExerciseEvaluator:
         target_angles[seq.body_parts["RightHip"]][AngleTypes.AB_AD.value][0] = ex.angles["start"]["hip_right"]["abduction_adduction"]["angle"]
         target_angles[seq.body_parts["RightHip"]][AngleTypes.AB_AD.value][1] = ex.angles["end"]["hip_right"]["abduction_adduction"]["angle"]
         # Elbow
-        target_angles[seq.body_parts["LeftElbow"]][AngleTypes.FLEX_EX.value][0] = ex.angles["start"]["hip_left"]["flexion_extension"]["angle"]
-        target_angles[seq.body_parts["LeftElbow"]][AngleTypes.FLEX_EX.value][1] = ex.angles["end"]["hip_left"]["flexion_extension"]["angle"]
-        target_angles[seq.body_parts["RightElbow"]][AngleTypes.FLEX_EX.value][0] = ex.angles["start"]["hip_left"]["flexion_extension"]["angle"]
-        target_angles[seq.body_parts["RightElbow"]][AngleTypes.FLEX_EX.value][1] = ex.angles["end"]["hip_left"]["flexion_extension"]["angle"]
+        target_angles[seq.body_parts["LeftElbow"]][AngleTypes.FLEX_EX.value][0] = ex.angles["start"]["elbow_left"]["flexion_extension"]["angle"]
+        target_angles[seq.body_parts["LeftElbow"]][AngleTypes.FLEX_EX.value][1] = ex.angles["end"]["elbow_left"]["flexion_extension"]["angle"]
+        target_angles[seq.body_parts["RightElbow"]][AngleTypes.FLEX_EX.value][0] = ex.angles["start"]["elbow_right"]["flexion_extension"]["angle"]
+        target_angles[seq.body_parts["RightElbow"]][AngleTypes.FLEX_EX.value][1] = ex.angles["end"]["elbow_right"]["flexion_extension"]["angle"]
         # Knee
-        target_angles[seq.body_parts["LeftKnee"]][AngleTypes.FLEX_EX.value][0] = ex.angles["start"]["hip_left"]["flexion_extension"]["angle"]
-        target_angles[seq.body_parts["LeftKnee"]][AngleTypes.FLEX_EX.value][1] = ex.angles["end"]["hip_left"]["flexion_extension"]["angle"]
-        target_angles[seq.body_parts["RightKnee"]][AngleTypes.FLEX_EX.value][0] = ex.angles["start"]["hip_left"]["flexion_extension"]["angle"]
-        target_angles[seq.body_parts["RightKnee"]][AngleTypes.FLEX_EX.value][1] = ex.angles["end"]["hip_left"]["flexion_extension"]["angle"]
+        target_angles[seq.body_parts["LeftKnee"]][AngleTypes.FLEX_EX.value][0] = ex.angles["start"]["knee_left"]["flexion_extension"]["angle"]
+        target_angles[seq.body_parts["LeftKnee"]][AngleTypes.FLEX_EX.value][1] = ex.angles["end"]["knee_left"]["flexion_extension"]["angle"]
+        target_angles[seq.body_parts["RightKnee"]][AngleTypes.FLEX_EX.value][0] = ex.angles["start"]["knee_right"]["flexion_extension"]["angle"]
+        target_angles[seq.body_parts["RightKnee"]][AngleTypes.FLEX_EX.value][1] = ex.angles["end"]["knee_right"]["flexion_extension"]["angle"]
 
         self.target_angles = target_angles
         return target_angles
