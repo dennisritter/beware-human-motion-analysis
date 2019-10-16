@@ -1,6 +1,3 @@
-import warnings
-import math
-
 
 class Exercise:
 
