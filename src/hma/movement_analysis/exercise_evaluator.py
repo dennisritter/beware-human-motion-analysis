@@ -206,9 +206,6 @@ class ExerciseEvaluator:
                     end_frame_min_dist > abs(angles_savgol[-1]-target_start_range[1])):
                 minima = np.append(minima, len(angles_savgol)-1)
 
-            print(minima)
-            print(maxima)
-
             # Get Exercise targets for the current angle type
             ex_targets = self.target_angles[body_part_idx][angle_type.value]
             # Check if Exercise targets of target state END are greater than targets of START
