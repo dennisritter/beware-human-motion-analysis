@@ -134,27 +134,23 @@ class ExerciseEvaluator:
         return target_angles
 
     # TODO: Identify anad create sub functions to shrink the length of this function and increase overview.
-    def find_iteration_keypoints(self, seq: Sequence, start_frame_min_dist=5, end_frame_min_dist=5, plot=False) -> list:
+    def find_iteration_keypoints(self, start_frame_min_dist: int=5, end_frame_min_dist: int=5, plot=False) -> list:
         """Finds iterations of a movement in a motion sequence.
 
         The function identifies Start, Mid and End positions of iterations in a motion sequence 
         based on shared minimum and maximum values of prioritised body part angles.
 
         Args:
-            seq (Sequence): The sequence to find iterations in.
+            # NOTE: Probably changes again
+            # TODO: Add doctring after finished
+            start_frame_min_dist (int): 
+            end_frame_min_dist (int):
+            plot (Boolean): Determines whether to plot partial results of an execution of this function. 
 
         Returns:
             A 2-D list of frame indices of the given sequence that represent start, mid and end frames of an iteration. 
         """
-        if len(self.prio_angles) == 0:
-            self._get_prio_angles(seq)
-
-        if len(self.target_angles) == 0:
-            self._get_target_angles(seq)
-
-        if self.body_part_indices == None:
-            self.body_part_indices = seq.body_parts
-
+        
         # Store all minima/maxima in a matrix of [0,1]
         # Rows represent prioritised angle (bodypart and angle type)
         # Columns represent Frames
