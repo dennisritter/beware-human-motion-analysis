@@ -150,7 +150,7 @@ class ExerciseEvaluator:
         Returns:
             A 2-D list of frame indices of the given sequence that represent start, mid and end frames of an iteration. 
         """
-        
+        seq = self.sequence
         # Store all minima/maxima in a matrix of [0,1]
         # Rows represent prioritised angle (bodypart and angle type)
         # Columns represent Frames
@@ -247,7 +247,6 @@ class ExerciseEvaluator:
             for prio_idx in range(len(angles_savgol_all_bps)):
                 maxima = maxima_all_bps[prio_idx].astype(int)
                 minima = minima_all_bps[prio_idx].astype(int)
-                # plt.plot(range(0, len(angles)), angles, zorder=1, linewidth="1.0")
                 plt.plot(range(0, len(angles_savgol_all_bps[prio_idx])), angles_savgol_all_bps[prio_idx], color='red', zorder=1, linewidth="1.0")
                 plt.scatter(maxima, angles_savgol_all_bps[prio_idx][maxima], color='green', marker="^", zorder=2, facecolors='none')
                 plt.scatter(minima, angles_savgol_all_bps[prio_idx][minima], color='green', marker="v", zorder=2, facecolors='none')
