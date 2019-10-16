@@ -321,27 +321,18 @@ class ExerciseEvaluator:
 
         return np.array(confirmed_extrema)
 
-    def evaluate(self, seq: Sequence, switch_state_idx: int) -> list:
-        """Evaluates the given sequence with respect to the Exercise of this ExerciseEvaluator instance.
+    def evaluate(self, switch_state_idx: int) -> list:
+        """Evaluates the Sequence of this ExerciseEvaluator instance with respect to the Exercise.
 
         Args:
-            seq (Sequence):         The motion sequence to evaluate.
             switch_state_idx (int): The sequence index where the target state to evaluate against changes from END to START 
 
         Returns:
             A list of evaluation results containing: Frames -> body_parts -> AngleTypes -> Result dictionaries
             Example indexing of a specific result: result[<frame>][<body_part_index>][<angle_type.value>]
         """
+        seq = self.sequence
         bp = seq.body_parts
-
-        if len(self.prio_angles) == 0:
-            self._get_prio_angles(seq)
-
-        if len(self.target_angles) == 0:
-            self._get_target_angles(seq)
-
-        if self.body_part_indices == None:
-            self.body_part_indices = seq.body_parts
 
         results = []
         current_target_state = AngleTargetStates.END
@@ -370,7 +361,7 @@ class ExerciseEvaluator:
             knee_right_angle_flex_ex = seq.joint_angles[frame][bp["RightKnee"]][AngleTypes.FLEX_EX.value]
 
             # Everything gets overridden? WHY?
-            frame_result = [None]*len(self.body_part_indices)
+            frame_result = [None]*len(bp)
             frame_result[bp["LeftShoulder"]] = self._get_results_shoulder_left(shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add, current_target_state, 10)
             frame_result[bp["RightShoulder"]] = self._get_results_shoulder_right(shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add, current_target_state, 10)
             frame_result[bp["LeftHip"]] = self._get_results_hip_left(hip_left_angle_flex_ex, hip_left_angle_abd_add, current_target_state, 10)
