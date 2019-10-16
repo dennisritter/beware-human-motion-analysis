@@ -166,6 +166,12 @@ class ExerciseEvaluator:
         # 0 means no minimum/maximum; 1 means minimum/maximum found
         start_frame_matrix = np.zeros((len(self.prio_angles), len(seq)))
         turning_frame_matrix = np.zeros((len(self.prio_angles), len(seq)))
+        # Gather information for plotting a summary graph
+        angles_savgol_all_bps = np.zeros((len(self.prio_angles), len(seq)))
+        minima_all_bps = [None]*len(self.prio_angles)
+        maxima_all_bps = [None]*len(self.prio_angles)
+        # minima_all_bps = np.zeros((len(self.prio_angles)))
+        # maxima_all_bps = np.zeros((len(self.prio_angles)))
 
         # self.prio_angles element example format (idx, AngleType) -> (1, AngleType.FLEX_EX)
         for prio_idx, (body_part_idx, angle_type) in enumerate(self.prio_angles):
@@ -180,6 +186,7 @@ class ExerciseEvaluator:
             # savgol_window = min(savgol_window_max, savgol_window_generic)
             savgol_window = 51
             angles_savgol = savgol_filter(angles, savgol_window, 3, mode="nearest")
+            angles_savgol_all_bps[prio_idx] = angles_savgol
 
             # TODO: Find best value for order parameter (10 seems to work well)
             # Find Minima and Maxima of angles after applying a Savitzky-Golay Filter filter
@@ -202,6 +209,8 @@ class ExerciseEvaluator:
                 maxima = maxima[np.invert(_dist_filter(maxima))]
                 minima = minima[_dist_filter(minima)]
 
+            maxima_all_bps[prio_idx] = maxima
+            minima_all_bps[prio_idx] = minima
             # Add 1 values to frames where a minimum/maximum has been found.
             # If movement type is a extension/adduction (target_end_greater_start == false),
             # add minima to turning frames matrix and maxima to starting frames matrix
@@ -216,23 +225,39 @@ class ExerciseEvaluator:
                 else:
                     start_frame_matrix[prio_idx][maximum] = 1.0
 
-            if plot:
-                plt.plot(range(0, len(angles)), angles, zorder=1)
-                plt.plot(range(0, len(angles)), angles_savgol, color='red', zorder=1)
-                plt.scatter(maxima, angles_savgol[maxima], color='green', marker="^", zorder=2)
-                plt.scatter(minima, angles_savgol[minima], color='green', marker="v", zorder=2)
-                plt.show()
+            # if plot:
+            #     plt.plot(range(0, len(angles)), angles, zorder=1, linewidth="1.0")
+            #     plt.plot(range(0, len(angles)), angles_savgol, color='red', zorder=1, linewidth="1.0")
+            #     plt.scatter(maxima, angles_savgol[maxima], color='green', marker="^", zorder=2, facecolors='none')
+            #     plt.scatter(minima, angles_savgol[minima], color='green', marker="v", zorder=2, facecolors='none')
+            #     plt.show()
 
         # TODO: What if we have only two prioritised angles? -> 100% must be correct? 50% must be correct? Something better?
         confirm_extrema_thresh = len(self.prio_angles) - 1
         # Window size that determines the range of frames minima/maxima of different body parts belong to each other.
-        w_size = 10
+        w_size = 30
         confirmed_start_frames = self._confirm_extrema(start_frame_matrix, w_size, confirm_extrema_thresh)
         confirmed_turning_frames = self._confirm_extrema(turning_frame_matrix, w_size, confirm_extrema_thresh)
 
+        if plot:
+            for prio_idx in range(len(angles_savgol_all_bps)):
+                maxima = maxima_all_bps[prio_idx].astype(int)
+                minima = minima_all_bps[prio_idx].astype(int)
+                # plt.plot(range(0, len(angles)), angles, zorder=1, linewidth="1.0")
+                plt.plot(range(0, len(angles_savgol_all_bps[prio_idx])), angles_savgol_all_bps[prio_idx], color='red', zorder=1, linewidth="1.0")
+                plt.scatter(maxima, angles_savgol_all_bps[prio_idx][maxima], color='green', marker="^", zorder=2, facecolors='none')
+                plt.scatter(minima, angles_savgol_all_bps[prio_idx][minima], color='green', marker="v", zorder=2, facecolors='none')
+            plt.scatter(confirmed_start_frames, np.zeros(confirmed_start_frames.shape), color='blue', marker="v", zorder=3)
+            plt.scatter(confirmed_turning_frames, np.full(confirmed_turning_frames.shape, 180), color='blue', marker="^", zorder=3)
+            plt.show()
+
         iterations = []
+        last_end_frame = None
         # We Don't need to iterate over the last element because this can't be the start of a iteration anymore.
         for sf_idx in range(0, len(confirmed_start_frames)-1):
+            # Ensure that next start frame is greater equal than last end frame
+            if last_end_frame is not None and last_end_frame > confirmed_start_frames[sf_idx]:
+                continue
             # Only keep turning frames that occur later than the current start frame
             start_frame = confirmed_start_frames[sf_idx]
             confirmed_turning_frames = confirmed_turning_frames[start_frame < confirmed_turning_frames]
@@ -249,6 +274,7 @@ class ExerciseEvaluator:
                 # If there are still elements left in confirmed_end_frames, take the smallest one as our end point
                 else:
                     end_frame = confirmed_end_frames[0]
+                    last_end_frame = end_frame
                     iterations.append([start_frame, turning_frame, end_frame])
 
         return iterations
