@@ -9,7 +9,10 @@ from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
 from hma.movement_analysis import angle_calculations as acm
 from hma.movement_analysis import distance
 from hma.movement_analysis.enums.angle_types import AngleTypes
+from hma.movement_analysis import exercise_loader
+from hma.movement_analysis.exercise_evaluator import ExerciseEvaluator
 import tslearn.metrics as ts
+from pathlib import Path
 
 
 # Calculating joint angles for a MOCAP sequence and returning a 2D-list containing all angles for each frame in consecutive order
@@ -31,7 +34,6 @@ def get_dtw_angles_mocap(seq):
         seq_frame_angles.append(seq.joint_angles[frame][bp["LeftKnee"]][AngleTypes.FLEX_EX.value])
         seq_frame_angles.append(seq.joint_angles[frame][bp["RightKnee"]][AngleTypes.FLEX_EX.value])
         dtw_angles.append(seq_frame_angles)
-        print(seq_frame_angles)
     return np.array(dtw_angles)
 
 
@@ -46,15 +48,34 @@ def get_distances_dtw(ground_truth_angles, seqs_angles):
 
 # Get PoseProcessor instance for MOCAP sequences
 mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
+ex = exercise_loader.load('data/exercises/kniebeuge.json')
+exval_squat = ExerciseEvaluator(ex)
 
-# Convert json sequence file to Sequence object and calculate joint angles for dtw comparison
-seq_gt_angles = get_dtw_angles_mocap(mocap_poseprocessor.load('data/sequences/squat_3/complete-session.json', 'Squat_Ground_Truth'))
-seq_1_angles = get_dtw_angles_mocap(mocap_poseprocessor.load('data/sequences/squat_1/complete-session.json', 'Squat 1'))
-seq_2_angles = get_dtw_angles_mocap(mocap_poseprocessor.load('data/sequences/squat_2/complete-session.json', 'Squat 2'))
-seq_3_angles = get_dtw_angles_mocap(mocap_poseprocessor.load('data/sequences/squat_4/complete-session.json', 'Squat 4'))
-seq_4_angles = get_dtw_angles_mocap(mocap_poseprocessor.load('data/sequences/squat_false/complete-session.json', 'False Squat'))
-seq_5_angles = get_dtw_angles_mocap(mocap_poseprocessor.load('data/sequences/no_squat/complete-session.json', 'No Squat'))
+g_seq = mocap_poseprocessor.load(
+    'data/sequences/unique_iterations/complete-session.json', 'squat-dennis-multi-1')
 
-# Compare sequences to ground truth sequence (squat)
-dtw_result = get_distances_dtw(seq_gt_angles, [seq_1_angles, seq_2_angles, seq_3_angles, seq_4_angles, seq_5_angles])
-print(dtw_result)
+# Load sequence files
+filenames = list(Path("data/sequences/_dennis").rglob("kniebeuge/multi/squat-dennis-multi-1/complete-session.json"))
+# filenames = list(Path("data/sequences/_dennis").rglob("complete-session.json"))
+sequences = []
+for file in filenames:
+    sequences.append(mocap_poseprocessor.load(file, name=str(file)))
+
+# Split them into single iterations and expand the name for identification
+sequences_single_iterations = []
+for s in sequences:
+    iterations = exval_squat.find_iteration_keypoints(s)
+    for idx, iteration in enumerate(iterations):
+        start, turn, end = iteration
+        sequence_iteration = s[start:end]
+        sequence_iteration.name += f"--iteration-{idx}"
+        sequences_single_iterations.append(sequence_iteration)
+
+sequences_dtw_angles = []
+for s in sequences_single_iterations:
+    sequences_dtw_angles.append(get_dtw_angles_mocap(s))
+
+dtw_distances = get_distances_dtw(sequences_dtw_angles[0], sequences_dtw_angles)
+
+for i in range(len(dtw_distances)):
+    print(f"{[dtw_distances[i]]} {sequences_single_iterations[i].name}")
