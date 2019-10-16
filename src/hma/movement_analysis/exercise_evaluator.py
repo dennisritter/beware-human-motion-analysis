@@ -374,7 +374,34 @@ class ExerciseEvaluator:
 
         return results
 
-    def process_ball_joint_angles(self,
+    def _process_sequence_ball_joint_angles(self, ignore_flex_abd90_delta: int = 20):
+        """Processes this ExerciseEvaluators sequences' ball joint angles for all ball joints and applies changes to the sequence. 
+        
+        Args:
+            ignore_flex_abd90_delta (int):  Determines the maximum distance to a 90 degrees abduction/adduction angle, from where the flexion/extension angle is ignored.
+                        	                Default=20;
+        """
+        seq = self.sequence
+        bp = seq.body_parts
+        for i in range(len(seq)):
+            processed_ls = self._process_ball_joint_angles(
+                seq.joint_angles[i][bp["LeftShoulder"]][AngleTypes.FLEX_EX.value],
+                seq.joint_angles[i][bp["LeftShoulder"]][AngleTypes.AB_AD.value], bp["LeftShoulder"])
+            seq.joint_angles[i][bp["LeftShoulder"]] = [processed_ls[0], processed_ls[1], seq.joint_angles[i][bp["LeftShoulder"]][AngleTypes.IN_EX_ROT.value]]
+            processed_rs = self._process_ball_joint_angles(
+                seq.joint_angles[i][bp["RightShoulder"]][AngleTypes.FLEX_EX.value],
+                seq.joint_angles[i][bp["RightShoulder"]][AngleTypes.AB_AD.value], bp["RightShoulder"])
+            seq.joint_angles[i][bp["RightShoulder"]] = [processed_rs[0], processed_rs[1], seq.joint_angles[i][bp["RightShoulder"]][AngleTypes.IN_EX_ROT.value]]
+            processed_lh = self._process_ball_joint_angles(
+                seq.joint_angles[i][bp["LeftHip"]][AngleTypes.FLEX_EX.value],
+                seq.joint_angles[i][bp["LeftHip"]][AngleTypes.AB_AD.value], bp["LeftHip"])
+            seq.joint_angles[i][bp["LeftHip"]] = [processed_lh[0], processed_lh[1], seq.joint_angles[i][bp["LeftHip"]][AngleTypes.IN_EX_ROT.value]]
+            processed_rh = self._process_ball_joint_angles(
+                seq.joint_angles[i][bp["RightHip"]][AngleTypes.FLEX_EX.value],
+                seq.joint_angles[i][bp["RightHip"]][AngleTypes.AB_AD.value], bp["RightHip"])
+            seq.joint_angles[i][bp["RightHip"]] = [processed_rh[0], processed_rh[1], seq.joint_angles[i][bp["RightHip"]][AngleTypes.IN_EX_ROT.value]]
+
+    def _process_ball_joint_angles(self,
                                   angle_flex_ex: float,
                                   angle_abd_add: float,
                                   bp_idx: int,
