@@ -1,4 +1,3 @@
-
 class Exercise:
 
     def __init__(self, name: str, angles: dict, userId: int = 0, description: str = "Sorry, there is no description"):
