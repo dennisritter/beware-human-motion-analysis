@@ -41,6 +41,24 @@ class ExerciseEvaluator:
         self.target_angles = self._get_target_angles()
         # The prioritised body parts and angles: [(<body_part_index>, <AngleType.KEY>)]
         self.prio_angles = self._get_prio_angles()
+        
+        # Process all ball joint angles of the sequence attribute
+        # NOTE: Will change the Sequences angles!
+        self._process_sequence_ball_joint_angles()
+
+    def set_sequence(self, seq: Sequence):
+        """Assigns the given sequence to the sequence attribute and performs necessary recalculations.
+
+        Args:
+            sequence (Sequence): The new sequence to set as sequence attribute.
+        """
+        self.sequence = seq
+        # As the sequence attribute has changed, we have to recalculate target_angles and prio_angles.
+        self.target_angles = self._get_target_angles()
+        self.prio_angles = self._get_prio_angles()
+        # And finally process the sequences' ball joint angles again.
+        # NOTE: Will change the Sequences angles!
+        self._process_sequence_ball_joint_angles()
 
     def _get_prio_angles(self) -> list:
         """Returns a list of tuples containing a body part mapped in Sequence.body_parts and the AngleType for that body part which is prioritised.
@@ -340,23 +358,19 @@ class ExerciseEvaluator:
             if frame == switch_state_idx + 1:
                 current_target_state = AngleTargetStates.START
             # Shoulders
-            shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add = self._process_ball_joint_angles(
-                seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.FLEX_EX.value],
-                seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.AB_AD.value])
-            shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add = self._process_ball_joint_angles(
-                seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.FLEX_EX.value],
-                seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.AB_AD.value])
+            shoulder_left_angle_flex_ex = seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.FLEX_EX.value]
+            shoulder_left_angle_abd_add = seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.AB_AD.value]
+            shoulder_right_angle_flex_ex = seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.FLEX_EX.value]
+            shoulder_right_angle_abd_add = seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.AB_AD.value]
             # Hips
-            hip_left_angle_flex_ex, hip_left_angle_abd_add = self._process_ball_joint_angles(
-                seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.FLEX_EX.value],
-                seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.AB_AD.value])
-            hip_right_angle_flex_ex, hip_right_angle_abd_add = self._process_ball_joint_angles(
-                seq.joint_angles[frame][bp["RightHip"]][AngleTypes.FLEX_EX.value],
-                seq.joint_angles[frame][bp["RightHip"]][AngleTypes.AB_AD.value])
-            # # Elbows
+            hip_left_angle_flex_ex = seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.FLEX_EX.value]
+            hip_left_angle_abd_add = seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.AB_AD.value]
+            hip_right_angle_flex_ex = seq.joint_angles[frame][bp["RightHip"]][AngleTypes.FLEX_EX.value]
+            hip_right_angle_abd_add = seq.joint_angles[frame][bp["RightHip"]][AngleTypes.AB_AD.value]
+            # Elbows
             elbow_left_angle_flex_ex = seq.joint_angles[frame][bp["LeftElbow"]][AngleTypes.FLEX_EX.value]
             elbow_right_angle_flex_ex = seq.joint_angles[frame][bp["RightElbow"]][AngleTypes.FLEX_EX.value]
-            # # Knees
+            # Knees
             knee_left_angle_flex_ex = seq.joint_angles[frame][bp["LeftKnee"]][AngleTypes.FLEX_EX.value]
             knee_right_angle_flex_ex = seq.joint_angles[frame][bp["RightKnee"]][AngleTypes.FLEX_EX.value]
 
