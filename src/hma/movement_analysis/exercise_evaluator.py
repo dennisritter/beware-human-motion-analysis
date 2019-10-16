@@ -20,10 +20,9 @@ class ExerciseEvaluator:
 
     Attributes:
         exercise (Exercise):    The exercise to evaluate motion sequences for.
+        sequence (Sequence):    The sequence to evaluate.
         target_angles (list):   A list of target angles defined in the given exercise.
         prio_angles(list):      A list of prioritised body parts and angletypes for the given exercise.
-        body_part_indices:      A dictionary that maps body part String keys to an index int to retrieve
-                                information for that specific body part.
     """
 
     # Definitions of high, mid, low priorities as floats
@@ -31,30 +30,28 @@ class ExerciseEvaluator:
     MEDIUM_PRIO = 0.5
     LOW_PRIO = 0.0
 
-    def __init__(self, exercise: Exercise):
-        """Inits ExerciseEvaluator class with the given Exercise"""
+    def __init__(self, exercise: Exercise, sequence: Sequence):
+        """Inits ExerciseEvaluator class with the given Exercise and Sequence"""
 
         # The Exercise to evaluate
         self.exercise = exercise
+        # The sequence to evaluate
+        self.sequence = sequence
         # The target_angles for each body part
-        self.target_angles = []
+        self.target_angles = self._get_target_angles()
         # The prioritised body parts and angles: [(<body_part_index>, <AngleType.KEY>)]
-        self.prio_angles = []
-        # A Dictionary that maps body part indices of a sequences positions to names body parts represented by String values (Sequence.body_parts attribute)
-        self.body_part_indices = None
+        self.prio_angles = self._get_prio_angles()
 
-    def _get_prio_angles(self, seq: Sequence) -> list:
+    def _get_prio_angles(self) -> list:
         """Returns a list of tuples containing a body part mapped in Sequence.body_parts and the AngleType for that body part which is prioritised.
            Example: [(4, AngleType.FLEX_EX), (4, AngleType.AB_AD)]
-
-        Args:
-            seq (Sequence): The sequence to get body part indices from.
 
         Returns:
             A list of tuples containing body part indices and angle types. 
             Example: [(4, AngleType.FLEX_EX), (4, AngleType.AB_AD)]
         """
         ex = self.exercise
+        seq = self.sequence
         prio_angles = []
         # Shoulders
         if ex.angles["start"]["shoulder_left"]["flexion_extension"]["priority"] == self.HIGH_PRIO:
@@ -88,7 +85,7 @@ class ExerciseEvaluator:
         self.prio_angles = prio_angles
         return prio_angles
 
-    def _get_target_angles(self, seq: Sequence) -> list:
+    def _get_target_angles(self) -> list:
         """Returns target angles for the exercise of this ExerciseEvaluator instance.
 
         Returns a 4-D ndarray which contain the Exercises' range of target angles for all body_parts, angle types and target states as minimum/maximum.
@@ -97,13 +94,11 @@ class ExerciseEvaluator:
         The position in the third dimension represents the START (0) and END (1) state.
         The position in the fourth dimension represent the minimum value (0) and maximum value (1).
 
-        Args:
-            seq (Sequence): The sequence to get body parts from.
-
         Returns:
             Returns a 4-D ndarray which contain the Exercises' range of target angles for all body_parts, angle types and target states as minimum/maximum.
         """
         ex = self.exercise
+        seq = self.sequence
         target_angles = np.zeros((len(seq.body_parts), len(AngleTypes), len(AngleTargetStates), 2))
 
         # Shoulders
