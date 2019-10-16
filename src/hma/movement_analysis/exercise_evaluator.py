@@ -340,17 +340,17 @@ class ExerciseEvaluator:
             if frame == switch_state_idx + 1:
                 current_target_state = AngleTargetStates.START
             # Shoulders
-            shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add = self.process_ball_joint_angles(
+            shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add = self._process_ball_joint_angles(
                 seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.FLEX_EX.value],
                 seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.AB_AD.value])
-            shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add = self.process_ball_joint_angles(
+            shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add = self._process_ball_joint_angles(
                 seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.FLEX_EX.value],
                 seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.AB_AD.value])
             # Hips
-            hip_left_angle_flex_ex, hip_left_angle_abd_add = self.process_ball_joint_angles(
+            hip_left_angle_flex_ex, hip_left_angle_abd_add = self._process_ball_joint_angles(
                 seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.FLEX_EX.value],
                 seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.AB_AD.value])
-            hip_right_angle_flex_ex, hip_right_angle_abd_add = self.process_ball_joint_angles(
+            hip_right_angle_flex_ex, hip_right_angle_abd_add = self._process_ball_joint_angles(
                 seq.joint_angles[frame][bp["RightHip"]][AngleTypes.FLEX_EX.value],
                 seq.joint_angles[frame][bp["RightHip"]][AngleTypes.AB_AD.value])
             # # Elbows
@@ -585,10 +585,10 @@ class ExerciseEvaluator:
 
             Returns: A dictionary that represents the result evaluation of the given AngleTypes for the left shoulder joint with respect to the given AngleTargetState.
         """
-        target_start = self.target_angles[self.body_part_indices["LeftShoulder"]][angle_type.value][AngleTargetStates.START.value]
-        target_end = self.target_angles[self.body_part_indices["LeftShoulder"]][angle_type.value][AngleTargetStates.END.value]
-        target_min = min(self.target_angles[self.body_part_indices["LeftShoulder"]][angle_type.value][target_state.value])
-        target_max = max(self.target_angles[self.body_part_indices["LeftShoulder"]][angle_type.value][target_state.value])
+        target_start = self.target_angles[self.sequence.body_parts["LeftShoulder"]][angle_type.value][AngleTargetStates.START.value]
+        target_end = self.target_angles[self.sequence.body_parts["LeftShoulder"]][angle_type.value][AngleTargetStates.END.value]
+        target_min = min(self.target_angles[self.sequence.body_parts["LeftShoulder"]][angle_type.value][target_state.value])
+        target_max = max(self.target_angles[self.sequence.body_parts["LeftShoulder"]][angle_type.value][target_state.value])
 
         result = {
             "angle": angle,
@@ -612,10 +612,10 @@ class ExerciseEvaluator:
 
             Returns: A dictionary that represents the result evaluation of the given AngleTypes for the right shoulder joint with respect to the given AngleTargetState.
         """
-        target_start = self.target_angles[self.body_part_indices["RightShoulder"]][angle_type.value][AngleTargetStates.START.value]
-        target_end = self.target_angles[self.body_part_indices["RightShoulder"]][angle_type.value][AngleTargetStates.END.value]
-        target_min = min(self.target_angles[self.body_part_indices["RightShoulder"]][angle_type.value][target_state.value])
-        target_max = max(self.target_angles[self.body_part_indices["RightShoulder"]][angle_type.value][target_state.value])
+        target_start = self.target_angles[self.sequence.body_parts["RightShoulder"]][angle_type.value][AngleTargetStates.START.value]
+        target_end = self.target_angles[self.sequence.body_parts["RightShoulder"]][angle_type.value][AngleTargetStates.END.value]
+        target_min = min(self.target_angles[self.sequence.body_parts["RightShoulder"]][angle_type.value][target_state.value])
+        target_max = max(self.target_angles[self.sequence.body_parts["RightShoulder"]][angle_type.value][target_state.value])
 
         result = {
             "angle": angle,
@@ -639,10 +639,10 @@ class ExerciseEvaluator:
 
             Returns: A dictionary that represents the result evaluation of the given AngleTypes for the left hip joint with respect to the given AngleTargetState.
         """
-        target_start = self.target_angles[self.body_part_indices["LeftHip"]][angle_type.value][AngleTargetStates.START.value]
-        target_end = self.target_angles[self.body_part_indices["LeftHip"]][angle_type.value][AngleTargetStates.END.value]
-        target_min = min(self.target_angles[self.body_part_indices["LeftHip"]][angle_type.value][target_state.value])
-        target_max = max(self.target_angles[self.body_part_indices["LeftHip"]][angle_type.value][target_state.value])
+        target_start = self.target_angles[self.sequence.body_parts["LeftHip"]][angle_type.value][AngleTargetStates.START.value]
+        target_end = self.target_angles[self.sequence.body_parts["LeftHip"]][angle_type.value][AngleTargetStates.END.value]
+        target_min = min(self.target_angles[self.sequence.body_parts["LeftHip"]][angle_type.value][target_state.value])
+        target_max = max(self.target_angles[self.sequence.body_parts["LeftHip"]][angle_type.value][target_state.value])
 
         result = {
             "angle": angle,
@@ -666,10 +666,10 @@ class ExerciseEvaluator:
 
             Returns: A dictionary that represents the result evaluation of the given AngleTypes for the left right hip with respect to the given AngleTargetState.
         """
-        target_start = self.target_angles[self.body_part_indices["RightHip"]][angle_type.value][AngleTargetStates.START.value]
-        target_end = self.target_angles[self.body_part_indices["RightHip"]][angle_type.value][AngleTargetStates.END.value]
-        target_min = min(self.target_angles[self.body_part_indices["RightHip"]][angle_type.value][target_state.value])
-        target_max = max(self.target_angles[self.body_part_indices["RightHip"]][angle_type.value][target_state.value])
+        target_start = self.target_angles[self.sequence.body_parts["RightHip"]][angle_type.value][AngleTargetStates.START.value]
+        target_end = self.target_angles[self.sequence.body_parts["RightHip"]][angle_type.value][AngleTargetStates.END.value]
+        target_min = min(self.target_angles[self.sequence.body_parts["RightHip"]][angle_type.value][target_state.value])
+        target_max = max(self.target_angles[self.sequence.body_parts["RightHip"]][angle_type.value][target_state.value])
 
         result = {
             "angle": angle,
@@ -693,10 +693,10 @@ class ExerciseEvaluator:
 
             Returns: A dictionary that represents the result evaluation of the given AngleTypes for the left elbow joint with respect to the given AngleTargetState.
         """
-        target_start = self.target_angles[self.body_part_indices["LeftElbow"]][angle_type.value][AngleTargetStates.START.value]
-        target_end = self.target_angles[self.body_part_indices["LeftElbow"]][angle_type.value][AngleTargetStates.END.value]
-        target_min = min(self.target_angles[self.body_part_indices["LeftElbow"]][angle_type.value][target_state.value])
-        target_max = max(self.target_angles[self.body_part_indices["LeftElbow"]][angle_type.value][target_state.value])
+        target_start = self.target_angles[self.sequence.body_parts["LeftElbow"]][angle_type.value][AngleTargetStates.START.value]
+        target_end = self.target_angles[self.sequence.body_parts["LeftElbow"]][angle_type.value][AngleTargetStates.END.value]
+        target_min = min(self.target_angles[self.sequence.body_parts["LeftElbow"]][angle_type.value][target_state.value])
+        target_max = max(self.target_angles[self.sequence.body_parts["LeftElbow"]][angle_type.value][target_state.value])
 
         result = {
             "angle": angle,
@@ -720,10 +720,10 @@ class ExerciseEvaluator:
 
             Returns: A dictionary that represents the result evaluation of the given AngleTypes for the right elbow joint with respect to the given AngleTargetState.
         """
-        target_start = self.target_angles[self.body_part_indices["RightElbow"]][angle_type.value][AngleTargetStates.START.value]
-        target_end = self.target_angles[self.body_part_indices["RightElbow"]][angle_type.value][AngleTargetStates.END.value]
-        target_min = min(self.target_angles[self.body_part_indices["RightElbow"]][angle_type.value][target_state.value])
-        target_max = max(self.target_angles[self.body_part_indices["RightElbow"]][angle_type.value][target_state.value])
+        target_start = self.target_angles[self.sequence.body_parts["RightElbow"]][angle_type.value][AngleTargetStates.START.value]
+        target_end = self.target_angles[self.sequence.body_parts["RightElbow"]][angle_type.value][AngleTargetStates.END.value]
+        target_min = min(self.target_angles[self.sequence.body_parts["RightElbow"]][angle_type.value][target_state.value])
+        target_max = max(self.target_angles[self.sequence.body_parts["RightElbow"]][angle_type.value][target_state.value])
 
         result = {
             "angle": angle,
@@ -747,10 +747,10 @@ class ExerciseEvaluator:
 
             Returns: A dictionary that represents the result evaluation of the given AngleTypes for the left knee joint with respect to the given AngleTargetState.
         """
-        target_start = self.target_angles[self.body_part_indices["LeftKnee"]][angle_type.value][AngleTargetStates.START.value]
-        target_end = self.target_angles[self.body_part_indices["LeftKnee"]][angle_type.value][AngleTargetStates.END.value]
-        target_min = min(self.target_angles[self.body_part_indices["LeftKnee"]][angle_type.value][target_state.value])
-        target_max = max(self.target_angles[self.body_part_indices["LeftKnee"]][angle_type.value][target_state.value])
+        target_start = self.target_angles[self.sequence.body_parts["LeftKnee"]][angle_type.value][AngleTargetStates.START.value]
+        target_end = self.target_angles[self.sequence.body_parts["LeftKnee"]][angle_type.value][AngleTargetStates.END.value]
+        target_min = min(self.target_angles[self.sequence.body_parts["LeftKnee"]][angle_type.value][target_state.value])
+        target_max = max(self.target_angles[self.sequence.body_parts["LeftKnee"]][angle_type.value][target_state.value])
 
         result = {
             "angle": angle,
@@ -774,10 +774,10 @@ class ExerciseEvaluator:
 
             Returns: A dictionary that represents the result evaluation of the given AngleTypes for the right shoulder joint with respect to the given AngleTargetState.
         """
-        target_start = self.target_angles[self.body_part_indices["RightKnee"]][angle_type.value][AngleTargetStates.START.value]
-        target_end = self.target_angles[self.body_part_indices["RightKnee"]][angle_type.value][AngleTargetStates.END.value]
-        target_min = min(self.target_angles[self.body_part_indices["RightKnee"]][angle_type.value][target_state.value])
-        target_max = max(self.target_angles[self.body_part_indices["RightKnee"]][angle_type.value][target_state.value])
+        target_start = self.target_angles[self.sequence.body_parts["RightKnee"]][angle_type.value][AngleTargetStates.START.value]
+        target_end = self.target_angles[self.sequence.body_parts["RightKnee"]][angle_type.value][AngleTargetStates.END.value]
+        target_min = min(self.target_angles[self.sequence.body_parts["RightKnee"]][angle_type.value][target_state.value])
+        target_max = max(self.target_angles[self.sequence.body_parts["RightKnee"]][angle_type.value][target_state.value])
 
         result = {
             "angle": angle,
