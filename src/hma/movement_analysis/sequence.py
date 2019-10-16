@@ -2,6 +2,8 @@ import numpy as np
 from sklearn.decomposition import PCA
 from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
 from hma.movement_analysis import angle_calculations as acm
+from matplotlib import pyplot as plt
+import matplotlib.animation as animation
 
 
 class Sequence:
@@ -126,6 +128,26 @@ class Sequence:
         pca = PCA(n_components=num_components)
         xPCA = pca.fit_transform(self.get_positions_2d())
         return xPCA
+
+    def visualise(self, fps: int = 10):
+        n_frames = len(self)
+        fps = 10
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        sct, = ax.plot([], [], [], "o", markersize=5)
+
+        def update(ifrm, xa, ya, za):
+            sct.set_data(xa[ifrm], ya[ifrm])
+            sct.set_3d_properties(za[ifrm])
+
+        ax.set_xlim(-1000, 1000)
+        ax.set_ylim(-1000, 1000)
+        ax.set_zlim(-1000, 3000)
+        ax.view_init(elev=-45, azim=90)
+        ani = animation.FuncAnimation(fig, update, n_frames, fargs=(self.positions[:, :, 0], self.positions[:, :, 1], self.positions[:, :, 2]), interval=1000/fps)
+
+        plt.show()
 
     def _filter_zero_frames(self, positions: list) -> list:
         """
