@@ -265,13 +265,6 @@ class ExerciseEvaluator:
                 else:
                     start_frame_matrix[prio_idx][maximum] = 1.0
 
-            # if plot:
-            #     plt.plot(range(0, len(angles)), angles, zorder=1, linewidth="1.0")
-            #     plt.plot(range(0, len(angles)), angles_savgol, color='red', zorder=1, linewidth="1.0")
-            #     plt.scatter(maxima, angles_savgol[maxima], color='green', marker="^", zorder=2, facecolors='none')
-            #     plt.scatter(minima, angles_savgol[minima], color='green', marker="v", zorder=2, facecolors='none')
-            #     plt.show()
-
         # TODO: What if we have only two prioritised angles? -> 100% must be correct? 50% must be correct? Something better?
         confirm_extrema_thresh = len(self.prio_angles) - 1
         # Window size that determines the range of frames minima/maxima of different body parts belong to each other.
@@ -290,6 +283,29 @@ class ExerciseEvaluator:
             plt.scatter(confirmed_turning_frames, np.full(confirmed_turning_frames.shape, 180), color='blue', marker="^", zorder=3)
             plt.show()
 
+        iterations = self._confirm_iterations(confirmed_start_frames, confirmed_turning_frames)
+
+        return iterations
+
+    def _confirm_iterations(self, confirmed_start_frames: np.ndarray, confirmed_turning_frames: np.ndarray) -> list:
+        """Checks for correct order of start and turning frames.
+
+            Ensures that each iterations is represented by Start frame -> Turning frame -> End frame.
+            Where End Frames are actually the same keypoints as Start frames. 
+            In cases like "Start, Turn, Turn, Turn, End" only the first Turn frame will be kept and the other two get removed.
+            Simplified Example:
+                confirmed_start_frames   =  [0,5,10,15]
+                confirmed_turning_frames =  [3,7,8,9,13]
+                Will result in the following returned iterations: [[0,3,5], [5,7,10], [10,13,15]]
+                (confirmed_turning_frames 8 and 9 got removed)
+            
+            Args:
+                confirmed_start_frames (np.ndarray): The potential start and end frames for iterations.
+                confirmed_turning_frames (np.ndarray): The potential turning frames for iterations.
+
+            Returns: (list) A 2-D list of iterations, represented by start, turn, end indices of the 
+                current ExerciseEvaluator sequence attribute.
+        """
         iterations = []
         last_end_frame = None
         # We Don't need to iterate over the last element because this can't be the start of a iteration anymore.
@@ -315,7 +331,6 @@ class ExerciseEvaluator:
                     end_frame = confirmed_end_frames[0]
                     last_end_frame = end_frame
                     iterations.append([start_frame, turning_frame, end_frame])
-
         return iterations
 
     def _confirm_extrema(self, extrema_matrix: np.ndarray, w_size: int, confirm_extrema_thresh: int) -> np.ndarray:
