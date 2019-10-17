@@ -20,10 +20,9 @@ class ExerciseEvaluator:
 
     Attributes:
         exercise (Exercise):    The exercise to evaluate motion sequences for.
+        sequence (Sequence):    The sequence to evaluate.
         target_angles (list):   A list of target angles defined in the given exercise.
         prio_angles(list):      A list of prioritised body parts and angletypes for the given exercise.
-        body_part_indices:      A dictionary that maps body part String keys to an index int to retrieve
-                                information for that specific body part.
     """
 
     # Definitions of high, mid, low priorities as floats
@@ -31,30 +30,64 @@ class ExerciseEvaluator:
     MEDIUM_PRIO = 0.5
     LOW_PRIO = 0.0
 
-    def __init__(self, exercise: Exercise):
-        """Inits ExerciseEvaluator class with the given Exercise"""
+    def __init__(self, exercise: Exercise, sequence: Sequence):
+        """Inits ExerciseEvaluator class with the given Exercise and Sequence"""
 
         # The Exercise to evaluate
         self.exercise = exercise
+        # The sequence to evaluate
+        self.sequence = sequence
+        # Hold the unprocessed angles in case the exercise changes
+        self.unprocessed_sequence = sequence
         # The target_angles for each body part
-        self.target_angles = []
+        self.target_angles = self._get_target_angles()
         # The prioritised body parts and angles: [(<body_part_index>, <AngleType.KEY>)]
-        self.prio_angles = []
-        # A Dictionary that maps body part indices of a sequences positions to names body parts represented by String values (Sequence.body_parts attribute)
-        self.body_part_indices = None
+        self.prio_angles = self._get_prio_angles()
+        
+        # Process all ball joint angles of the sequence attribute
+        # NOTE: Will change the Sequences angles!
+        self._process_sequence_ball_joint_angles()
 
-    def _get_prio_angles(self, seq: Sequence) -> list:
-        """Returns a list of tuples containing a body part mapped in Sequence.body_parts and the AngleType for that body part which is prioritised.
-           Example: [(4, AngleType.FLEX_EX), (4, AngleType.AB_AD)]
+    def set_sequence(self, seq: Sequence):
+        """Assigns the given sequence to the sequence attribute and performs necessary recalculations.
 
         Args:
-            seq (Sequence): The sequence to get body part indices from.
+            seq (Sequence): The new sequence to set as sequence attribute.
+        """
+        self.sequence = seq
+        # As the sequence attribute has changed, we have to recalculate target_angles and prio_angles.
+        self.target_angles = self._get_target_angles()
+        self.prio_angles = self._get_prio_angles()
+        # And finally process the sequences' ball joint angles again.
+        # NOTE: Will change the Sequences angles!
+        self._process_sequence_ball_joint_angles()
+
+    def set_exercise(self, ex: Exercise):
+        """Assigns the given exercise to the exercise attribute and performs necessary recalculations.
+
+        Args:
+            ex (Sequence): The new exercise to set as exercise attribute.
+        """
+        self.exercise = ex
+        # As the sequence attribute has changed, we have to recalculate target_angles and prio_angles.
+        self.target_angles = self._get_target_angles()
+        self.prio_angles = self._get_prio_angles()
+        # Assign unprocessed sequence to sequence to process the original (unprocessed) angles.
+        self.sequence = self.unprocessed_sequence
+        # And finally process the sequences' ball joint angles again.
+        # NOTE: Will change the Sequences angles!
+        self._process_sequence_ball_joint_angles()
+
+    def _get_prio_angles(self) -> list:
+        """Returns a list of tuples containing a body part mapped in Sequence.body_parts and the AngleType for that body part which is prioritised.
+           Example: [(4, AngleType.FLEX_EX), (4, AngleType.AB_AD)]
 
         Returns:
             A list of tuples containing body part indices and angle types. 
             Example: [(4, AngleType.FLEX_EX), (4, AngleType.AB_AD)]
         """
         ex = self.exercise
+        seq = self.sequence
         prio_angles = []
         # Shoulders
         if ex.angles["start"]["shoulder_left"]["flexion_extension"]["priority"] == self.HIGH_PRIO:
@@ -88,7 +121,7 @@ class ExerciseEvaluator:
         self.prio_angles = prio_angles
         return prio_angles
 
-    def _get_target_angles(self, seq: Sequence) -> list:
+    def _get_target_angles(self) -> list:
         """Returns target angles for the exercise of this ExerciseEvaluator instance.
 
         Returns a 4-D ndarray which contain the Exercises' range of target angles for all body_parts, angle types and target states as minimum/maximum.
@@ -97,13 +130,11 @@ class ExerciseEvaluator:
         The position in the third dimension represents the START (0) and END (1) state.
         The position in the fourth dimension represent the minimum value (0) and maximum value (1).
 
-        Args:
-            seq (Sequence): The sequence to get body parts from.
-
         Returns:
             Returns a 4-D ndarray which contain the Exercises' range of target angles for all body_parts, angle types and target states as minimum/maximum.
         """
         ex = self.exercise
+        seq = self.sequence
         target_angles = np.zeros((len(seq.body_parts), len(AngleTypes), len(AngleTargetStates), 2))
 
         # Shoulders
@@ -125,41 +156,37 @@ class ExerciseEvaluator:
         target_angles[seq.body_parts["RightHip"]][AngleTypes.AB_AD.value][0] = ex.angles["start"]["hip_right"]["abduction_adduction"]["angle"]
         target_angles[seq.body_parts["RightHip"]][AngleTypes.AB_AD.value][1] = ex.angles["end"]["hip_right"]["abduction_adduction"]["angle"]
         # Elbow
-        target_angles[seq.body_parts["LeftElbow"]][AngleTypes.FLEX_EX.value][0] = ex.angles["start"]["hip_left"]["flexion_extension"]["angle"]
-        target_angles[seq.body_parts["LeftElbow"]][AngleTypes.FLEX_EX.value][1] = ex.angles["end"]["hip_left"]["flexion_extension"]["angle"]
-        target_angles[seq.body_parts["RightElbow"]][AngleTypes.FLEX_EX.value][0] = ex.angles["start"]["hip_left"]["flexion_extension"]["angle"]
-        target_angles[seq.body_parts["RightElbow"]][AngleTypes.FLEX_EX.value][1] = ex.angles["end"]["hip_left"]["flexion_extension"]["angle"]
+        target_angles[seq.body_parts["LeftElbow"]][AngleTypes.FLEX_EX.value][0] = ex.angles["start"]["elbow_left"]["flexion_extension"]["angle"]
+        target_angles[seq.body_parts["LeftElbow"]][AngleTypes.FLEX_EX.value][1] = ex.angles["end"]["elbow_left"]["flexion_extension"]["angle"]
+        target_angles[seq.body_parts["RightElbow"]][AngleTypes.FLEX_EX.value][0] = ex.angles["start"]["elbow_right"]["flexion_extension"]["angle"]
+        target_angles[seq.body_parts["RightElbow"]][AngleTypes.FLEX_EX.value][1] = ex.angles["end"]["elbow_right"]["flexion_extension"]["angle"]
         # Knee
-        target_angles[seq.body_parts["LeftKnee"]][AngleTypes.FLEX_EX.value][0] = ex.angles["start"]["hip_left"]["flexion_extension"]["angle"]
-        target_angles[seq.body_parts["LeftKnee"]][AngleTypes.FLEX_EX.value][1] = ex.angles["end"]["hip_left"]["flexion_extension"]["angle"]
-        target_angles[seq.body_parts["RightKnee"]][AngleTypes.FLEX_EX.value][0] = ex.angles["start"]["hip_left"]["flexion_extension"]["angle"]
-        target_angles[seq.body_parts["RightKnee"]][AngleTypes.FLEX_EX.value][1] = ex.angles["end"]["hip_left"]["flexion_extension"]["angle"]
+        target_angles[seq.body_parts["LeftKnee"]][AngleTypes.FLEX_EX.value][0] = ex.angles["start"]["knee_left"]["flexion_extension"]["angle"]
+        target_angles[seq.body_parts["LeftKnee"]][AngleTypes.FLEX_EX.value][1] = ex.angles["end"]["knee_left"]["flexion_extension"]["angle"]
+        target_angles[seq.body_parts["RightKnee"]][AngleTypes.FLEX_EX.value][0] = ex.angles["start"]["knee_right"]["flexion_extension"]["angle"]
+        target_angles[seq.body_parts["RightKnee"]][AngleTypes.FLEX_EX.value][1] = ex.angles["end"]["knee_right"]["flexion_extension"]["angle"]
 
         self.target_angles = target_angles
         return target_angles
 
     # TODO: Identify anad create sub functions to shrink the length of this function and increase overview.
-    def find_iteration_keypoints(self, seq: Sequence, start_frame_min_dist=5, end_frame_min_dist=5, plot=False) -> list:
+    def find_iteration_keypoints(self, start_frame_min_dist: int=5, end_frame_min_dist: int=5, plot=False) -> list:
         """Finds iterations of a movement in a motion sequence.
 
         The function identifies Start, Mid and End positions of iterations in a motion sequence 
         based on shared minimum and maximum values of prioritised body part angles.
 
         Args:
-            seq (Sequence): The sequence to find iterations in.
+            # NOTE: Probably changes again
+            # TODO: Add doctring after finished
+            start_frame_min_dist (int): 
+            end_frame_min_dist (int):
+            plot (Boolean): Determines whether to plot partial results of an execution of this function. 
 
         Returns:
             A 2-D list of frame indices of the given sequence that represent start, mid and end frames of an iteration. 
         """
-        if len(self.prio_angles) == 0:
-            self._get_prio_angles(seq)
-
-        if len(self.target_angles) == 0:
-            self._get_target_angles(seq)
-
-        if self.body_part_indices == None:
-            self.body_part_indices = seq.body_parts
-
+        seq = self.sequence
         # Store all minima/maxima in a matrix of [0,1]
         # Rows represent prioritised angle (bodypart and angle type)
         # Columns represent Frames
@@ -256,7 +283,6 @@ class ExerciseEvaluator:
             for prio_idx in range(len(angles_savgol_all_bps)):
                 maxima = maxima_all_bps[prio_idx].astype(int)
                 minima = minima_all_bps[prio_idx].astype(int)
-                # plt.plot(range(0, len(angles)), angles, zorder=1, linewidth="1.0")
                 plt.plot(range(0, len(angles_savgol_all_bps[prio_idx])), angles_savgol_all_bps[prio_idx], color='red', zorder=1, linewidth="1.0")
                 plt.scatter(maxima, angles_savgol_all_bps[prio_idx][maxima], color='green', marker="^", zorder=2, facecolors='none')
                 plt.scatter(minima, angles_savgol_all_bps[prio_idx][minima], color='green', marker="v", zorder=2, facecolors='none')
@@ -331,27 +357,18 @@ class ExerciseEvaluator:
 
         return np.array(confirmed_extrema)
 
-    def evaluate(self, seq: Sequence, switch_state_idx: int) -> list:
-        """Evaluates the given sequence with respect to the Exercise of this ExerciseEvaluator instance.
+    def evaluate(self, switch_state_idx: int) -> list:
+        """Evaluates the Sequence of this ExerciseEvaluator instance with respect to the Exercise.
 
         Args:
-            seq (Sequence):         The motion sequence to evaluate.
             switch_state_idx (int): The sequence index where the target state to evaluate against changes from END to START 
 
         Returns:
             A list of evaluation results containing: Frames -> body_parts -> AngleTypes -> Result dictionaries
             Example indexing of a specific result: result[<frame>][<body_part_index>][<angle_type.value>]
         """
+        seq = self.sequence
         bp = seq.body_parts
-
-        if len(self.prio_angles) == 0:
-            self._get_prio_angles(seq)
-
-        if len(self.target_angles) == 0:
-            self._get_target_angles(seq)
-
-        if self.body_part_indices == None:
-            self.body_part_indices = seq.body_parts
 
         results = []
         current_target_state = AngleTargetStates.END
@@ -359,28 +376,24 @@ class ExerciseEvaluator:
             if frame == switch_state_idx + 1:
                 current_target_state = AngleTargetStates.START
             # Shoulders
-            shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add = self.process_ball_joint_angles(
-                seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.FLEX_EX.value],
-                seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.AB_AD.value])
-            shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add = self.process_ball_joint_angles(
-                seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.FLEX_EX.value],
-                seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.AB_AD.value])
+            shoulder_left_angle_flex_ex = seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.FLEX_EX.value]
+            shoulder_left_angle_abd_add = seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.AB_AD.value]
+            shoulder_right_angle_flex_ex = seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.FLEX_EX.value]
+            shoulder_right_angle_abd_add = seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.AB_AD.value]
             # Hips
-            hip_left_angle_flex_ex, hip_left_angle_abd_add = self.process_ball_joint_angles(
-                seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.FLEX_EX.value],
-                seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.AB_AD.value])
-            hip_right_angle_flex_ex, hip_right_angle_abd_add = self.process_ball_joint_angles(
-                seq.joint_angles[frame][bp["RightHip"]][AngleTypes.FLEX_EX.value],
-                seq.joint_angles[frame][bp["RightHip"]][AngleTypes.AB_AD.value])
-            # # Elbows
+            hip_left_angle_flex_ex = seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.FLEX_EX.value]
+            hip_left_angle_abd_add = seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.AB_AD.value]
+            hip_right_angle_flex_ex = seq.joint_angles[frame][bp["RightHip"]][AngleTypes.FLEX_EX.value]
+            hip_right_angle_abd_add = seq.joint_angles[frame][bp["RightHip"]][AngleTypes.AB_AD.value]
+            # Elbows
             elbow_left_angle_flex_ex = seq.joint_angles[frame][bp["LeftElbow"]][AngleTypes.FLEX_EX.value]
             elbow_right_angle_flex_ex = seq.joint_angles[frame][bp["RightElbow"]][AngleTypes.FLEX_EX.value]
-            # # Knees
+            # Knees
             knee_left_angle_flex_ex = seq.joint_angles[frame][bp["LeftKnee"]][AngleTypes.FLEX_EX.value]
             knee_right_angle_flex_ex = seq.joint_angles[frame][bp["RightKnee"]][AngleTypes.FLEX_EX.value]
 
             # Everything gets overridden? WHY?
-            frame_result = [None]*len(self.body_part_indices)
+            frame_result = [None]*len(bp)
             frame_result[bp["LeftShoulder"]] = self._get_results_shoulder_left(shoulder_left_angle_flex_ex, shoulder_left_angle_abd_add, current_target_state, 10)
             frame_result[bp["RightShoulder"]] = self._get_results_shoulder_right(shoulder_right_angle_flex_ex, shoulder_right_angle_abd_add, current_target_state, 10)
             frame_result[bp["LeftHip"]] = self._get_results_hip_left(hip_left_angle_flex_ex, hip_left_angle_abd_add, current_target_state, 10)
@@ -393,54 +406,78 @@ class ExerciseEvaluator:
 
         return results
 
-    # TODO: Either use target_angle_range_flex_ex, target_angle_range_abd_add parameters or remove them from the function.
-    def process_ball_joint_angles(
-            self,
-            angle_flex_ex: float,
-            angle_abd_add: float,
-            ignore_flex_abd90_delta: int = 20,
-            abd_add_motion_thresh: int = 45) -> tuple:
+    # TODO: There should be a better, clearer way to process the sequences angles that doesnt change the sequence implicitly. 
+    def _process_sequence_ball_joint_angles(self, ignore_flex_abd90_delta: int = 20):
+        """Processes this ExerciseEvaluators sequences' ball joint angles for all ball joints and applies changes to the sequence. 
+        
+        Args:
+            ignore_flex_abd90_delta (int):  Determines the maximum distance to a 90 degrees abduction/adduction angle, from where the flexion/extension angle is ignored.
+                        	                Default=20;
+        """
+        seq = self.sequence
+        bp = seq.body_parts
+        for i in range(len(seq)):
+            processed_ls = self._process_ball_joint_angles(
+                seq.joint_angles[i][bp["LeftShoulder"]][AngleTypes.FLEX_EX.value],
+                seq.joint_angles[i][bp["LeftShoulder"]][AngleTypes.AB_AD.value], bp["LeftShoulder"])
+            seq.joint_angles[i][bp["LeftShoulder"]] = [processed_ls[0], processed_ls[1], seq.joint_angles[i][bp["LeftShoulder"]][AngleTypes.IN_EX_ROT.value]]
+            processed_rs = self._process_ball_joint_angles(
+                seq.joint_angles[i][bp["RightShoulder"]][AngleTypes.FLEX_EX.value],
+                seq.joint_angles[i][bp["RightShoulder"]][AngleTypes.AB_AD.value], bp["RightShoulder"])
+            seq.joint_angles[i][bp["RightShoulder"]] = [processed_rs[0], processed_rs[1], seq.joint_angles[i][bp["RightShoulder"]][AngleTypes.IN_EX_ROT.value]]
+            processed_lh = self._process_ball_joint_angles(
+                seq.joint_angles[i][bp["LeftHip"]][AngleTypes.FLEX_EX.value],
+                seq.joint_angles[i][bp["LeftHip"]][AngleTypes.AB_AD.value], bp["LeftHip"])
+            seq.joint_angles[i][bp["LeftHip"]] = [processed_lh[0], processed_lh[1], seq.joint_angles[i][bp["LeftHip"]][AngleTypes.IN_EX_ROT.value]]
+            processed_rh = self._process_ball_joint_angles(
+                seq.joint_angles[i][bp["RightHip"]][AngleTypes.FLEX_EX.value],
+                seq.joint_angles[i][bp["RightHip"]][AngleTypes.AB_AD.value], bp["RightHip"])
+            seq.joint_angles[i][bp["RightHip"]] = [processed_rh[0], processed_rh[1], seq.joint_angles[i][bp["RightHip"]][AngleTypes.IN_EX_ROT.value]]
+
+    def _process_ball_joint_angles(self,
+                                  angle_flex_ex: float,
+                                  angle_abd_add: float,
+                                  bp_idx: int,
+                                  ignore_flex_abd90_delta: int = 20) -> tuple:
         """Processes ball joint angles to improve clinical representation of those.
 
-        Checks whether the current position is more likely a abduction/adductio or flexion/extension.
-        For that, the abd_add_motion_thresh parameter value determines the minimum abduction value to
-        treat the movement as an abduction. Since abduction/adduction angles range after initial 
-        calculation is [-90, 90] degrees, but the range of motion is [-180,180] degrees, the value must be extended 
-        by -90/90 degrees whenever the flexion angle is greater 90 or less than -90.
-        The operation resets the flexion/extension angle to zero(0) whenever the abduction/adduction
+        (1) Abduction/Adduction angles range after initial calculations is [-90, 90] degrees, 
+        but the range of motion is [-180,180] degrees, the value must be extended
+        by -90/90 degrees if a prioritised angle of the exercise is an abduction/adduction and 
+        corresponding the flexion angle is greater 90 or less than -90.
+
+        (2) The second operation resets the flexion/extension angle to zero(0) whenever the abduction/adduction
         angles distance is less than the ignore_flex_abd90_delta parameters value from 90 degrees.
-        Because flexion/extension angles are very sensitive and error prone when close to the X-Axis 
+        Because flexion/extension angles are very sensitive and error prone when close to the X-Axis
         because it represents a rotation around it.
 
         Args:
-            angle_flex_ex (float): 
+            angle_flex_ex (float):
                 The flexion/extension angle to process.
             angle_abd_add (float):
                 The abduction/adduction angle to process.
-            target_angle_range_flex_ex (list):
-            target_angle_range_abd_add (list):
-            ignore_flex_abd90_delta (int): 
+            bp_idx (int): The sequences body_part index of the processed angles.
+            ignore_flex_abd90_delta (int):
                 Determines the maximum distance to a 90 degrees abduction/adduction angle, from where the flexion/extension angle is ignored.
                 Default=20;
-            abd_add_motion_thresh (int): 
-                Determines the minimum abduction value to treat the movement as an abduction.
-                Default=45;             
 
         Returns:
             A tuple containing the processed flexion/extension angle as first element and the processed
             abduction/adduction angle as second element.
             Example: (85.0, 11.0)
         """
-
         # Check if angle-vector.y is higher than origin and adjust abduction/adduction angles if conditions are met.
         # If flexion angle is >90.0, angle-vector.y is higher than origin because flexion angle represents a rotation about the X-Axis
         if angle_flex_ex > 90.0 or angle_flex_ex < -90:
-            # If motion is considered an Abduction, add 90 degrees to the current angle to meet the expected abduction range [0,180] and not only [0,90]
-            if angle_abd_add > abd_add_motion_thresh:
-                angle_abd_add += 90
-            # If motion is considered an Adduction, sub 90 degrees to the current angle to meet the expected abduction range [0,-180] and not only [0,-90]
-            if angle_abd_add < -abd_add_motion_thresh:
-                angle_abd_add -= 90
+            for pa in self.prio_angles:
+                # TODO: Maybe it is better to check for the expected range of motion instead of priority
+                # If Abduction/Adduction is a prio angle type, fix the 90° limitation
+                if pa[0] == bp_idx and pa[1] == AngleTypes.AB_AD:
+                    if angle_abd_add < 0:
+                        angle_abd_add -= 90
+
+                    if angle_abd_add > 0:
+                        angle_abd_add += 90
 
         # Set Flexion/Extension to 0.0° when angle-vector is close to X-Axis.
         # -> Flexion/Extension angles get very sensitive and error prone when close to X-Axis because it represents a rotation around it.
@@ -581,10 +618,10 @@ class ExerciseEvaluator:
 
             Returns: A dictionary that represents the result evaluation of the given AngleTypes for the left shoulder joint with respect to the given AngleTargetState.
         """
-        target_start = self.target_angles[self.body_part_indices["LeftShoulder"]][angle_type.value][AngleTargetStates.START.value]
-        target_end = self.target_angles[self.body_part_indices["LeftShoulder"]][angle_type.value][AngleTargetStates.END.value]
-        target_min = min(self.target_angles[self.body_part_indices["LeftShoulder"]][angle_type.value][target_state.value])
-        target_max = max(self.target_angles[self.body_part_indices["LeftShoulder"]][angle_type.value][target_state.value])
+        target_start = self.target_angles[self.sequence.body_parts["LeftShoulder"]][angle_type.value][AngleTargetStates.START.value]
+        target_end = self.target_angles[self.sequence.body_parts["LeftShoulder"]][angle_type.value][AngleTargetStates.END.value]
+        target_min = min(self.target_angles[self.sequence.body_parts["LeftShoulder"]][angle_type.value][target_state.value])
+        target_max = max(self.target_angles[self.sequence.body_parts["LeftShoulder"]][angle_type.value][target_state.value])
 
         result = {
             "angle": angle,
@@ -608,10 +645,10 @@ class ExerciseEvaluator:
 
             Returns: A dictionary that represents the result evaluation of the given AngleTypes for the right shoulder joint with respect to the given AngleTargetState.
         """
-        target_start = self.target_angles[self.body_part_indices["RightShoulder"]][angle_type.value][AngleTargetStates.START.value]
-        target_end = self.target_angles[self.body_part_indices["RightShoulder"]][angle_type.value][AngleTargetStates.END.value]
-        target_min = min(self.target_angles[self.body_part_indices["RightShoulder"]][angle_type.value][target_state.value])
-        target_max = max(self.target_angles[self.body_part_indices["RightShoulder"]][angle_type.value][target_state.value])
+        target_start = self.target_angles[self.sequence.body_parts["RightShoulder"]][angle_type.value][AngleTargetStates.START.value]
+        target_end = self.target_angles[self.sequence.body_parts["RightShoulder"]][angle_type.value][AngleTargetStates.END.value]
+        target_min = min(self.target_angles[self.sequence.body_parts["RightShoulder"]][angle_type.value][target_state.value])
+        target_max = max(self.target_angles[self.sequence.body_parts["RightShoulder"]][angle_type.value][target_state.value])
 
         result = {
             "angle": angle,
@@ -635,10 +672,10 @@ class ExerciseEvaluator:
 
             Returns: A dictionary that represents the result evaluation of the given AngleTypes for the left hip joint with respect to the given AngleTargetState.
         """
-        target_start = self.target_angles[self.body_part_indices["LeftHip"]][angle_type.value][AngleTargetStates.START.value]
-        target_end = self.target_angles[self.body_part_indices["LeftHip"]][angle_type.value][AngleTargetStates.END.value]
-        target_min = min(self.target_angles[self.body_part_indices["LeftHip"]][angle_type.value][target_state.value])
-        target_max = max(self.target_angles[self.body_part_indices["LeftHip"]][angle_type.value][target_state.value])
+        target_start = self.target_angles[self.sequence.body_parts["LeftHip"]][angle_type.value][AngleTargetStates.START.value]
+        target_end = self.target_angles[self.sequence.body_parts["LeftHip"]][angle_type.value][AngleTargetStates.END.value]
+        target_min = min(self.target_angles[self.sequence.body_parts["LeftHip"]][angle_type.value][target_state.value])
+        target_max = max(self.target_angles[self.sequence.body_parts["LeftHip"]][angle_type.value][target_state.value])
 
         result = {
             "angle": angle,
@@ -662,10 +699,10 @@ class ExerciseEvaluator:
 
             Returns: A dictionary that represents the result evaluation of the given AngleTypes for the left right hip with respect to the given AngleTargetState.
         """
-        target_start = self.target_angles[self.body_part_indices["RightHip"]][angle_type.value][AngleTargetStates.START.value]
-        target_end = self.target_angles[self.body_part_indices["RightHip"]][angle_type.value][AngleTargetStates.END.value]
-        target_min = min(self.target_angles[self.body_part_indices["RightHip"]][angle_type.value][target_state.value])
-        target_max = max(self.target_angles[self.body_part_indices["RightHip"]][angle_type.value][target_state.value])
+        target_start = self.target_angles[self.sequence.body_parts["RightHip"]][angle_type.value][AngleTargetStates.START.value]
+        target_end = self.target_angles[self.sequence.body_parts["RightHip"]][angle_type.value][AngleTargetStates.END.value]
+        target_min = min(self.target_angles[self.sequence.body_parts["RightHip"]][angle_type.value][target_state.value])
+        target_max = max(self.target_angles[self.sequence.body_parts["RightHip"]][angle_type.value][target_state.value])
 
         result = {
             "angle": angle,
@@ -689,10 +726,10 @@ class ExerciseEvaluator:
 
             Returns: A dictionary that represents the result evaluation of the given AngleTypes for the left elbow joint with respect to the given AngleTargetState.
         """
-        target_start = self.target_angles[self.body_part_indices["LeftElbow"]][angle_type.value][AngleTargetStates.START.value]
-        target_end = self.target_angles[self.body_part_indices["LeftElbow"]][angle_type.value][AngleTargetStates.END.value]
-        target_min = min(self.target_angles[self.body_part_indices["LeftElbow"]][angle_type.value][target_state.value])
-        target_max = max(self.target_angles[self.body_part_indices["LeftElbow"]][angle_type.value][target_state.value])
+        target_start = self.target_angles[self.sequence.body_parts["LeftElbow"]][angle_type.value][AngleTargetStates.START.value]
+        target_end = self.target_angles[self.sequence.body_parts["LeftElbow"]][angle_type.value][AngleTargetStates.END.value]
+        target_min = min(self.target_angles[self.sequence.body_parts["LeftElbow"]][angle_type.value][target_state.value])
+        target_max = max(self.target_angles[self.sequence.body_parts["LeftElbow"]][angle_type.value][target_state.value])
 
         result = {
             "angle": angle,
@@ -716,10 +753,10 @@ class ExerciseEvaluator:
 
             Returns: A dictionary that represents the result evaluation of the given AngleTypes for the right elbow joint with respect to the given AngleTargetState.
         """
-        target_start = self.target_angles[self.body_part_indices["RightElbow"]][angle_type.value][AngleTargetStates.START.value]
-        target_end = self.target_angles[self.body_part_indices["RightElbow"]][angle_type.value][AngleTargetStates.END.value]
-        target_min = min(self.target_angles[self.body_part_indices["RightElbow"]][angle_type.value][target_state.value])
-        target_max = max(self.target_angles[self.body_part_indices["RightElbow"]][angle_type.value][target_state.value])
+        target_start = self.target_angles[self.sequence.body_parts["RightElbow"]][angle_type.value][AngleTargetStates.START.value]
+        target_end = self.target_angles[self.sequence.body_parts["RightElbow"]][angle_type.value][AngleTargetStates.END.value]
+        target_min = min(self.target_angles[self.sequence.body_parts["RightElbow"]][angle_type.value][target_state.value])
+        target_max = max(self.target_angles[self.sequence.body_parts["RightElbow"]][angle_type.value][target_state.value])
 
         result = {
             "angle": angle,
@@ -743,10 +780,10 @@ class ExerciseEvaluator:
 
             Returns: A dictionary that represents the result evaluation of the given AngleTypes for the left knee joint with respect to the given AngleTargetState.
         """
-        target_start = self.target_angles[self.body_part_indices["LeftKnee"]][angle_type.value][AngleTargetStates.START.value]
-        target_end = self.target_angles[self.body_part_indices["LeftKnee"]][angle_type.value][AngleTargetStates.END.value]
-        target_min = min(self.target_angles[self.body_part_indices["LeftKnee"]][angle_type.value][target_state.value])
-        target_max = max(self.target_angles[self.body_part_indices["LeftKnee"]][angle_type.value][target_state.value])
+        target_start = self.target_angles[self.sequence.body_parts["LeftKnee"]][angle_type.value][AngleTargetStates.START.value]
+        target_end = self.target_angles[self.sequence.body_parts["LeftKnee"]][angle_type.value][AngleTargetStates.END.value]
+        target_min = min(self.target_angles[self.sequence.body_parts["LeftKnee"]][angle_type.value][target_state.value])
+        target_max = max(self.target_angles[self.sequence.body_parts["LeftKnee"]][angle_type.value][target_state.value])
 
         result = {
             "angle": angle,
@@ -770,10 +807,10 @@ class ExerciseEvaluator:
 
             Returns: A dictionary that represents the result evaluation of the given AngleTypes for the right shoulder joint with respect to the given AngleTargetState.
         """
-        target_start = self.target_angles[self.body_part_indices["RightKnee"]][angle_type.value][AngleTargetStates.START.value]
-        target_end = self.target_angles[self.body_part_indices["RightKnee"]][angle_type.value][AngleTargetStates.END.value]
-        target_min = min(self.target_angles[self.body_part_indices["RightKnee"]][angle_type.value][target_state.value])
-        target_max = max(self.target_angles[self.body_part_indices["RightKnee"]][angle_type.value][target_state.value])
+        target_start = self.target_angles[self.sequence.body_parts["RightKnee"]][angle_type.value][AngleTargetStates.START.value]
+        target_end = self.target_angles[self.sequence.body_parts["RightKnee"]][angle_type.value][AngleTargetStates.END.value]
+        target_min = min(self.target_angles[self.sequence.body_parts["RightKnee"]][angle_type.value][target_state.value])
+        target_max = max(self.target_angles[self.sequence.body_parts["RightKnee"]][angle_type.value][target_state.value])
 
         result = {
             "angle": angle,

@@ -28,8 +28,8 @@ mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 
 g_seq = mocap_poseprocessor.load(
     'data/sequences/unique_iterations/complete-session.json', 'squat-dennis-multi-1')
-ex = exercise_loader.load('data/exercises/kniebeuge.json')
-exval_squat = ExerciseEvaluator(ex)
+squat = exercise_loader.load('data/exercises/kniebeuge.json')
+EE = None
 
 seqs = []
 # Split long sequence for testing
@@ -48,9 +48,12 @@ for seq in seqs:
         merged_seq = seq
     else:
         merged_seq.merge(seq)
-    part_iterations_biased = exval_squat.find_iteration_keypoints(
-        merged_seq, 20, 20)
-    part_iterations = exval_squat.find_iteration_keypoints(merged_seq, 20, 20)
+    if EE == None:
+        EE = ExerciseEvaluator(squat, merged_seq)
+    else:
+        EE.set_sequence(merged_seq)
+    part_iterations_biased = EE.find_iteration_keypoints(20, 20)
+    part_iterations = EE.find_iteration_keypoints(20, 20)
     # If at least one iteration found
     if len(part_iterations) >= 1:
         # Store the sequence in a list
@@ -68,12 +71,13 @@ for seq in seqs:
 
 print(f"Iterations found result (GLOBAL): {g_iterations}")
 print(f"Iterations found result (LOCAL): {iterations}")
-g_iterations = exval_squat.find_iteration_keypoints(g_seq, 20, 20, plot=True)
+EE.set_sequence(g_seq)
+g_iterations = EE.find_iteration_keypoints(20, 20, True)
 print(f"Iterations for complete sequence [{len(g_seq)} Frames]{g_iterations}")
 
-# prio_angles = exval_squat.prio_angles
+# prio_angles = EE.prio_angles
 # for i, iteration_seq in enumerate(iteration_seqs):
-#     result = exval_squat.evaluate(iteration_seq, iterations[i][1])
+#     result = EE.evaluate(iteration_seq, iterations[i][1])
 #     print(f"########## Evaluation results for iteration [{i}] ##########")
 #     print(f"START FRAME [{iterations[i][0]}]")
 #     for angle in prio_angles:
