@@ -120,7 +120,7 @@
             90,
             90
           ],
-          "priority": 1
+          "priority": 1.0
         }
       },
       "elbow_right": {
@@ -129,7 +129,7 @@
             90,
             90
           ],
-          "priority": 1
+          "priority": 1.0
         }
       }
     },
@@ -250,7 +250,7 @@
             0,
             0
           ],
-          "priority": 1
+          "priority": 1.0
         }
       },
       "elbow_right": {
@@ -259,7 +259,7 @@
             0,
             0
           ],
-          "priority": 1
+          "priority": 1.0
         }
       }
     }
