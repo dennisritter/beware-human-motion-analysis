@@ -1,169 +1,265 @@
 {
   "name": "Overhead Press",
-  "userId": 0, 
+  "userId": 0,
   "description": "Pushing both arms up next to the head.",
   "angles": {
     "start": {
       "hip_left": {
         "flexion_extension": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.5
         },
         "innerrotation_outerrotation": {
-            "angle": [0, 0],
-            "priority": 0.0
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.0
         },
         "abduction_adduction": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.5
         }
       },
       "hip_right": {
         "flexion_extension": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.5
         },
         "innerrotation_outerrotation": {
-            "angle": [0, 0],
-            "priority": 0.0
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.0
         },
         "abduction_adduction": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.5
         }
       },
       "knee_left": {
         "flexion_extension": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.5
         }
       },
       "knee_right": {
         "flexion_extension": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.5
         }
       },
       "shoulder_left": {
         "flexion_extension": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.5
         },
         "innerrotation_outerrotation": {
-            "angle": [0, 0],
-            "priority": 0.0
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.0
         },
         "abduction_adduction": {
-            "angle": [60, 90],
-            "priority": 1.0
+          "angle": [
+            60,
+            90
+          ],
+          "priority": 1.0
         }
       },
       "shoulder_right": {
         "flexion_extension": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.5
         },
         "innerrotation_outerrotation": {
-            "angle": [0, 0],
-            "priority": 0.0
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.0
         },
         "abduction_adduction": {
-            "angle": [60, 90],
-            "priority": 1.0
+          "angle": [
+            60,
+            90
+          ],
+          "priority": 1.0
         }
       },
       "elbow_left": {
         "flexion_extension": {
-            "angle": [90, 90],
-            "priority": 0.5
+          "angle": [
+            90,
+            90
+          ],
+          "priority": 1
         }
       },
       "elbow_right": {
         "flexion_extension": {
-            "angle": [90, 90],
-            "priority": 0.5
+          "angle": [
+            90,
+            90
+          ],
+          "priority": 1
         }
       }
     },
     "end": {
       "hip_left": {
         "flexion_extension": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.5
         },
         "innerrotation_outerrotation": {
-            "angle": [0, 0],
-            "priority": 0.0
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.0
         },
         "abduction_adduction": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.5
         }
       },
       "hip_right": {
         "flexion_extension": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.5
         },
         "innerrotation_outerrotation": {
-            "angle": [0, 0],
-            "priority": 0.0
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.0
         },
         "abduction_adduction": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.5
         }
       },
       "knee_left": {
         "flexion_extension": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.5
         }
       },
       "knee_right": {
         "flexion_extension": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.5
         }
       },
       "shoulder_left": {
         "flexion_extension": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.5
         },
         "innerrotation_outerrotation": {
-            "angle": [0, 0],
-            "priority": 0.0
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.0
         },
         "abduction_adduction": {
-            "angle": [120, 180],
-            "priority": 1.0
+          "angle": [
+            120,
+            180
+          ],
+          "priority": 1.0
         }
       },
       "shoulder_right": {
         "flexion_extension": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.5
         },
         "innerrotation_outerrotation": {
-            "angle": [0, 0],
-            "priority": 0.0
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 0.0
         },
         "abduction_adduction": {
-            "angle": [120, 180],
-            "priority": 0.5
+          "angle": [
+            120,
+            180
+          ],
+          "priority": 0.5
         }
       },
       "elbow_left": {
         "flexion_extension": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 1
         }
       },
       "elbow_right": {
         "flexion_extension": {
-            "angle": [0, 0],
-            "priority": 0.5
+          "angle": [
+            0,
+            0
+          ],
+          "priority": 1
         }
       }
     }

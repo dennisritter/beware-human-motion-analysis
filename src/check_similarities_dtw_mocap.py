@@ -3,12 +3,16 @@ from mpl_toolkits.mplot3d import Axes3D
 import tslearn.metrics as ts
 import seaborn as sns
 import numpy as np
+from pathlib import Path
 from hma.movement_analysis.sequence import Sequence
+from hma.movement_analysis.exercise import Exercise
 from hma.movement_analysis.pose_processor import PoseProcessor
 from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
 from hma.movement_analysis import angle_calculations as acm
 from hma.movement_analysis import distance
 from hma.movement_analysis.enums.angle_types import AngleTypes
+from hma.movement_analysis import exercise_loader
+from hma.movement_analysis.exercise_evaluator import ExerciseEvaluator
 import tslearn.metrics as ts
 
 
@@ -31,7 +35,6 @@ def get_dtw_angles_mocap(seq):
         seq_frame_angles.append(seq.joint_angles[frame][bp["LeftKnee"]][AngleTypes.FLEX_EX.value])
         seq_frame_angles.append(seq.joint_angles[frame][bp["RightKnee"]][AngleTypes.FLEX_EX.value])
         dtw_angles.append(seq_frame_angles)
-        print(seq_frame_angles)
     return np.array(dtw_angles)
 
 
@@ -44,17 +47,79 @@ def get_distances_dtw(ground_truth_angles, seqs_angles):
     return distances
 
 
+def get_sequence_iterations(folder_path: str, ex: Exercise):
+    EE = None
+    # Load sequence files
+    filenames = list(Path(folder_path).rglob("complete-session.json"))
+    sequences = []
+    for file in filenames:
+        sequences.append(mocap_poseprocessor.load(file, name=str(file)))
+
+    # Split them into single iterations and expand the name for identification
+    sequences_single_iterations = []
+    for s in sequences:
+        if EE == None:
+            EE = ExerciseEvaluator(ex, s)
+        else:
+            EE.set_sequence(s)
+        iterations = EE.find_iteration_keypoints()
+        for idx, iteration in enumerate(iterations):
+            start, turn, end = iteration
+            sequence_iteration = s[start:end]
+            sequence_iteration.name += f"--iteration-{idx}"
+            sequences_single_iterations.append(sequence_iteration)
+    return sequences_single_iterations
+
+
 # Get PoseProcessor instance for MOCAP sequences
 mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 
-# Convert json sequence file to Sequence object and calculate joint angles for dtw comparison
-seq_gt_angles = get_dtw_angles_mocap(mocap_poseprocessor.load('data/sequences/squat_3/complete-session.json', 'Squat_Ground_Truth'))
-seq_1_angles = get_dtw_angles_mocap(mocap_poseprocessor.load('data/sequences/squat_1/complete-session.json', 'Squat 1'))
-seq_2_angles = get_dtw_angles_mocap(mocap_poseprocessor.load('data/sequences/squat_2/complete-session.json', 'Squat 2'))
-seq_3_angles = get_dtw_angles_mocap(mocap_poseprocessor.load('data/sequences/squat_4/complete-session.json', 'Squat 4'))
-seq_4_angles = get_dtw_angles_mocap(mocap_poseprocessor.load('data/sequences/squat_false/complete-session.json', 'False Squat'))
-seq_5_angles = get_dtw_angles_mocap(mocap_poseprocessor.load('data/sequences/no_squat/complete-session.json', 'No Squat'))
+squat = exercise_loader.load('data/exercises/kniebeuge.json')
+overheadpress = exercise_loader.load('data/exercises/overhead-press.json')
+lungeleft = exercise_loader.load('data/exercises/lunge-left.json')
+lungeright = exercise_loader.load('data/exercises/lunge-right.json')
 
-# Compare sequences to ground truth sequence (squat)
-dtw_result = get_distances_dtw(seq_gt_angles, [seq_1_angles, seq_2_angles, seq_3_angles, seq_4_angles, seq_5_angles])
-print(dtw_result)
+sequences_single_iterations = []
+# sequences_single_iterations += get_sequence_iterations("data/sequences/dennis/kniebeuge", squat)
+# sequences_single_iterations += get_sequence_iterations("data/sequences/levente/kniebeuge", squat)
+# sequences_single_iterations += get_sequence_iterations("data/sequences/philippe/kniebeuge", squat)
+sequences_single_iterations += get_sequence_iterations("data/sequences/dennis/overhead-press", overheadpress)
+sequences_single_iterations += get_sequence_iterations("data/sequences/levente/overhead-press", overheadpress)
+# sequences_single_iterations += get_sequence_iterations("data/sequences/philippe/overhead-press", overheadpress)
+# sequences_single_iterations += get_sequence_iterations("data/sequences/dennis/wechsel-lunges", lungeleft)
+# sequences_single_iterations += get_sequence_iterations("data/sequences/levente/wechsel-lunges", lungeleft)
+# sequences_single_iterations += get_sequence_iterations("data/sequences/philippe/wechsel-lunges", lungeleft)
+
+# filenames = list(Path("data/sequences/dennis/lunge-left").rglob("complete-session.json"))
+# for file in filenames:
+#     print(f"Loading file: {file}")
+#     sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
+# filenames = list(Path("data/sequences/levente/lunge-right").rglob("complete-session.json"))
+# for file in filenames:
+#     print(f"Loading file: {file}")
+#     sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
+# filenames = list(Path("data/sequences/philippe/lunge-left").rglob("complete-session.json"))
+# for file in filenames:
+#     print(f"Loading file: {file}")
+#     sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
+# filenames = list(Path("data/sequences/dennis/lunge-right").rglob("complete-session.json"))
+# for file in filenames:
+#     print(f"Loading file: {file}")
+#     sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
+# filenames = list(Path("data/sequences/levente/lunge-left").rglob("complete-session.json"))
+# for file in filenames:
+#     print(f"Loading file: {file}")
+#     sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
+# filenames = list(Path("data/sequences/philippe/lunge-right").rglob("complete-session.json"))
+# for file in filenames:
+#     print(f"Loading file: {file}")
+#     sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
+
+sequences_dtw_angles = []
+for s in sequences_single_iterations:
+    print(f"Restructuring angles for DTW: {s.name}")
+    sequences_dtw_angles.append(get_dtw_angles_mocap(s))
+
+dtw_distances = sorted(get_distances_dtw(sequences_dtw_angles[0], sequences_dtw_angles))
+for i in range(len(dtw_distances)):
+    print(f"{[dtw_distances[i]]} {sequences_single_iterations[i].name}")
