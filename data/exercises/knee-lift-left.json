@@ -1,7 +1,7 @@
 {
-  "name": "Overhead Press",
+  "name": "Knee Lift Left",
   "userId": 0,
-  "description": "Pushing both arms up next to the head.",
+  "description": "Lift up your left knee.",
   "angles": {
     "start": {
       "hip_left": {
@@ -10,7 +10,7 @@
             0,
             0
           ],
-          "priority": 0.5
+          "priority": 1.0
         },
         "innerrotation_outerrotation": {
           "angle": [
@@ -56,7 +56,7 @@
             0,
             0
           ],
-          "priority": 0.5
+          "priority": 1.0
         }
       },
       "knee_right": {
@@ -85,10 +85,10 @@
         },
         "abduction_adduction": {
           "angle": [
-            60,
-            90
+            0,
+            0
           ],
-          "priority": 1.0
+          "priority": 0.5
         }
       },
       "shoulder_right": {
@@ -97,7 +97,7 @@
             0,
             0
           ],
-          "priority": 0.5
+          "priority": 1.0
         },
         "innerrotation_outerrotation": {
           "angle": [
@@ -108,26 +108,26 @@
         },
         "abduction_adduction": {
           "angle": [
-            60,
-            90
+            0,
+            0
           ],
-          "priority": 1.0
+          "priority": 0.5
         }
       },
       "elbow_left": {
         "flexion_extension": {
           "angle": [
-            90,
-            90
+            0,
+            0
           ],
-          "priority": 1.0
+          "priority": 0.5
         }
       },
       "elbow_right": {
         "flexion_extension": {
           "angle": [
-            90,
-            90
+            -10,
+            10
           ],
           "priority": 1.0
         }
@@ -137,10 +137,10 @@
       "hip_left": {
         "flexion_extension": {
           "angle": [
-            0,
-            0
+            45,
+            90
           ],
-          "priority": 0.5
+          "priority": 1.0
         },
         "innerrotation_outerrotation": {
           "angle": [
@@ -183,10 +183,10 @@
       "knee_left": {
         "flexion_extension": {
           "angle": [
-            0,
-            0
+            90,
+            120
           ],
-          "priority": 0.5
+          "priority": 1.0
         }
       },
       "knee_right": {
@@ -215,19 +215,19 @@
         },
         "abduction_adduction": {
           "angle": [
-            120,
-            180
+            0,
+            0
           ],
-          "priority": 1.0
+          "priority": 0.5
         }
       },
       "shoulder_right": {
         "flexion_extension": {
           "angle": [
-            0,
-            0
+            45,
+            90
           ],
-          "priority": 0.5
+          "priority": 1.0
         },
         "innerrotation_outerrotation": {
           "angle": [
@@ -238,8 +238,8 @@
         },
         "abduction_adduction": {
           "angle": [
-            120,
-            180
+            0,
+            0
           ],
           "priority": 0.5
         }
@@ -250,14 +250,14 @@
             0,
             0
           ],
-          "priority": 1.0
+          "priority": 0.5
         }
       },
       "elbow_right": {
         "flexion_extension": {
           "angle": [
-            0,
-            0
+            45,
+            90
           ],
           "priority": 1.0
         }

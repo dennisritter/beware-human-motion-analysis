@@ -1,22 +1,19 @@
 {
-  "name": "Overhead Press",
+  "name": "Side Step Left / Jumping Jack Left",
   "userId": 0,
-  "description": "Pushing both arms up next to the head.",
+  "description": "Step the left foot to the left.",
   "angles": {
     "start": {
       "hip_left": {
         "flexion_extension": {
           "angle": [
-            0,
-            0
+            20,
+            30
           ],
           "priority": 0.5
         },
         "innerrotation_outerrotation": {
-          "angle": [
-            0,
-            0
-          ],
+          "angle": [0, 0],
           "priority": 0.0
         },
         "abduction_adduction": {
@@ -24,14 +21,14 @@
             0,
             0
           ],
-          "priority": 0.5
+          "priority": 1.0
         }
       },
       "hip_right": {
         "flexion_extension": {
           "angle": [
-            0,
-            0
+            20,
+            30
           ],
           "priority": 0.5
         },
@@ -47,14 +44,14 @@
             0,
             0
           ],
-          "priority": 0.5
+          "priority": 1.0
         }
       },
       "knee_left": {
         "flexion_extension": {
           "angle": [
-            0,
-            0
+            20,
+            40
           ],
           "priority": 0.5
         }
@@ -62,8 +59,8 @@
       "knee_right": {
         "flexion_extension": {
           "angle": [
-            0,
-            0
+            20,
+            40
           ],
           "priority": 0.5
         }
@@ -85,10 +82,10 @@
         },
         "abduction_adduction": {
           "angle": [
-            60,
-            90
+            0,
+            0
           ],
-          "priority": 1.0
+          "priority": 0.5
         }
       },
       "shoulder_right": {
@@ -108,10 +105,10 @@
         },
         "abduction_adduction": {
           "angle": [
-            60,
-            90
+            0,
+            0
           ],
-          "priority": 1.0
+          "priority": 0.5
         }
       },
       "elbow_left": {
@@ -120,7 +117,7 @@
             90,
             90
           ],
-          "priority": 1.0
+          "priority": 0.5
         }
       },
       "elbow_right": {
@@ -129,7 +126,7 @@
             90,
             90
           ],
-          "priority": 1.0
+          "priority": 0.5
         }
       }
     },
@@ -151,17 +148,17 @@
         },
         "abduction_adduction": {
           "angle": [
-            0,
-            0
+            30,
+            50
           ],
-          "priority": 0.5
+          "priority": 1.0
         }
       },
       "hip_right": {
         "flexion_extension": {
           "angle": [
-            0,
-            0
+            20,
+            30
           ],
           "priority": 0.5
         },
@@ -177,7 +174,7 @@
             0,
             0
           ],
-          "priority": 0.5
+          "priority": 1.0
         }
       },
       "knee_left": {
@@ -192,8 +189,8 @@
       "knee_right": {
         "flexion_extension": {
           "angle": [
-            0,
-            0
+            20,
+            30
           ],
           "priority": 0.5
         }
@@ -215,8 +212,8 @@
         },
         "abduction_adduction": {
           "angle": [
-            120,
-            180
+            60,
+            90
           ],
           "priority": 1.0
         }
@@ -238,8 +235,8 @@
         },
         "abduction_adduction": {
           "angle": [
-            120,
-            180
+            60,
+            90
           ],
           "priority": 0.5
         }
@@ -247,19 +244,19 @@
       "elbow_left": {
         "flexion_extension": {
           "angle": [
-            0,
-            0
+            90,
+            90
           ],
-          "priority": 1.0
+          "priority": 0.5
         }
       },
       "elbow_right": {
         "flexion_extension": {
           "angle": [
-            0,
-            0
+            90,
+            90
           ],
-          "priority": 1.0
+          "priority": 0.5
         }
       }
     }
