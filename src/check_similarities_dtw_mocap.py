@@ -14,6 +14,7 @@ from hma.movement_analysis.enums.angle_types import AngleTypes
 from hma.movement_analysis import exercise_loader
 from hma.movement_analysis.exercise_evaluator import ExerciseEvaluator
 import tslearn.metrics as ts
+from pathlib import Path
 
 
 # Calculating joint angles for a MOCAP sequence and returning a 2D-list containing all angles for each frame in consecutive order
@@ -73,6 +74,8 @@ def get_sequence_iterations(folder_path: str, ex: Exercise):
 
 # Get PoseProcessor instance for MOCAP sequences
 mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
+ex = exercise_loader.load('data/exercises/kniebeuge.json')
+exval_squat = ExerciseEvaluator(ex)
 
 squat = exercise_loader.load('data/exercises/kniebeuge.json')
 overheadpress = exercise_loader.load('data/exercises/overhead-press.json')
@@ -121,5 +124,6 @@ for s in sequences_single_iterations:
     sequences_dtw_angles.append(get_dtw_angles_mocap(s))
 
 dtw_distances = sorted(get_distances_dtw(sequences_dtw_angles[0], sequences_dtw_angles))
+
 for i in range(len(dtw_distances)):
     print(f"{[dtw_distances[i]]} {sequences_single_iterations[i].name}")
