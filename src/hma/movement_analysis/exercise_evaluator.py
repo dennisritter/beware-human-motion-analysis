@@ -43,7 +43,7 @@ class ExerciseEvaluator:
         self.target_angles = self._get_target_angles()
         # The prioritised body parts and angles: [(<body_part_index>, <AngleType.KEY>)]
         self.prio_angles = self._get_prio_angles()
-        
+
         # Process all ball joint angles of the sequence attribute
         # NOTE: Will change the Sequences angles!
         self._process_sequence_ball_joint_angles()
@@ -169,16 +169,13 @@ class ExerciseEvaluator:
         self.target_angles = target_angles
         return target_angles
 
-    # TODO: Identify anad create sub functions to shrink the length of this function and increase overview.
-    def find_iteration_keypoints(self, start_frame_min_dist: int=5, end_frame_min_dist: int=5, plot=False) -> list:
+    def find_iteration_keypoints(self, plot=False) -> list:
         """Finds iterations of a movement in a motion sequence.
 
         The function identifies Start, Mid and End positions of iterations in a motion sequence 
         based on shared minimum and maximum values of prioritised body part angles.
 
         Args:
-            # NOTE: Probably changes again
-            # TODO: Add doctring after finished
             start_frame_min_dist (int): 
             end_frame_min_dist (int):
             plot (Boolean): Determines whether to plot partial results of an execution of this function. 
@@ -222,15 +219,12 @@ class ExerciseEvaluator:
 
             # Add minimum to first and last frame if start_frame_min_dist/end_frame_min_dist
             # param value is not less than the actual distance to the target angle
+            target_distance_tolerance = 20
             angles_savgol = np.array(angles_savgol)
             target_start_range = self.target_angles[body_part_idx][angle_type.value][AngleTargetStates.START.value]
-            if (min(target_start_range) < angles_savgol[0] < max(target_start_range) or
-                start_frame_min_dist > abs(angles_savgol[0]-target_start_range[0]) or
-                    start_frame_min_dist > abs(angles_savgol[0]-target_start_range[1])):
+            if (min(target_start_range) - target_distance_tolerance < angles_savgol[0] < max(target_start_range) + target_distance_tolerance):
                 minima = np.insert(minima, 0, 0)
-            if (min(target_start_range) < angles_savgol[-1] < max(target_start_range) or
-                end_frame_min_dist > abs(angles_savgol[-1]-target_start_range[0]) or
-                    end_frame_min_dist > abs(angles_savgol[-1]-target_start_range[1])):
+            if (min(target_start_range) - target_distance_tolerance < angles_savgol[-1] < max(target_start_range) + target_distance_tolerance):
                 minima = np.append(minima, len(angles_savgol)-1)
 
             # Get Exercise targets for the current angle type
@@ -298,7 +292,7 @@ class ExerciseEvaluator:
                 confirmed_turning_frames =  [3,7,8,9,13]
                 Will result in the following returned iterations: [[0,3,5], [5,7,10], [10,13,15]]
                 (confirmed_turning_frames 8 and 9 got removed)
-            
+
             Args:
                 confirmed_start_frames (np.ndarray): The potential start and end frames for iterations.
                 confirmed_turning_frames (np.ndarray): The potential turning frames for iterations.
@@ -421,13 +415,13 @@ class ExerciseEvaluator:
 
         return results
 
-    # TODO: There should be a better, clearer way to process the sequences angles that doesnt change the sequence implicitly. 
+    # TODO: There should be a better, clearer way to process the sequences angles that doesnt change the sequence implicitly.
     def _process_sequence_ball_joint_angles(self, ignore_flex_abd90_delta: int = 20):
         """Processes this ExerciseEvaluators sequences' ball joint angles for all ball joints and applies changes to the sequence. 
-        
+
         Args:
             ignore_flex_abd90_delta (int):  Determines the maximum distance to a 90 degrees abduction/adduction angle, from where the flexion/extension angle is ignored.
-                        	                Default=20;
+                                                Default=20;
         """
         seq = self.sequence
         bp = seq.body_parts
@@ -450,10 +444,10 @@ class ExerciseEvaluator:
             seq.joint_angles[i][bp["RightHip"]] = [processed_rh[0], processed_rh[1], seq.joint_angles[i][bp["RightHip"]][AngleTypes.IN_EX_ROT.value]]
 
     def _process_ball_joint_angles(self,
-                                  angle_flex_ex: float,
-                                  angle_abd_add: float,
-                                  bp_idx: int,
-                                  ignore_flex_abd90_delta: int = 20) -> tuple:
+                                   angle_flex_ex: float,
+                                   angle_abd_add: float,
+                                   bp_idx: int,
+                                   ignore_flex_abd90_delta: int = 20) -> tuple:
         """Processes ball joint angles to improve clinical representation of those.
 
         (1) Abduction/Adduction angles range after initial calculations is [-90, 90] degrees, 
