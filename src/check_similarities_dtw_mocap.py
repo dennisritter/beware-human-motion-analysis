@@ -115,13 +115,11 @@ sequences_single_iterations += get_sequence_iterations("data/sequences/levente/o
 #     print(f"Loading file: {file}")
 #     sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
 
-
 sequences_dtw_angles = []
 for s in sequences_single_iterations:
     print(f"Restructuring angles for DTW: {s.name}")
     sequences_dtw_angles.append(get_dtw_angles_mocap(s))
 
 dtw_distances = sorted(get_distances_dtw(sequences_dtw_angles[0], sequences_dtw_angles))
-
 for i in range(len(dtw_distances)):
     print(f"{[dtw_distances[i]]} {sequences_single_iterations[i].name}")
