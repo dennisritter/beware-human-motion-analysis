@@ -33,7 +33,6 @@ squat = exercise_loader.load('data/exercises/squat.json')
 overheadpress = exercise_loader.load('data/exercises/overhead-press.json')
 lungleleft = exercise_loader.load('data/exercises/lunge-left.json')
 EE = None
-g_seq.visualise()
 seqs = []
 # Split long sequence for testing
 for i in range(0, math.floor(len(g_seq.positions)/30)):
@@ -56,8 +55,8 @@ for seq in seqs:
         EE = ExerciseEvaluator(overheadpress, merged_seq)
     else:
         EE.set_sequence(merged_seq)
-    part_iterations_biased = EE.find_iteration_keypoints(20, 20)
-    part_iterations = EE.find_iteration_keypoints(20, 20)
+    part_iterations_biased = EE.find_iteration_keypoints()
+    part_iterations = EE.find_iteration_keypoints()
     # If at least one iteration found
     if len(part_iterations) >= 1:
         # Store the sequence in a list
@@ -76,7 +75,7 @@ for seq in seqs:
 print(f"Iterations found result (GLOBAL): {g_iterations}")
 print(f"Iterations found result (LOCAL): {iterations}")
 EE.set_sequence(g_seq)
-g_iterations = EE.find_iteration_keypoints(20, 20, True)
+g_iterations = EE.find_iteration_keypoints(plot=True)
 print(f"Iterations for complete sequence [{len(g_seq)} Frames]{g_iterations}")
 
 # prio_angles = EE.prio_angles

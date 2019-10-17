@@ -259,25 +259,30 @@ class ExerciseEvaluator:
                 else:
                     start_frame_matrix[prio_idx][maximum] = 1.0
 
-        # TODO: What if we have only two prioritised angles? -> 100% must be correct? 50% must be correct? Something better?
-        confirm_extrema_thresh = len(self.prio_angles) - 1
+        # For n >= 3, n-1 extrema must be in range of the window to confirm an extremum.
+        # For n < 3, n extrema must be in range of the window to confirm an extremum.
+        confirm_extrema_thresh = len(self.prio_angles) if len(self.prio_angles) <= 2 else len(self.prio_angles) - 1
         # Window size that determines the range of frames minima/maxima of different body parts belong to each other.
         w_size = 30
         confirmed_start_frames = self._confirm_extrema(start_frame_matrix, w_size, confirm_extrema_thresh)
         confirmed_turning_frames = self._confirm_extrema(turning_frame_matrix, w_size, confirm_extrema_thresh)
 
+        iterations = self._confirm_iterations(confirmed_start_frames, confirmed_turning_frames)
+
         if plot:
             for prio_idx in range(len(angles_savgol_all_bps)):
                 maxima = maxima_all_bps[prio_idx].astype(int)
                 minima = minima_all_bps[prio_idx].astype(int)
-                plt.plot(range(0, len(angles_savgol_all_bps[prio_idx])), angles_savgol_all_bps[prio_idx], color='red', zorder=1, linewidth="1.0")
-                plt.scatter(maxima, angles_savgol_all_bps[prio_idx][maxima], color='green', marker="^", zorder=2, facecolors='none')
-                plt.scatter(minima, angles_savgol_all_bps[prio_idx][minima], color='green', marker="v", zorder=2, facecolors='none')
-            plt.scatter(confirmed_start_frames, np.zeros(confirmed_start_frames.shape), color='blue', marker="v", zorder=3)
-            plt.scatter(confirmed_turning_frames, np.full(confirmed_turning_frames.shape, 180), color='blue', marker="^", zorder=3)
+                plt.plot(range(0, len(angles_savgol_all_bps[prio_idx])), angles_savgol_all_bps[prio_idx], color='tab:red', zorder=1, linewidth="1.0")
+                plt.scatter(maxima, angles_savgol_all_bps[prio_idx][maxima], color='tab:green', marker="^", zorder=2, facecolors='none')
+                plt.scatter(minima, angles_savgol_all_bps[prio_idx][minima], color='tab:green', marker="v", zorder=2, facecolors='none')
+            plt.scatter(confirmed_start_frames, np.zeros(confirmed_start_frames.shape), color='tab:blue', marker="v", zorder=3)
+            plt.scatter(confirmed_turning_frames, np.full(confirmed_turning_frames.shape, 180), color='tab:blue', marker="^", zorder=3)
+            y_pos = 0
+            for iteration in iterations:
+                y_pos -= 5
+                plt.plot([iteration[0], iteration[2]], [y_pos, y_pos], color='tab:purple', zorder=4, linewidth="2.0")
             plt.show()
-
-        iterations = self._confirm_iterations(confirmed_start_frames, confirmed_turning_frames)
 
         return iterations
 
@@ -324,8 +329,8 @@ class ExerciseEvaluator:
                 else:
                     end_frame = confirmed_end_frames[0]
                     last_end_frame = end_frame
-                    iterations.append([start_frame, turning_frame, end_frame])
-        return iterations
+                    iterations.append(np.array([start_frame, turning_frame, end_frame]))
+        return np.array(iterations)
 
     def _confirm_extrema(self, extrema_matrix: np.ndarray, w_size: int, confirm_extrema_thresh: int) -> np.ndarray:
         """Returns a 1-D numpy ndarray of extrema (minima or maxima).
