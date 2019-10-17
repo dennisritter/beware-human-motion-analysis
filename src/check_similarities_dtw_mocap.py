@@ -80,42 +80,46 @@ lungeleft = exercise_loader.load('data/exercises/lunge-left.json')
 lungeright = exercise_loader.load('data/exercises/lunge-right.json')
 
 sequences_single_iterations = []
-sequences_single_iterations += get_sequence_iterations("data/sequences/dennis/kniebeuge", squat)
-sequences_single_iterations += get_sequence_iterations("data/sequences/levente/kniebeuge", squat)
-sequences_single_iterations += get_sequence_iterations("data/sequences/philippe/kniebeuge", squat)
+# sequences_single_iterations += get_sequence_iterations("data/sequences/dennis/kniebeuge", squat)
+# sequences_single_iterations += get_sequence_iterations("data/sequences/levente/kniebeuge", squat)
+# sequences_single_iterations += get_sequence_iterations("data/sequences/philippe/kniebeuge", squat)
 sequences_single_iterations += get_sequence_iterations("data/sequences/dennis/overhead-press", overheadpress)
 sequences_single_iterations += get_sequence_iterations("data/sequences/levente/overhead-press", overheadpress)
-sequences_single_iterations += get_sequence_iterations("data/sequences/philippe/overhead-press", overheadpress)
-sequences_single_iterations += get_sequence_iterations("data/sequences/dennis/wechsel-lunges", lungeleft)
-sequences_single_iterations += get_sequence_iterations("data/sequences/levente/wechsel-lunges", lungeleft)
-sequences_single_iterations += get_sequence_iterations("data/sequences/philippe/wechsel-lunges", lungeleft)
-# sequences_single_iterations += get_sequence_iterations("data/sequences/dennis/lunge-left", lungeleft)
-# sequences_single_iterations += get_sequence_iterations("data/sequences/dennis/lunge-right", lungeright)
+# sequences_single_iterations += get_sequence_iterations("data/sequences/philippe/overhead-press", overheadpress)
+# sequences_single_iterations += get_sequence_iterations("data/sequences/dennis/wechsel-lunges", lungeleft)
+# sequences_single_iterations += get_sequence_iterations("data/sequences/levente/wechsel-lunges", lungeleft)
+# sequences_single_iterations += get_sequence_iterations("data/sequences/philippe/wechsel-lunges", lungeleft)
 
-filenames = list(Path("data/sequences/dennis/lunge-left").rglob("complete-session.json"))
-for file in filenames:
-    sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
-filenames = list(Path("data/sequences/levente/lunge-right").rglob("complete-session.json"))
-for file in filenames:
-    sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
-filenames = list(Path("data/sequences/philippe/lunge-left").rglob("complete-session.json"))
-for file in filenames:
-    sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
-filenames = list(Path("data/sequences/dennis/lunge-right").rglob("complete-session.json"))
-for file in filenames:
-    sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
-filenames = list(Path("data/sequences/levente/lunge-left").rglob("complete-session.json"))
-for file in filenames:
-    sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
-filenames = list(Path("data/sequences/philippe/lunge-right").rglob("complete-session.json"))
-for file in filenames:
-    sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
+# filenames = list(Path("data/sequences/dennis/lunge-left").rglob("complete-session.json"))
+# for file in filenames:
+#     print(f"Loading file: {file}")
+#     sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
+# filenames = list(Path("data/sequences/levente/lunge-right").rglob("complete-session.json"))
+# for file in filenames:
+#     print(f"Loading file: {file}")
+#     sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
+# filenames = list(Path("data/sequences/philippe/lunge-left").rglob("complete-session.json"))
+# for file in filenames:
+#     print(f"Loading file: {file}")
+#     sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
+# filenames = list(Path("data/sequences/dennis/lunge-right").rglob("complete-session.json"))
+# for file in filenames:
+#     print(f"Loading file: {file}")
+#     sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
+# filenames = list(Path("data/sequences/levente/lunge-left").rglob("complete-session.json"))
+# for file in filenames:
+#     print(f"Loading file: {file}")
+#     sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
+# filenames = list(Path("data/sequences/philippe/lunge-right").rglob("complete-session.json"))
+# for file in filenames:
+#     print(f"Loading file: {file}")
+#     sequences_single_iterations.append(mocap_poseprocessor.load(file, name=str(file)))
 
 sequences_dtw_angles = []
 for s in sequences_single_iterations:
+    print(f"Restructuring angles for DTW: {s.name}")
     sequences_dtw_angles.append(get_dtw_angles_mocap(s))
 
 dtw_distances = sorted(get_distances_dtw(sequences_dtw_angles[0], sequences_dtw_angles))
-
 for i in range(len(dtw_distances)):
     print(f"{[dtw_distances[i]]} {sequences_single_iterations[i].name}")
