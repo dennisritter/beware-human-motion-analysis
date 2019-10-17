@@ -273,11 +273,15 @@ class ExerciseEvaluator:
             for prio_idx in range(len(angles_savgol_all_bps)):
                 maxima = maxima_all_bps[prio_idx].astype(int)
                 minima = minima_all_bps[prio_idx].astype(int)
+                # Savgol angles
                 plt.plot(range(0, len(angles_savgol_all_bps[prio_idx])), angles_savgol_all_bps[prio_idx], color='tab:red', zorder=1, linewidth="1.0")
+                # Minima/Maxima
                 plt.scatter(maxima, angles_savgol_all_bps[prio_idx][maxima], color='tab:green', marker="^", zorder=2, facecolors='none')
                 plt.scatter(minima, angles_savgol_all_bps[prio_idx][minima], color='tab:green', marker="v", zorder=2, facecolors='none')
+            # Confirmed Extrema
             plt.scatter(confirmed_start_frames, np.zeros(confirmed_start_frames.shape), color='tab:blue', marker="v", zorder=3)
             plt.scatter(confirmed_turning_frames, np.full(confirmed_turning_frames.shape, 180), color='tab:blue', marker="^", zorder=3)
+            # Iterations
             y_pos = 0
             for iteration in iterations:
                 y_pos -= 5
