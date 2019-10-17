@@ -88,7 +88,7 @@
             0,
             0
           ],
-          "priority": 0.0
+          "priority": 0.5
         }
       },
       "shoulder_right": {
@@ -97,7 +97,7 @@
             0,
             0
           ],
-          "priority": 0.0
+          "priority": 0.5
         },
         "innerrotation_outerrotation": {
           "angle": [
