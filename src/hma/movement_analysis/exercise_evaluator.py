@@ -311,6 +311,8 @@ class ExerciseEvaluator:
             box = ax.get_position()
             ax.set_position([box.x0, box.y0, box.width * 0.9, box.height])
             plt.legend(loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
+            plt.xlabel("Frame")
+            plt.ylabel("Angle")
             plt.show()
 
         return iterations
