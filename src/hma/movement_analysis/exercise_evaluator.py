@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.signal import argrelextrema, savgol_filter
 
+
 # TODO: Check whether Sequence parameter for some function are really necessary.
 # Some of them only use the sequences body_part attribute, which is also a attribute in the ExerciseEvaluator class.
 # Either remove the ExerciseEvaluator.body_part_indices attribute or use it instead of sequence.body_parts in some functions.
@@ -270,22 +271,46 @@ class ExerciseEvaluator:
         iterations = self._confirm_iterations(confirmed_start_frames, confirmed_turning_frames)
 
         if plot:
+            sns.set_style("ticks")
+            sns.set_context("paper")
+            fig = plt.figure(figsize=(15, 5))
+            ax = plt.subplot(111)
+
+            # Major ticks every 20, minor ticks every 5
+            angle_major_ticks = np.arange(-180, 180, 20)
+            angle_minor_ticks = np.arange(-180, 180, 10)
+            frame_major_ticks = np.arange(-100, len(seq) + 100, 50)
+            frame_minor_ticks = np.arange(-100, len(seq) + 100, 10)
+
+            ax.set_xticks(frame_major_ticks)
+            ax.set_xticks(frame_minor_ticks, minor=True)
+            ax.set_yticks(angle_major_ticks)
+            ax.set_yticks(angle_minor_ticks, minor=True)
+
+            # Or if you want different settings for the grids:
+            ax.grid(which='minor', alpha=0.3)
+            ax.grid(which='major', alpha=0.85)
+            ax.tick_params(which='both', direction='out')
+
             for prio_idx in range(len(angles_savgol_all_bps)):
+                savgol_angles_label, min_label, max_label = (None, None, None) if prio_idx != 0 else ("Body part angles", "Minimum", "Maximum")
                 maxima = maxima_all_bps[prio_idx].astype(int)
                 minima = minima_all_bps[prio_idx].astype(int)
                 # Savgol angles
-                plt.plot(range(0, len(angles_savgol_all_bps[prio_idx])), angles_savgol_all_bps[prio_idx], color='tab:red', zorder=1, linewidth="1.0")
+                plt.plot(range(0, len(angles_savgol_all_bps[prio_idx])), angles_savgol_all_bps[prio_idx], color='r', zorder=1, linewidth="1.0", label=savgol_angles_label)
                 # Minima/Maxima
-                plt.scatter(maxima, angles_savgol_all_bps[prio_idx][maxima], color='tab:green', marker="^", zorder=2, facecolors='none')
-                plt.scatter(minima, angles_savgol_all_bps[prio_idx][minima], color='tab:green', marker="v", zorder=2, facecolors='none')
+                plt.scatter(maxima, angles_savgol_all_bps[prio_idx][maxima], color='b', marker="^", zorder=2, facecolors='none', label=min_label)
+                plt.scatter(minima, angles_savgol_all_bps[prio_idx][minima], color='b', marker="v", zorder=2, facecolors='none', label=max_label)
             # Confirmed Extrema
-            plt.scatter(confirmed_start_frames, np.zeros(confirmed_start_frames.shape), color='tab:blue', marker="v", zorder=3)
-            plt.scatter(confirmed_turning_frames, np.full(confirmed_turning_frames.shape, 180), color='tab:blue', marker="^", zorder=3)
+            plt.scatter(confirmed_start_frames, np.full(confirmed_start_frames.shape, angles_savgol_all_bps.min() - 10), color='r', marker="v", s=20, zorder=3, label="Removed Turning Frame")
+            plt.scatter(confirmed_turning_frames, np.full(confirmed_turning_frames.shape, angles_savgol_all_bps.max() + 10), color='r', marker="^", s=20, zorder=3, label="Removed Start/End Frame")
             # Iterations
-            y_pos = 0
-            for iteration in iterations:
-                y_pos -= 5
-                plt.plot([iteration[0], iteration[2]], [y_pos, y_pos], color='tab:purple', zorder=4, linewidth="2.0")
+            plt.scatter(iterations[:, 1], np.full((len(iterations), ), angles_savgol_all_bps.max() + 10), color="g", zorder=4, marker="^", s=50, label="Turning Frame")
+            plt.scatter(iterations[:, 0:2:2], np.full((len(iterations), ), angles_savgol_all_bps.min() - 10), color="g", zorder=4, marker="v", s=50, label="Start/End Frame")
+
+            box = ax.get_position()
+            ax.set_position([box.x0, box.y0, box.width * 0.9, box.height])
+            plt.legend(loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
             plt.show()
 
         return iterations
