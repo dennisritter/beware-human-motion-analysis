@@ -37,9 +37,9 @@ class ExerciseEvaluator:
         # The Exercise to evaluate
         self.exercise = exercise
         # The sequence to evaluate
-        self.sequence = sequence
+        self.sequence = sequence[:]
         # Hold the unprocessed angles in case the exercise changes
-        self.unprocessed_sequence = sequence
+        self.unprocessed_sequence = self.sequence[:]
         # The target_angles for each body part
         self.target_angles = self._get_target_angles()
         # The prioritised body parts and angles: [(<body_part_index>, <AngleType.KEY>)]
@@ -402,17 +402,18 @@ class ExerciseEvaluator:
 
         return np.array(confirmed_extrema)
 
-    def evaluate(self, switch_state_idx: int) -> list:
+    def evaluate(self, switch_state_idx: int, sequence_range: slice = slice(None, None, 1)) -> list:
         """Evaluates the Sequence of this ExerciseEvaluator instance with respect to the Exercise.
 
         Args:
-            switch_state_idx (int): The sequence index where the target state to evaluate against changes from END to START 
+            switch_state_idx (int): The sequence index where the target state to evaluate against changes from END to START
+            sequence_range (slice): The range of the sequence which should be evaluated. Given as a slice of (start, stop, step). The default option is to evaluate the whole sequence with step size = 1.
 
         Returns:
             A list of evaluation results containing: Frames -> body_parts -> AngleTypes -> Result dictionaries
             Example indexing of a specific result: result[<frame>][<body_part_index>][<angle_type.value>]
         """
-        seq = self.sequence
+        seq = self.sequence[sequence_range]
         bp = seq.body_parts
 
         results = []
