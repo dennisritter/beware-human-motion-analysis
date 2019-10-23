@@ -37,9 +37,9 @@ class ExerciseEvaluator:
         # The Exercise to evaluate
         self.exercise = exercise
         # The sequence to evaluate
-        self.sequence = sequence
+        self.sequence = sequence[:]
         # Hold the unprocessed angles in case the exercise changes
-        self.unprocessed_sequence = sequence
+        self.unprocessed_sequence = self.sequence[:]
         # The target_angles for each body part
         self.target_angles = self._get_target_angles()
         # The prioritised body parts and angles: [(<body_part_index>, <AngleType.KEY>)]
