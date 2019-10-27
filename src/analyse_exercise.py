@@ -28,15 +28,18 @@ mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 
 # g_seq = mocap_poseprocessor.load('data/sequences/unique_iterations/complete-session.json', 'squat-dennis-multi-1')
 # g_seq = mocap_poseprocessor.load('data/sequences/testing/multi/overheadpress/levente/2019-09-25_15-09-03_records/complete-session.json', 'overheadpress')
-g_seq = mocap_poseprocessor.load('data/sequences/testing/multi/overheadpress/dennis/overheadpress-dennis-multi-1/complete-session.json', 'overheadpress')
+g_seq = mocap_poseprocessor.load(
+    'data/sequences/thesis_plots/multi/squat/user-3/191024__multi__squat__user-3__0.json',
+    'squat')
+# g_seq.visualise()
 squat = exercise_loader.load('data/exercises/squat.json')
 overheadpress = exercise_loader.load('data/exercises/overhead-press.json')
 lungleleft = exercise_loader.load('data/exercises/lunge-left.json')
 EE = None
 seqs = []
 # Split long sequence for testing
-for i in range(0, math.floor(len(g_seq.positions)/30)):
-    partial_seq = g_seq[i*30:i*30+30]
+for i in range(0, math.floor(len(g_seq.positions) / 30)):
+    partial_seq = g_seq[i * 30:i * 30 + 30]
     seqs.append(partial_seq)
 
 # find iterations and merge sequence if it was to short to identify an iteration
@@ -52,7 +55,7 @@ for seq in seqs:
         merged_seq.merge(seq)
     if EE == None:
         # EE = ExerciseEvaluator(squat, merged_seq)
-        EE = ExerciseEvaluator(overheadpress, merged_seq)
+        EE = ExerciseEvaluator(squat, merged_seq)
     else:
         EE.set_sequence(merged_seq)
     part_iterations_biased = EE.find_iteration_keypoints()
@@ -72,8 +75,8 @@ for seq in seqs:
 
     print(f"Iterations from Script: {g_iterations}")
 
-print(f"Iterations found result (GLOBAL): {g_iterations}")
-print(f"Iterations found result (LOCAL): {iterations}")
+# print(f"Iterations found result (GLOBAL): {g_iterations}")
+# print(f"Iterations found result (LOCAL): {iterations}")
 EE.set_sequence(g_seq)
 g_iterations = EE.find_iteration_keypoints(plot=True)
 print(f"Iterations for complete sequence [{len(g_seq)} Frames]{g_iterations}")
