@@ -306,7 +306,7 @@ class ExerciseEvaluator:
             plt.scatter(confirmed_turning_frames, np.full(confirmed_turning_frames.shape, angles_savgol_all_bps.max() + 10), color='r', marker="^", s=20, zorder=3, label="Removed Start/End Frame")
             # Iterations
             plt.scatter(iterations[:, 1], np.full((len(iterations), ), angles_savgol_all_bps.max() + 10), color="g", zorder=4, marker="^", s=50, label="Turning Frame")
-            plt.scatter(iterations[:, 0:2:2], np.full((len(iterations), ), angles_savgol_all_bps.min() - 10), color="g", zorder=4, marker="v", s=50, label="Start/End Frame")
+            plt.scatter(iterations[:, 0:3:2], np.full((len(iterations), 2), angles_savgol_all_bps.min() - 10), color="g", zorder=4, marker="v", s=50, label="Start/End Frame")
 
             box = ax.get_position()
             ax.set_position([box.x0, box.y0, box.width * 0.9, box.height])
@@ -520,10 +520,10 @@ class ExerciseEvaluator:
                 # If Abduction/Adduction is a prio angle type, fix the 90° limitation
                 if pa[0] == bp_idx and pa[1] == AngleTypes.AB_AD:
                     if angle_abd_add < 0:
-                        angle_abd_add -= 90
+                        angle_abd_add = -180 - angle_abd_add
 
                     if angle_abd_add > 0:
-                        angle_abd_add += 90
+                        angle_abd_add = 180 - angle_abd_add
 
         # Set Flexion/Extension to 0.0° when angle-vector is close to X-Axis.
         # -> Flexion/Extension angles get very sensitive and error prone when close to X-Axis because it represents a rotation around it.
