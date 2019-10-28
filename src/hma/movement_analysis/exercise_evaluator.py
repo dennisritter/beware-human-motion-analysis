@@ -325,9 +325,9 @@ class ExerciseEvaluator:
             plt.legend(loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
             plt.xlabel("Frame")
             plt.ylabel("Angle")
-            plt.savefig("subsequencing_extrema_distance_filter.png",
-                        bbox_inches="tight",
-                        dpi=300)
+            # plt.savefig("subsequencing_extrema_distance_filter.png",
+            #             bbox_inches="tight",
+            #             dpi=300)
             plt.show()
 
         return iterations
