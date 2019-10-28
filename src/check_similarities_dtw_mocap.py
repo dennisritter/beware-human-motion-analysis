@@ -76,6 +76,8 @@ mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 
 squat = exercise_loader.load('data/exercises/squat.json')
 overheadpress = exercise_loader.load('data/exercises/overhead-press.json')
+biceps_curl_left = exercise_loader.load('data/exercises/biceps-curl-left.json')
+biceps_curl_right = exercise_loader.load('data/exercises/biceps-curl-right.json')
 lungeleft = exercise_loader.load('data/exercises/lunge-left.json')
 lungeright = exercise_loader.load('data/exercises/lunge-right.json')
 
@@ -83,7 +85,8 @@ sequences_single_iterations = []
 # sequences_single_iterations += get_sequence_iterations("data/sequences/dennis/kniebeuge", squat)
 # sequences_single_iterations += get_sequence_iterations("data/sequences/levente/kniebeuge", squat)
 # sequences_single_iterations += get_sequence_iterations("data/sequences/philippe/kniebeuge", squat)
-sequences_single_iterations += get_sequence_iterations("data/sequences/191024 Tracking/multi/overhead_press/user-1", overheadpress)
+sequences_single_iterations += get_sequence_iterations("data/sequences/191024 Tracking/multi/biceps_curl_left/user-1", biceps_curl_left)
+sequences_single_iterations += get_sequence_iterations("data/sequences/191024 Tracking/multi/biceps_curl_right/user-1", biceps_curl_right)
 # sequences_single_iterations += get_sequence_iterations("data/sequences/philippe/overhead-press", overheadpress)
 # sequences_single_iterations += get_sequence_iterations("data/sequences/dennis/wechsel-lunges", lungeleft)
 # sequences_single_iterations += get_sequence_iterations("data/sequences/levente/wechsel-lunges", lungeleft)
