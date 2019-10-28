@@ -130,4 +130,4 @@ dmypy.json
 data/sequences/dennis
 data/sequences/philippe
 data/sequences/levente
-
+data/sequences/*
