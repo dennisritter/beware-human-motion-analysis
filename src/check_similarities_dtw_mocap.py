@@ -50,7 +50,7 @@ def get_distances_dtw(ground_truth_angles, seqs_angles):
 def get_sequence_iterations(folder_path: str, ex: Exercise):
     EE = None
     # Load sequence files
-    filenames = list(Path(folder_path).rglob("complete-session.json"))
+    filenames = list(Path(folder_path).rglob("*.json"))
     sequences = []
     for file in filenames:
         sequences.append(mocap_poseprocessor.load(file, name=str(file)))
@@ -62,7 +62,7 @@ def get_sequence_iterations(folder_path: str, ex: Exercise):
             EE = ExerciseEvaluator(ex, s)
         else:
             EE.set_sequence(s)
-        iterations = EE.find_iteration_keypoints()
+        iterations = EE.find_iteration_keypoints(plot=True)
         for idx, iteration in enumerate(iterations):
             start, turn, end = iteration
             sequence_iteration = s[start:end]
@@ -74,7 +74,7 @@ def get_sequence_iterations(folder_path: str, ex: Exercise):
 # Get PoseProcessor instance for MOCAP sequences
 mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 
-squat = exercise_loader.load('data/exercises/kniebeuge.json')
+squat = exercise_loader.load('data/exercises/squat.json')
 overheadpress = exercise_loader.load('data/exercises/overhead-press.json')
 lungeleft = exercise_loader.load('data/exercises/lunge-left.json')
 lungeright = exercise_loader.load('data/exercises/lunge-right.json')
@@ -83,8 +83,7 @@ sequences_single_iterations = []
 # sequences_single_iterations += get_sequence_iterations("data/sequences/dennis/kniebeuge", squat)
 # sequences_single_iterations += get_sequence_iterations("data/sequences/levente/kniebeuge", squat)
 # sequences_single_iterations += get_sequence_iterations("data/sequences/philippe/kniebeuge", squat)
-sequences_single_iterations += get_sequence_iterations("data/sequences/dennis/overhead-press", overheadpress)
-sequences_single_iterations += get_sequence_iterations("data/sequences/levente/overhead-press", overheadpress)
+sequences_single_iterations += get_sequence_iterations("data/sequences/tracking_party/multi/overhead_press/user-1", overheadpress)
 # sequences_single_iterations += get_sequence_iterations("data/sequences/philippe/overhead-press", overheadpress)
 # sequences_single_iterations += get_sequence_iterations("data/sequences/dennis/wechsel-lunges", lungeleft)
 # sequences_single_iterations += get_sequence_iterations("data/sequences/levente/wechsel-lunges", lungeleft)

@@ -539,10 +539,10 @@ class ExerciseEvaluator:
                 # If Abduction/Adduction is a prio angle type, fix the 90° limitation
                 if pa[0] == bp_idx and pa[1] == AngleTypes.AB_AD:
                     if angle_abd_add < 0:
-                        angle_abd_add -= 90
+                        angle_abd_add = -180 - angle_abd_add
 
                     if angle_abd_add > 0:
-                        angle_abd_add += 90
+                        angle_abd_add = 180 - angle_abd_add
 
         # Set Flexion/Extension to 0.0° when angle-vector is close to X-Axis.
         # -> Flexion/Extension angles get very sensitive and error prone when close to X-Axis because it represents a rotation around it.
