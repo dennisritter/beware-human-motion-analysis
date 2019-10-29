@@ -82,12 +82,12 @@ class PoseProcessor:
         # reshape positions to 3d array
         positions = np.reshape(positions, (np.shape(positions)[0], int(np.shape(positions)[1]/3), 3))
 
-        # # Center Positions by subtracting the mean of each coordinate
-        # positions[:, :,
-        #           0] -= np.mean(positions[:, :, 0])
-        # positions[:, :,
-        #           1] -= np.mean(positions[:, :, 1])
-        # positions[:, :,
-        #           2] -= np.mean(positions[:, :, 2])
+        # Center Positions by subtracting the mean of each coordinate
+        positions[:, :,
+                  0] -= np.mean(positions[:, :, 0])
+        positions[:, :,
+                  1] -= np.mean(positions[:, :, 1])
+        positions[:, :,
+                  2] -= np.mean(positions[:, :, 2])
 
-        return Sequence(body_parts, positions, timestamps, self.poseformat, name=name)
+        return Sequence(body_parts, positions, timestamps, body_parts, name=name)
