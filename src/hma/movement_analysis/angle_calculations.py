@@ -38,7 +38,7 @@ def calc_angles_hip_left(positions: list, hip_left_idx: int, hip_right_idx: int,
     angles = np.zeros((n_frames, n_angle_types))
     for frame in range(0, n_frames):
         # Move coordinate system to left Hip
-        left_hip_aligned_positions = transformations.align_coordinates_to(hip_left_idx, hip_right_idx, torso_idx, positions, frame=frame)
+        left_hip_aligned_positions = transformations.align_coordinates_to(hip_left_idx, hip_right_idx, torso_idx, positions[frame])
         kx = left_hip_aligned_positions[knee_left_idx][0]
         ky = left_hip_aligned_positions[knee_left_idx][1]
         kz = left_hip_aligned_positions[knee_left_idx][2]
@@ -86,7 +86,7 @@ def calc_angles_hip_right(positions: list, hip_right_idx: int, hip_left_idx: int
     angles = np.zeros((n_frames, n_angle_types))
     for frame in range(0, n_frames):
         # Move coordinate system to right Hip
-        right_hip_aligned_positions = transformations.align_coordinates_to(hip_right_idx, hip_left_idx, torso_idx, positions, frame=frame)
+        right_hip_aligned_positions = transformations.align_coordinates_to(hip_right_idx, hip_left_idx, torso_idx, positions[frame])
 
         kx = right_hip_aligned_positions[knee_right_idx][0]
         ky = right_hip_aligned_positions[knee_right_idx][1]
@@ -143,7 +143,7 @@ def calc_angles_knee(positions: list, knee_idx: int, hip_idx: int, ankle_idx: in
     return angles
 
 
-def calc_angles_shoulder_left(positions: list, shoulder_left_idx: int, shoulder_right_idx: int, torso_idx: int, elbow_left_idx: int, log: bool = False) -> dict:
+def calc_angles_shoulder_left(positions: list, shoulder_left_idx: int, shoulder_right_idx: int, torso_idx: int, elbow_left_idx: int, log: bool = False) -> np.ndarray:
     """ Calculates Left Shoulder angles
     Parameters
     ----------
@@ -154,7 +154,7 @@ def calc_angles_shoulder_left(positions: list, shoulder_left_idx: int, shoulder_
     for frame in range(0, n_frames):
 
         # Move coordinate system to left Shoulder
-        left_shoulder_aligned_positions = transformations.align_coordinates_to(shoulder_left_idx, shoulder_right_idx, torso_idx, positions, frame=frame)
+        left_shoulder_aligned_positions = transformations.align_coordinates_to(shoulder_left_idx, shoulder_right_idx, torso_idx, positions[frame])
 
         ex = left_shoulder_aligned_positions[elbow_left_idx][0]
         ey = left_shoulder_aligned_positions[elbow_left_idx][1]
@@ -163,7 +163,7 @@ def calc_angles_shoulder_left(positions: list, shoulder_left_idx: int, shoulder_
         # Convert to spherical coordinates
         er = math.sqrt(ex**2 + ey**2 + ez**2)
 
-        # Theta is the angle of the Shoulder-Elbow Vector to the YZ-Plane and represents an abduction/adduction
+        # Theta is the angle of the Shoulder-Elbow Vector to the YZ-Plane and represents an abduction/adduction.
         theta = math.degrees(math.acos(ex/er))
         theta = 90.0 - theta
         abduction_adduction = theta
@@ -173,24 +173,19 @@ def calc_angles_shoulder_left(positions: list, shoulder_left_idx: int, shoulder_
         if elbow_xaxis_angle == 0.0 or elbow_xaxis_angle == math.pi:
             phi = 0
         else:
-            # Phi is the angle of the Elbow around the X-Axis (Down = 0) and represents flexion/extension angle
+            # Phi is the angle of the Elbow around the X-Axis (Down = 0) and represents flexion/extension angle.
             phi = math.degrees(math.atan2(ey, -ez))
             phi += 90.0
-            # An Extension should be represented in a negative angle
+            # An Extension should be represented in a negative angle.
             if phi > 180.0:
                 phi -= 360.0
         flexion_extension = phi
 
         angles[frame][AngleTypes.FLEX_EX.value] = flexion_extension
         angles[frame][AngleTypes.AB_AD.value] = abduction_adduction
-
-        if log:
-            print("\n##### SHOULDER LEFT ANGLES #####")
-            print(f"[{frame}] flexion_extension angle: {flexion_extension}")
-            print(f"[{frame}] abduction_adduction angle: {abduction_adduction}")
-        # plotting.plot_ball_joint_angle(left_shoulder_aligned_positions, shoulder_left_idx, elbow_left_idx)
-
+    
     return angles
+
 
 
 def calc_angles_shoulder_right(positions: list, shoulder_right_idx: int, shoulder_left_idx: int, torso_idx: int, elbow_right_idx: int, log: bool = False) -> dict:
@@ -203,7 +198,7 @@ def calc_angles_shoulder_right(positions: list, shoulder_right_idx: int, shoulde
     angles = np.zeros((n_frames, n_angle_types))
     for frame in range(0, n_frames):
         # Move coordinate system to right shoulder
-        right_shoulder_aligned_positions = transformations.align_coordinates_to(shoulder_right_idx, shoulder_left_idx, torso_idx, positions, frame=frame)
+        right_shoulder_aligned_positions = transformations.align_coordinates_to(shoulder_right_idx, shoulder_left_idx, torso_idx, positions[frame])
 
         ex = right_shoulder_aligned_positions[elbow_right_idx][0]
         ey = right_shoulder_aligned_positions[elbow_right_idx][1]

@@ -124,7 +124,7 @@ for p in path:
 plt.legend(loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
 plt.xlabel("Frame")
 plt.ylabel("Right Elbow Flexion Angle")
-fig.suptitle(f"Sequence 1:{seq1.name}.json \nSequence 2: {seq2.name}.json \nTotal distance: {max(dtw_distances)}")
+fig.suptitle(f"Sequence 1: {seq1.name}.json \nSequence 2: {seq2.name}.json \nTotal distance: {max(dtw_distances)}")
 plt.savefig("matching.png",
             bbox_inches="tight",
             dpi=300)
