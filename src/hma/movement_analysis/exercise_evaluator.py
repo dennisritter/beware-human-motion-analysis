@@ -215,6 +215,8 @@ class ExerciseEvaluator:
             maxima = argrelextrema(angles_savgol, np.greater, order=10)[0]
             minima = argrelextrema(angles_savgol, np.less, order=10)[0]
 
+            # Get Exercise targets for the current angle type
+            ex_targets = self.target_angles[body_part_idx][angle_type.value]
             # Check if Exercise targets of target state END are greater than targets of START
             # We need this information to identify whether local MAXIMA or MINIMA represent start/end of a subsequence
             target_end_greater_start = min(ex_targets[AngleTargetStates.END.value]) > min(ex_targets[AngleTargetStates.START.value])
@@ -233,9 +235,6 @@ class ExerciseEvaluator:
                     minima = np.append(minima, len(angles_savgol)-1)
                 else:
                     maxima = np.append(maxima, len(angles_savgol)-1)
-
-            # Get Exercise targets for the current angle type
-            ex_targets = self.target_angles[body_part_idx][angle_type.value]
 
             # Check if distance to Exercise START target angle is greater than Exercise END target angle
             # in order to remove falsy maxima/minima
