@@ -143,23 +143,17 @@ def calc_angles_knee(positions: list, knee_idx: int, hip_idx: int, ankle_idx: in
     return angles
 
 
-def calc_angles_shoulder_left(positions: list, shoulder_left_idx: int, shoulder_right_idx: int, torso_idx: int, elbow_left_idx: int, log: bool = False) -> np.ndarray:
-    """ Calculates Left Shoulder angles
-    Parameters
-    ----------
-    """
+def calc_angles_shoulder_left(positions: list, shoulder_left_idx: int, shoulder_right_idx: int, torso_idx: int, elbow_left_idx: int) -> np.ndarray:
     n_frames = len(positions)
     n_angle_types = len(AngleTypes)
     angles = np.zeros((n_frames, n_angle_types))
     for frame in range(0, n_frames):
-
         # Move coordinate system to left Shoulder
         left_shoulder_aligned_positions = transformations.align_coordinates_to(shoulder_left_idx, shoulder_right_idx, torso_idx, positions[frame])
 
         ex = left_shoulder_aligned_positions[elbow_left_idx][0]
         ey = left_shoulder_aligned_positions[elbow_left_idx][1]
         ez = left_shoulder_aligned_positions[elbow_left_idx][2]
-
         # Convert to spherical coordinates
         er = math.sqrt(ex**2 + ey**2 + ez**2)
 

@@ -46,7 +46,6 @@ class ExerciseEvaluator:
         self.prio_angles = self._get_prio_angles()
 
         # Process all ball joint angles of the sequence attribute
-        # NOTE: Will change the Sequences angles!
         self._process_sequence_ball_joint_angles()
 
     def set_sequence(self, seq: Sequence):
@@ -177,8 +176,6 @@ class ExerciseEvaluator:
         based on shared minimum and maximum values of prioritised body part angles.
 
         Args:
-            start_frame_min_dist (int): 
-            end_frame_min_dist (int):
             plot (Boolean): Determines whether to plot partial results of an execution of this function. 
 
         Returns:
@@ -197,10 +194,8 @@ class ExerciseEvaluator:
         angles_legend = np.zeros((len(self.prio_angles)))
         minima_all_bps = [None]*len(self.prio_angles)
         maxima_all_bps = [None]*len(self.prio_angles)
-        # minima_all_bps = np.zeros((len(self.prio_angles)))
-        # maxima_all_bps = np.zeros((len(self.prio_angles)))
 
-        # self.prio_angles element example format (idx, AngleType) -> (1, AngleType.FLEX_EX)
+        # self.prio_angles element example format: (idx, AngleType) -> (1, AngleType.FLEX_EX)
         for prio_idx, (body_part_idx, angle_type) in enumerate(self.prio_angles):
 
             # Get calculated angles of a specific type for a specific body part for all frames
@@ -208,9 +203,6 @@ class ExerciseEvaluator:
 
             # TODO: Find best value for window size (51 seems to work well)
             # Apply a Savitzky-Golay Filter to get a list of 'smoothed' angles.
-            # savgol_window_max = 51
-            # savgol_window_generic = int(math.floor(len(angles)/1.5)+1 if math.floor(len(angles)/1.5) % 2 == 0 else math.floor(len(angles)/1.5))
-            # savgol_window = min(savgol_window_max, savgol_window_generic)
             savgol_window = 51
             angles_savgol = savgol_filter(angles, savgol_window, 3, mode="nearest")
             angles_savgol_all_bps[prio_idx] = angles_savgol
@@ -219,25 +211,31 @@ class ExerciseEvaluator:
 
 
             # TODO: Find best value for order parameter (10 seems to work well)
-            # Find Minima and Maxima of angles after applying a Savitzky-Golay Filter filter
+            # Find Minima and Maxima of angles after applying a Savitzky-Golay Filter
             maxima = argrelextrema(angles_savgol, np.greater, order=10)[0]
             minima = argrelextrema(angles_savgol, np.less, order=10)[0]
 
+            # Check if Exercise targets of target state END are greater than targets of START
+            # We need this information to identify whether local MAXIMA or MINIMA represent start/end of a subsequence
+            target_end_greater_start = min(ex_targets[AngleTargetStates.END.value]) > min(ex_targets[AngleTargetStates.START.value])
             # Add minimum to first and last frame if start_frame_min_dist/end_frame_min_dist
             # param value is not less than the actual distance to the target angle
             target_distance_tolerance = 20
             angles_savgol = np.array(angles_savgol)
             target_start_range = self.target_angles[body_part_idx][angle_type.value][AngleTargetStates.START.value]
             if (min(target_start_range) - target_distance_tolerance < angles_savgol[0] < max(target_start_range) + target_distance_tolerance):
-                minima = np.insert(minima, 0, 0)
+                if target_end_greater_start:
+                    minima = np.insert(minima, 0, 0)
+                else:
+                    maxima = np.insert(maxima, 0, 0)
             if (min(target_start_range) - target_distance_tolerance < angles_savgol[-1] < max(target_start_range) + target_distance_tolerance):
-                minima = np.append(minima, len(angles_savgol)-1)
+                if target_end_greater_start:
+                    minima = np.append(minima, len(angles_savgol)-1)
+                else:
+                    maxima = np.append(maxima, len(angles_savgol)-1)
 
             # Get Exercise targets for the current angle type
             ex_targets = self.target_angles[body_part_idx][angle_type.value]
-            # Check if Exercise targets of target state END are greater than targets of START
-            # We need this information to identify whether local MAXIMA or MINIMA represent start/end of a subsequence
-            target_end_greater_start = min(ex_targets[AngleTargetStates.END.value]) > min(ex_targets[AngleTargetStates.START.value])
 
             # Check if distance to Exercise START target angle is greater than Exercise END target angle
             # in order to remove falsy maxima/minima
@@ -269,9 +267,9 @@ class ExerciseEvaluator:
         # For n < 3, n extrema must be in range of the window to confirm an extremum.
         confirm_extrema_thresh = len(self.prio_angles) if len(self.prio_angles) <= 2 else len(self.prio_angles) - 1
         # Window size that determines the range of frames minima/maxima of different body parts belong to each other.
-        w_size = 30
-        confirmed_start_frames = self._confirm_extrema(start_frame_matrix, w_size, confirm_extrema_thresh)
-        confirmed_turning_frames = self._confirm_extrema(turning_frame_matrix, w_size, confirm_extrema_thresh)
+        extrema_group_window_size = 30
+        confirmed_start_frames = self._confirm_extrema(start_frame_matrix, extrema_group_window_size, confirm_extrema_thresh)
+        confirmed_turning_frames = self._confirm_extrema(turning_frame_matrix, extrema_group_window_size, confirm_extrema_thresh)
 
         iterations = self._confirm_iterations(confirmed_start_frames, confirmed_turning_frames)
 
