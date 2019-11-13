@@ -323,6 +323,7 @@ class ExerciseEvaluator:
             plt.legend(loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
             plt.xlabel("Frame")
             plt.ylabel("Angle")
+            fig.suptitle(f"{seq.name}\nsavgol_window: 21  |  savgol_order: 3  |  argrelextrema_order: 10  |  extrema_group_window_size: 30", fontsize=13)
             plt.savefig("subsequencing_extrema.png",
                         bbox_inches="tight",
                         dpi=300)

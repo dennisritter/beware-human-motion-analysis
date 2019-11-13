@@ -29,7 +29,7 @@ mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 # g_seq = mocap_poseprocessor.load('data/sequences/unique_iterations/complete-session.json', 'squat-dennis-multi-1')
 # g_seq = mocap_poseprocessor.load('data/sequences/testing/multi/overheadpress/levente/2019-09-25_15-09-03_records/complete-session.json', 'overheadpress')
 g_seq = mocap_poseprocessor.load(
-    'data/sequences/191024_tracking/multi/overhead_press/user-8/191024__multi__overhead_press__user-8__0.json')
+    'data/sequences/191024_tracking/multi/overhead_press/user-5/191024__multi__overhead_press__user-5__0.json', "191024__multi__overhead_press__user-5__0.json")
 # g_seq.visualise()
 squat = exercise_loader.load('data/exercises/squat.json')
 knee_lift_left = exercise_loader.load('data/exercises/knee-lift-left.json')
