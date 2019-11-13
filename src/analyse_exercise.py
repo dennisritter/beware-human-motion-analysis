@@ -29,18 +29,19 @@ mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 # g_seq = mocap_poseprocessor.load('data/sequences/unique_iterations/complete-session.json', 'squat-dennis-multi-1')
 # g_seq = mocap_poseprocessor.load('data/sequences/testing/multi/overheadpress/levente/2019-09-25_15-09-03_records/complete-session.json', 'overheadpress')
 g_seq = mocap_poseprocessor.load(
-    'data/sequences/thesis_plots/multi/squat/user-3/191024__multi__squat__user-3__0.json',
-    'squat')
+    'data/sequences/191024_tracking/multi/squat/user-6/191024__multi__squat__user-6__0.json')
 # g_seq.visualise()
 squat = exercise_loader.load('data/exercises/squat.json')
+knee_lift_left = exercise_loader.load('data/exercises/knee-lift-left.json')
+knee_lift_right = exercise_loader.load('data/exercises/knee-lift-right.json')
 overheadpress = exercise_loader.load('data/exercises/overhead-press.json')
 lungleleft = exercise_loader.load('data/exercises/lunge-left.json')
 EE = None
-seqs = []
+seqs = [g_seq]
 # Split long sequence for testing
-for i in range(0, math.floor(len(g_seq.positions) / 30)):
-    partial_seq = g_seq[i * 30:i * 30 + 30]
-    seqs.append(partial_seq)
+# for i in range(0, math.floor(len(g_seq.positions) / 30)):
+#     partial_seq = g_seq[i * 30:i * 30 + 30]
+#     seqs.append(partial_seq)
 
 # find iterations and merge sequence if it was to short to identify an iteration
 iterations = []

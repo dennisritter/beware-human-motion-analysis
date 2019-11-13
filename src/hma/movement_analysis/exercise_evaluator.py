@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.signal import argrelextrema, savgol_filter
+from statistics import mean
 
 
 # TODO: Check whether Sequence parameter for some function are really necessary.
@@ -209,7 +210,6 @@ class ExerciseEvaluator:
             angles_all_bps[prio_idx] = angles
             angles_legend[prio_idx] = body_part_idx
 
-
             # TODO: Find best value for order parameter (10 seems to work well)
             # Find Minima and Maxima of angles after applying a Savitzky-Golay Filter
             maxima = argrelextrema(angles_savgol, np.greater, order=10)[0]
@@ -222,7 +222,7 @@ class ExerciseEvaluator:
             target_end_greater_start = min(ex_targets[AngleTargetStates.END.value]) > min(ex_targets[AngleTargetStates.START.value])
             # Add minimum to first and last frame if start_frame_min_dist/end_frame_min_dist
             # param value is not less than the actual distance to the target angle
-            target_distance_tolerance = 20
+            target_distance_tolerance = abs(int(mean(ex_targets[AngleTargetStates.END.value]) - mean(ex_targets[AngleTargetStates.START.value])))
             angles_savgol = np.array(angles_savgol)
             target_start_range = self.target_angles[body_part_idx][angle_type.value][AngleTargetStates.START.value]
             if (min(target_start_range) - target_distance_tolerance < angles_savgol[0] < max(target_start_range) + target_distance_tolerance):
@@ -314,8 +314,9 @@ class ExerciseEvaluator:
             plt.scatter(confirmed_start_frames, np.full(confirmed_start_frames.shape, angles_savgol_all_bps.min() - 10), color='r', marker="v", s=20, zorder=3, label="Removed Turning Frame")
             plt.scatter(confirmed_turning_frames, np.full(confirmed_turning_frames.shape, angles_savgol_all_bps.max() + 10), color='r', marker="^", s=20, zorder=3, label="Removed Start/End Frame")
             # # Iterations
-            plt.scatter(iterations[:, 1], np.full((len(iterations), ), angles_savgol_all_bps.max() + 10), color="g", zorder=4, marker="^", s=50, label="Turning Frame")
-            plt.scatter(iterations[:, 0:3:2], np.full((len(iterations), 2), angles_savgol_all_bps.min() - 10), color="g", zorder=4, marker="v", s=50, label="Start/End Frame")
+            if len(iterations) > 0:
+                plt.scatter(iterations[:, 1], np.full((len(iterations), ), angles_savgol_all_bps.max() + 10), color="g", zorder=4, marker="^", s=50, label="Turning Frame")
+                plt.scatter(iterations[:, 0:3:2], np.full((len(iterations), 2), angles_savgol_all_bps.min() - 10), color="g", zorder=4, marker="v", s=50, label="Start/End Frame")
 
             box = ax.get_position()
             ax.set_position([box.x0, box.y0, box.width * 0.9, box.height])
@@ -328,6 +329,7 @@ class ExerciseEvaluator:
             plt.show()
 
         return iterations
+
     def get_label(self, idx):
         for key, val in self.sequence.body_parts.items():
             if val == idx:

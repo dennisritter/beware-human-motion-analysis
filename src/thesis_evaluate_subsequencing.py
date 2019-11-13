@@ -16,68 +16,69 @@ from pathlib import Path
 import json
 
 mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
-seq = mocap_poseprocessor.load(
-    'data/sequences/thesis_plots/multi/squat/user-3/191024__multi__squat__user-3__0.json',
-    'squat')
 squat = exercise_loader.load('data/exercises/squat.json')
-overheadpress = exercise_loader.load('data/exercises/overhead-press.json')
+overhead_press = exercise_loader.load('data/exercises/overhead-press.json')
 biceps_curl_left = exercise_loader.load('data/exercises/biceps-curl-left.json')
 biceps_curl_right = exercise_loader.load('data/exercises/biceps-curl-right.json')
-knee_lift_left = exercise_loader.load('data/exercises/biceps-curl-left.json')
-knee_lift_right = exercise_loader.load('data/exercises/biceps-curl-right.json')
-seqs = []
-squat_seqs = []
-overheadpress_seqs = []
-biceps_curl_left_seqs = []
-biceps_curl_right_seqs = []
-knee_lift_left_seqs = []
-knee_lift_right_seqs = []
-EE = None
+knee_lift_left = exercise_loader.load('data/exercises/knee-lift-left.json')
+knee_lift_right = exercise_loader.load('data/exercises/knee-lift-right.json')
 
 
-# Get all multi iteration sequences of a squat
-filenames = list(Path("data/sequences/191024_tracking/multi/squat/user-1").rglob("*.json"))
-for filename in filenames:
-    print(f"Loading Sequence file: {filename}")
-    sequence = mocap_poseprocessor.load(filename, str(filename).split('\\')[-1])
-    seqs.append(sequence)
+def get_subseq_result(exercise: Exercise, exercise_name: str):
+    seqs = []
+    EE = None
 
-result = {
-    "exercise": "squat",
-    "params": {
-        "savgol_window": 51,
-        "savgol_order": 3,
-        "argrelextrema_order": 10,
-        "start_end_keyframe_tolerance": 20,
-        "extrema_group_window_size": 30,
-    },
-    "n_sequences": len(seqs),
-    "n_iterations_found": 0,
-    "results": [None]*len(seqs),
-}
+    # Get all multi iteration sequences of a squat
+    filenames = list(Path("data/sequences/191024_tracking/multi/" + exercise_name + "/").rglob("*.json"))
+    for filename in filenames:
+        print(f"Loading Sequence file: {filename}")
+        sequence = mocap_poseprocessor.load(filename, str(filename).split('\\')[-1])
+        seqs.append(sequence)
 
-seq_results = [None]*len(seqs)
-for i, seq in enumerate(seqs):
-    if EE is None:
-        EE = ExerciseEvaluator(squat, seq)
-    else:
-        EE.set_sequence(seq)
-    seq_results[i] = {
-        "name": seq.name,
-        "length": len(seq),
-        "iterations": EE.find_iteration_keypoints().tolist(),
+    result = {
+        "exercise": exercise_name,
+        "params": {
+            "savgol_window": 51,
+            "savgol_order": 3,
+            "argrelextrema_order": 10,
+            "start_end_keyframe_tolerance": "dmean",
+            "extrema_group_window_size": 30,
+        },
+        "n_sequences": len(seqs),
+        "n_iterations_found": 0,
+        "results": [None]*len(seqs),
     }
-    result["n_iterations_found"] += len(seq_results[i]["iterations"])
-    print("----------------------------------------")
-    print(f"{seq_results[0]['name']}")
-    print(f"Sequence length: {seq_results[0]['length']}")
-    print(f"{len(seq_results[0]['iterations'])} iterations found: {seq_results[0]['iterations']}")
 
-result["results"] = seq_results
+    seq_results = [None]*len(seqs)
+    for i, seq in enumerate(seqs):
+        if EE is None:
+            EE = ExerciseEvaluator(exercise, seq)
+        else:
+            EE.set_sequence(seq)
+        seq_results[i] = {
+            "name": seq.name,
+            "length": len(seq),
+            "iterations": EE.find_iteration_keypoints().tolist(),
+        }
+        result["n_iterations_found"] += len(seq_results[i]["iterations"])
+        print("----------------------------------------")
+        print(f"{seq_results[i]['name']}")
+        print(f"Sequence length: {seq_results[i]['length']}")
+        print(f"{len(seq_results[i]['iterations'])} iterations found: {seq_results[i]['iterations']}")
 
-result_filename = f"subseq_result_{result['exercise']}_{result['params']['savgol_window']}_{result['params']['savgol_order']}_{result['params']['argrelextrema_order']}_{result['params']['start_end_keyframe_tolerance']}_{result['params']['extrema_group_window_size']}.json"
-with open(f"data/evaluation/subsequencing/{result_filename}", 'w') as outfile:
-    json.dump(result, outfile)
+    result["results"] = seq_results
+
+    result_filename = f"subseq_result_{result['exercise']}_{result['params']['savgol_window']}_{result['params']['savgol_order']}_{result['params']['argrelextrema_order']}_{result['params']['start_end_keyframe_tolerance']}_{result['params']['extrema_group_window_size']}.json"
+    with open(f"data/evaluation/subsequencing/{result_filename}", 'w') as outfile:
+        json.dump(result, outfile)
+
+
+get_subseq_result(squat, 'squat')
+get_subseq_result(overhead_press, 'overhead_press')
+get_subseq_result(biceps_curl_left, 'biceps_curl_left')
+get_subseq_result(biceps_curl_right, 'biceps_curl_right')
+get_subseq_result(knee_lift_left, 'knee_lift_left')
+get_subseq_result(knee_lift_right, 'knee_lift_right')
 
 
 # if plot:
