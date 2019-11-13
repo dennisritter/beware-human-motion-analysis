@@ -29,7 +29,7 @@ mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 # g_seq = mocap_poseprocessor.load('data/sequences/unique_iterations/complete-session.json', 'squat-dennis-multi-1')
 # g_seq = mocap_poseprocessor.load('data/sequences/testing/multi/overheadpress/levente/2019-09-25_15-09-03_records/complete-session.json', 'overheadpress')
 g_seq = mocap_poseprocessor.load(
-    'data/sequences/191024_tracking/multi/squat/user-6/191024__multi__squat__user-6__0.json')
+    'data/sequences/191024_tracking/multi/overhead_press/user-8/191024__multi__overhead_press__user-8__0.json')
 # g_seq.visualise()
 squat = exercise_loader.load('data/exercises/squat.json')
 knee_lift_left = exercise_loader.load('data/exercises/knee-lift-left.json')
@@ -56,7 +56,7 @@ for seq in seqs:
         merged_seq.merge(seq)
     if EE == None:
         # EE = ExerciseEvaluator(squat, merged_seq)
-        EE = ExerciseEvaluator(squat, merged_seq)
+        EE = ExerciseEvaluator(overheadpress, merged_seq)
     else:
         EE.set_sequence(merged_seq)
     part_iterations_biased = EE.find_iteration_keypoints()

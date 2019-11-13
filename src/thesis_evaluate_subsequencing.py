@@ -82,39 +82,46 @@ def get_subseq_result(exercise: Exercise, exercise_name: str):
 # get_subseq_result(knee_lift_left, 'knee_lift_left')
 # get_subseq_result(knee_lift_right, 'knee_lift_right')
 
-results = []
-filenames = list(Path("data/evaluation/subsequencing/").rglob("*_3_10_dmean_30.json"))
-for filename in filenames:
-    with open(filename, 'r') as f:
-        result = json.load(f)
-        results.append(result)
 
-groups = ['squat', 'overhead_press', 'biceps_curl_left', 'biceps_curl_right', 'knee_lift_left', 'knee_lift_right']
-categorical = ['Expected iterations', 21, 51, 101]
-categorical_label = ['Expected iterations', f"savgol_window: {21}", f"savgol_window: {51}", f"savgol_window: {101}"]
-# colors = ['green', 'red', 'blue', 'orange']
-numerical = [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
-for result in results:
-    expected_iterations = result["n_sequences"] * 10
-    identified_iterations = result["n_iterations_found"]
-    numerical[categorical.index(result["params"]["savgol_window"])][groups.index(result["exercise"])] = identified_iterations
-    numerical[0][groups.index(result["exercise"])] = expected_iterations
+def plot_evauluation_savgol_window():
+    results = []
+    filenames = list(Path("data/evaluation/subsequencing/").rglob("*_3_10_dmean_30.json"))
+    for filename in filenames:
+        with open(filename, 'r') as f:
+            result = json.load(f)
+            results.append(result)
 
-number_groups = len(categorical)
-bin_width = 1.0 / (number_groups + 1)
-fig, ax = plt.subplots(figsize=(15, 3))
-for i in range(number_groups):
-    ax.bar(x=np.arange(6) + i*bin_width, height=numerical[i], width=bin_width, align='center')
-    ax.set_xticks(np.arange(len(groups)) + number_groups/(3*(number_groups+1)))  # number_groups/(2*(number_groups+1)): offset of xticklabelax.set_xticklabels(categorical)
-    ax.set_xticklabels(groups)
-    ax.legend(categorical_label, facecolor='w', loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
+    groups = ['squat', 'overhead_press', 'biceps_curl_left', 'biceps_curl_right', 'knee_lift_left', 'knee_lift_right']
+    categorical = ['Expected iterations', 21, 51, 101]
+    categorical_label = ['Expected iterations', f"savgol_window: {21}", f"savgol_window: {51}", f"savgol_window: {101}"]
+    # colors = ['green', 'red', 'blue', 'orange']
+    numerical = [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
+    for result in results:
+        expected_iterations = result["n_sequences"] * 10
+        identified_iterations = result["n_iterations_found"]
+        numerical[categorical.index(result["params"]["savgol_window"])][groups.index(result["exercise"])] = identified_iterations
+        numerical[0][groups.index(result["exercise"])] = expected_iterations
 
-box = ax.get_position()
-ax.set_position([box.x0, box.y0, box.width * 0.9, box.height])
-fig.suptitle(f"Subsequencing results using different Savitzky Golay window sizes")
-plt.xlabel("Exercise")
-plt.ylabel("Iterations")
-plt.savefig("subsequencing_savgol_windows.png",
-            bbox_inches="tight",
-            dpi=300)
-plt.show()
+    number_groups = len(categorical)
+    bin_width = 1.0 / (number_groups + 1)
+    fig, ax = plt.subplots(figsize=(15, 3))
+    for i in range(number_groups):
+        bars = ax.bar(x=np.arange(6) + i * bin_width, height=numerical[i], width=bin_width, align='center')
+        for bar in bars:
+            ax.text(bar.get_x() + bar.get_width()/2., 3, '%d' % int(bar.get_height()), ha='center', va="bottom", color='white')
+        ax.set_xticks(np.arange(len(groups)) + number_groups/(3*(number_groups+1)))  # number_groups/(2*(number_groups+1)): offset of xticklabelax.set_xticklabels(categorical)
+        ax.set_xticklabels(groups)
+        ax.legend(categorical_label, facecolor='w', loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.9, box.height * 0.9])
+    fig.suptitle(f"Subsequencing results using different Savitzky Golay window sizes\nsavgol_order: 3  |  argrelextrema_order: 10  |  extrema_group_window_size: 30", fontsize=13)
+    plt.xlabel("Exercise")
+    plt.ylabel("Iterations")
+    plt.savefig("subsequencing_savgol_windows.png",
+                bbox_inches="tight",
+                dpi=300)
+    plt.show()
+
+
+# plot_evauluation_savgol_window()

@@ -192,7 +192,7 @@ class ExerciseEvaluator:
         # Gather information for plotting a summary graph
         angles_savgol_all_bps = np.zeros((len(self.prio_angles), len(seq)))
         angles_all_bps = np.zeros((len(self.prio_angles), len(seq)))
-        angles_legend = np.zeros((len(self.prio_angles)))
+        angles_legend = np.zeros((len(self.prio_angles), 2))
         minima_all_bps = [None]*len(self.prio_angles)
         maxima_all_bps = [None]*len(self.prio_angles)
 
@@ -208,7 +208,7 @@ class ExerciseEvaluator:
             angles_savgol = savgol_filter(angles, savgol_window, 3, mode="nearest")
             angles_savgol_all_bps[prio_idx] = angles_savgol
             angles_all_bps[prio_idx] = angles
-            angles_legend[prio_idx] = body_part_idx
+            angles_legend[prio_idx] = [body_part_idx, angle_type.value]
 
             # TODO: Find best value for order parameter (10 seems to work well)
             # Find Minima and Maxima of angles after applying a Savitzky-Golay Filter
@@ -323,17 +323,20 @@ class ExerciseEvaluator:
             plt.legend(loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
             plt.xlabel("Frame")
             plt.ylabel("Angle")
-            # plt.savefig("subsequencing_extrema_distance_filter.png",
-            #             bbox_inches="tight",
-            #             dpi=300)
+            plt.savefig("subsequencing_extrema.png",
+                        bbox_inches="tight",
+                        dpi=300)
             plt.show()
 
         return iterations
 
-    def get_label(self, idx):
+    def get_label(self, angle_idx_type: np.ndarray):
         for key, val in self.sequence.body_parts.items():
-            if val == idx:
-                return key
+            if val == angle_idx_type[0]:
+                if angle_idx_type[1] == 0:
+                    return key + " Flex/Ex"
+                if angle_idx_type[1] == 1:
+                    return key + " Abd/Add"
 
     def _confirm_iterations(self, confirmed_start_frames: np.ndarray, confirmed_turning_frames: np.ndarray) -> list:
         """Checks for correct order of start and turning frames.
