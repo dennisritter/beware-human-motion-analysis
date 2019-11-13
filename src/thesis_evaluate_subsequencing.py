@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 from hma.movement_analysis.exercise import Exercise
 from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
 from hma.movement_analysis.enums.angle_target_states import AngleTargetStates
@@ -14,6 +15,7 @@ from scipy.signal import argrelextrema, savgol_filter
 import glob
 from pathlib import Path
 import json
+import seaborn as sns
 
 mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 squat = exercise_loader.load('data/exercises/squat.json')
@@ -73,65 +75,46 @@ def get_subseq_result(exercise: Exercise, exercise_name: str):
         json.dump(result, outfile)
 
 
-get_subseq_result(squat, 'squat')
-get_subseq_result(overhead_press, 'overhead_press')
-get_subseq_result(biceps_curl_left, 'biceps_curl_left')
-get_subseq_result(biceps_curl_right, 'biceps_curl_right')
-get_subseq_result(knee_lift_left, 'knee_lift_left')
-get_subseq_result(knee_lift_right, 'knee_lift_right')
+# get_subseq_result(squat, 'squat')
+# get_subseq_result(overhead_press, 'overhead_press')
+# get_subseq_result(biceps_curl_left, 'biceps_curl_left')
+# get_subseq_result(biceps_curl_right, 'biceps_curl_right')
+# get_subseq_result(knee_lift_left, 'knee_lift_left')
+# get_subseq_result(knee_lift_right, 'knee_lift_right')
 
+results = []
+filenames = list(Path("data/evaluation/subsequencing/").rglob("*_3_10_dmean_30.json"))
+for filename in filenames:
+    with open(filename, 'r') as f:
+        result = json.load(f)
+        results.append(result)
 
-# if plot:
-#             sns.set_style("ticks")
-#             # sns.set_context("paper")
-#             fig = plt.figure(figsize=(12, 5))
-#             ax = plt.subplot(111)
+groups = ['squat', 'overhead_press', 'biceps_curl_left', 'biceps_curl_right', 'knee_lift_left', 'knee_lift_right']
+categorical = ['Expected iterations', 21, 51, 101]
+categorical_label = ['Expected iterations', f"savgol_window: {21}", f"savgol_window: {51}", f"savgol_window: {101}"]
+# colors = ['green', 'red', 'blue', 'orange']
+numerical = [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
+for result in results:
+    expected_iterations = result["n_sequences"] * 10
+    identified_iterations = result["n_iterations_found"]
+    numerical[categorical.index(result["params"]["savgol_window"])][groups.index(result["exercise"])] = identified_iterations
+    numerical[0][groups.index(result["exercise"])] = expected_iterations
 
-#             # Major ticks every 20, minor ticks every 5
-#             angle_major_ticks = np.arange(-180, 180, 20)
-#             angle_minor_ticks = np.arange(-180, 180, 10)
-#             frame_major_ticks = np.arange(-100, len(seq) + 100, 100)
-#             frame_minor_ticks = np.arange(-100, len(seq) + 100, 20)
+number_groups = len(categorical)
+bin_width = 1.0 / (number_groups + 1)
+fig, ax = plt.subplots(figsize=(15, 3))
+for i in range(number_groups):
+    ax.bar(x=np.arange(6) + i*bin_width, height=numerical[i], width=bin_width, align='center')
+    ax.set_xticks(np.arange(len(groups)) + number_groups/(3*(number_groups+1)))  # number_groups/(2*(number_groups+1)): offset of xticklabelax.set_xticklabels(categorical)
+    ax.set_xticklabels(groups)
+    ax.legend(categorical_label, facecolor='w', loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
 
-#             ax.set_xticks(frame_major_ticks)
-#             ax.set_xticks(frame_minor_ticks, minor=True)
-#             ax.set_yticks(angle_major_ticks)
-#             ax.set_yticks(angle_minor_ticks, minor=True)
-
-#             # Or if you want different settings for the grids:
-#             ax.grid(which='minor', alpha=0.3)
-#             ax.grid(which='major', alpha=0.85)
-#             ax.tick_params(which='both', direction='out')
-
-#             for prio_idx in range(len(angles_savgol_all_bps)):
-#                 savgol_angles_label, min_label, max_label = (None, None, None) if prio_idx != 0 else ("Body part angles", "Minimum", "Maximum")
-#                 maxima = maxima_all_bps[prio_idx].astype(int)
-#                 minima = minima_all_bps[prio_idx].astype(int)
-#                 # Savgol angles
-#                 sns.color_palette()
-#                 plt.plot(range(0, len(angles_savgol_all_bps[prio_idx])),
-#                          angles_savgol_all_bps[prio_idx],
-#                          zorder=1,
-#                          linewidth="2.0",
-#                          label=self.get_label(angles_legend[prio_idx]))
-#                 # Minima/Maxima
-#                 plt.scatter(maxima, angles_savgol_all_bps[prio_idx][maxima], color='black', marker="^", zorder=2, facecolors='b', label=max_label)
-#                 plt.scatter(minima, angles_savgol_all_bps[prio_idx][minima], color='black', marker="v", zorder=2, facecolors='b', label=min_label)
-#             # # Confirmed Extrema
-#             # plt.scatter(confirmed_start_frames, np.full(confirmed_start_frames.shape, angles_savgol_all_bps.min() - 10), color='r', marker="v", s=20, zorder=3, label="Removed Turning Frame")
-#             # plt.scatter(confirmed_turning_frames, np.full(confirmed_turning_frames.shape, angles_savgol_all_bps.max() + 10), color='r', marker="^", s=20, zorder=3, label="Removed Start/End Frame")
-#             plt.scatter(confirmed_start_frames, np.full(confirmed_start_frames.shape, angles_savgol_all_bps.min() - 10), color='r', marker="v", s=20, zorder=3, label="Removed Turning Frame")
-#             plt.scatter(confirmed_turning_frames, np.full(confirmed_turning_frames.shape, angles_savgol_all_bps.max() + 10), color='r', marker="^", s=20, zorder=3, label="Removed Start/End Frame")
-#             # # Iterations
-#             plt.scatter(iterations[:, 1], np.full((len(iterations), ), angles_savgol_all_bps.max() + 10), color="g", zorder=4, marker="^", s=50, label="Turning Frame")
-#             plt.scatter(iterations[:, 0:3:2], np.full((len(iterations), 2), angles_savgol_all_bps.min() - 10), color="g", zorder=4, marker="v", s=50, label="Start/End Frame")
-
-#             box = ax.get_position()
-#             ax.set_position([box.x0, box.y0, box.width * 0.9, box.height])
-#             plt.legend(loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
-#             plt.xlabel("Frame")
-#             plt.ylabel("Angle")
-#             # plt.savefig("subsequencing_extrema_distance_filter.png",
-#             #             bbox_inches="tight",
-#             #             dpi=300)
-#             plt.show()
+box = ax.get_position()
+ax.set_position([box.x0, box.y0, box.width * 0.9, box.height])
+fig.suptitle(f"Subsequencing results using different Savitzky Golay window sizes")
+plt.xlabel("Exercise")
+plt.ylabel("Iterations")
+plt.savefig("subsequencing_savgol_windows.png",
+            bbox_inches="tight",
+            dpi=300)
+plt.show()
