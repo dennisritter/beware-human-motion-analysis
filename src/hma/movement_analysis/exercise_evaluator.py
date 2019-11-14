@@ -279,8 +279,8 @@ class ExerciseEvaluator:
             ax = plt.subplot(111)
 
             # Major ticks every 20, minor ticks every 5
-            angle_major_ticks = np.arange(-180, 180, 20)
-            angle_minor_ticks = np.arange(-180, 180, 10)
+            angle_major_ticks = np.arange(-180, 200, 20)
+            angle_minor_ticks = np.arange(-180, 200, 10)
             frame_major_ticks = np.arange(-100, len(seq) + 100, 100)
             frame_minor_ticks = np.arange(-100, len(seq) + 100, 20)
 
@@ -323,8 +323,8 @@ class ExerciseEvaluator:
             plt.legend(loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
             plt.xlabel("Frame")
             plt.ylabel("Angle")
-            fig.suptitle(f"{seq.name}\nsavgol_window: 21  |  savgol_order: 3  |  argrelextrema_order: 10  |  extrema_group_window_size: 30", fontsize=13)
-            plt.savefig("subsequencing_extrema.png",
+            fig.suptitle(f"{seq.name}\nsavgol_window: 51  |  savgol_order: 3  |  argrelextrema_order: 10  |  extrema_group_window_size: 30", fontsize=13)
+            plt.savefig("subsequencing_extrema_overheadpress.png",
                         bbox_inches="tight",
                         dpi=300)
             plt.show()
