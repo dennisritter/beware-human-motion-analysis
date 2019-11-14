@@ -324,7 +324,7 @@ class ExerciseEvaluator:
             plt.xlabel("Frame")
             plt.ylabel("Angle")
             fig.suptitle(f"{seq.name}\nsavgol_window: 51  |  savgol_order: 3  |  argrelextrema_order: 10  |  extrema_group_window_size: 30", fontsize=13)
-            plt.savefig("subsequencing_extrema_overheadpress.png",
+            plt.savefig("matching_knee_lift_left_groundtruth.png",
                         bbox_inches="tight",
                         dpi=300)
             plt.show()

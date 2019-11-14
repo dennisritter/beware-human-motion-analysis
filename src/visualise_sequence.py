@@ -16,6 +16,27 @@ from pathlib import Path
 import json
 
 mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
-seq = mocap_poseprocessor.load(
-    'data/sequences/191024_tracking/multi/knee_lift_left/user-6/191024__multi__knee_lift_left__user-6__0.json')
-seq.visualise()
+squat = exercise_loader.load('data/exercises/squat.json')
+biceps_curl_left = exercise_loader.load('data/exercises/biceps-curl-left.json')
+biceps_curl_right = exercise_loader.load('data/exercises/biceps-curl-right.json')
+knee_lift_left = exercise_loader.load('data/exercises/knee-lift-left.json')
+knee_lift_right = exercise_loader.load('data/exercises/knee-lift-right.json')
+EE = None
+seqs = []
+
+filenames = list(Path("data/sequences/191024_tracking/single/").rglob("*.json"))
+for filename in filenames:
+    print(f"Loading Sequence file: {filename}")
+    sequence = mocap_poseprocessor.load(filename, str(filename).split('\\')[-1])
+    seqs.append(sequence)
+# seq.visualise()
+# 191024__single__squat__user
+
+# for seq in seqs:
+#     if EE is None:
+#         EE = ExerciseEvaluator(knee_lift_right, seq)
+#     else:
+#         EE.set_sequence(seq)
+#     iterations = EE.find_iteration_keypoints(plot=True)
+#     print(iterations)
+#     # print(EE.evaluate(iterations))

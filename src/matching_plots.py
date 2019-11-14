@@ -49,16 +49,17 @@ def get_distances_dtw(ground_truth_angles, seqs_angles):
 
     return path, distances
 
+
 # Get PoseProcessor instance for MOCAP sequences
 mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 biceps_curl_left = exercise_loader.load('data/exercises/biceps-curl-left.json')
 biceps_curl_right = exercise_loader.load('data/exercises/biceps-curl-right.json')
 
 seq1 = mocap_poseprocessor.load(
-    'data/sequences/191024 Tracking/single/biceps_curl_right/user-2/191024__single__biceps_curl_right__user-2__0.json',
+    'data/sequences/191024_tracking/single/biceps_curl_right/user-2/191024__single__biceps_curl_right__user-2__0.json',
     '191024__single__biceps_curl_right__user-2__0')
 seq2 = mocap_poseprocessor.load(
-    'data/sequences/191024 Tracking/single/biceps_curl_right/user-3/191024__single__biceps_curl_right__user-3__0.json',
+    'data/sequences/191024_tracking/single/biceps_curl_right/user-2/191024__single__biceps_curl_right__user-2__1.json',
     '191024__single__biceps_curl_right__user-3__0')
 
 sequences_single_iterations = [seq1, seq2]
@@ -79,7 +80,7 @@ print(path)
 sns.set_style("ticks")
 # sns.set_context("paper")
 fig = plt.figure(figsize=(18, 5))
-fig.subplots_adjust(top = 0.8)
+fig.subplots_adjust(top=0.8)
 ax = plt.subplot(111)
 
 # Major ticks every 20, minor ticks every 5
@@ -99,19 +100,19 @@ ax.grid(which='major', alpha=0.85)
 ax.tick_params(which='both', direction='out')
 
 plt.plot(range(0, len(seq1)),
-                seq1.joint_angles[:, bp["RightElbow"], AngleTypes.FLEX_EX.value],
-                zorder=1,
-                linewidth="2.0",
-                label="Biceps Curl Seq 1")
+         seq1.joint_angles[:, bp["RightElbow"], AngleTypes.FLEX_EX.value],
+         zorder=1,
+         linewidth="2.0",
+         label="Biceps Curl Seq 1")
 
 plt.plot(range(0, len(seq2)),
-                seq2.joint_angles[:, bp["RightElbow"], AngleTypes.FLEX_EX.value],
-                zorder=1,
-                linewidth="2.0",
-                label="Biceps Curl Seq 2")
+         seq2.joint_angles[:, bp["RightElbow"], AngleTypes.FLEX_EX.value],
+         zorder=1,
+         linewidth="2.0",
+         label="Biceps Curl Seq 2")
 for p in path:
     print(p[0], p[1])
-    plt.plot([p[0], p[1]],[seq1.joint_angles[p[0], bp["RightElbow"], AngleTypes.FLEX_EX.value], seq2.joint_angles[p[1], bp["RightElbow"], AngleTypes.FLEX_EX.value]], color="black", linewidth=1)
+    plt.plot([p[0], p[1]], [seq1.joint_angles[p[0], bp["RightElbow"], AngleTypes.FLEX_EX.value], seq2.joint_angles[p[1], bp["RightElbow"], AngleTypes.FLEX_EX.value]], color="black", linewidth=1)
 
 # plt.scatter(confirmed_start_frames, np.full(confirmed_start_frames.shape, angles_savgol_all_bps.min() - 10), color='r', marker="v", s=20, zorder=3, label="Removed Turning Frame")
 # plt.scatter(confirmed_turning_frames, np.full(confirmed_turning_frames.shape, angles_savgol_all_bps.max() + 10), color='r', marker="^", s=20, zorder=3, label="Removed Start/End Frame")
