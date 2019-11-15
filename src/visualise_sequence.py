@@ -24,12 +24,12 @@ knee_lift_right = exercise_loader.load('data/exercises/knee-lift-right.json')
 EE = None
 seqs = []
 
-filenames = list(Path("data/sequences/191024_tracking/single/").rglob("*.json"))
+filenames = list(Path("data/sequences/191024_tracking/single/").rglob("191024__single__knee_lift_right__user-3__18.json"))
 for filename in filenames:
     print(f"Loading Sequence file: {filename}")
     sequence = mocap_poseprocessor.load(filename, str(filename).split('\\')[-1])
     seqs.append(sequence)
-# seq.visualise()
+    sequence.visualise()
 # 191024__single__squat__user
 
 # for seq in seqs:

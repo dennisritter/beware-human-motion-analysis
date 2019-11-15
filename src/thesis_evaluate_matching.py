@@ -96,15 +96,258 @@ def get_dtw_results():
         json.dump(dtw_results, outfile)
 
 
-def plot_dtw_result():
+def get_closest_distances_dtw_result():
     with open(f"data/evaluation/matching/dtw_results.json", 'r') as result_file:
         serialised_json_result = json.load(result_file)
         results = serialised_json_result["payload"]
         exercises = serialised_json_result["exercises"]
 
+    q_grouped_results = {}
     for result in results:
-        # TODO: Group results by query sequence and compare distances
-        pass
+        distance = result["distance"]
+        gt_name = result["ground_truth_name"]
+        q_name = result["query_name"]
+        if q_name not in q_grouped_results:
+            q_grouped_results[q_name] = []
+        q_grouped_results[q_name].append((gt_name, distance))
+    with open(f"data/evaluation/matching/dtw_results_q_grouped.json", 'w') as outfile:
+        json.dump(q_grouped_results, outfile)
+
+    closest_distances = []
+    for q_group in q_grouped_results.keys():
+        closest_distance = None
+        for q_distance in q_grouped_results[f"{q_group}"]:
+            if closest_distance is None:
+                closest_distance = q_distance
+            if closest_distance[1] > q_distance[1]:
+                closest_distance = q_distance
+        closest_distance = [q_group, closest_distance[0], closest_distance[1]]
+        closest_distances.append(closest_distance)
+    with open(f"data/evaluation/matching/dtw_results_closest_distances.json", 'w') as outfile:
+        json.dump({"result": closest_distances}, outfile)
+    return closest_distances
 
 
-plot_dtw_result()
+def plot_matching_global():
+    exercises = [
+        "squat",
+        "biceps_curl_left",
+        "biceps_curl_right",
+        "knee_lift_left",
+        "knee_lift_right"
+    ]
+    closest_distances_result = get_closest_distances_dtw_result()
+    correct_matches = 0
+    incorrect_matches = 0
+    for result in closest_distances_result:
+        for ex in exercises:
+            if ex in result[0] and ex in result[1]:
+                correct_matches += 1
+                break
+            if ex in result[0] and ex not in result[1]:
+                incorrect_matches += 1
+                break
+
+    # Pie chart, where the slices will be ordered and plotted counter-clockwise:
+    labels = ['correct', 'incorrect']
+    sizes = [correct_matches, incorrect_matches]
+    print(sizes)
+    fig1, ax1 = plt.subplots()
+    ax1.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=["#2ecc71", "#e74c3c"])
+    ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    fig1.suptitle(f"Overall Matching Results for {correct_matches+incorrect_matches} Query Sequences")
+    plt.savefig("matching_overall_result.png",
+                bbox_inches="tight",
+                dpi=300)
+    plt.show()
+
+
+def plot_matching_per_exercise():
+    exercises = [
+        "squat",
+        "biceps_curl_left",
+        "biceps_curl_right",
+        "knee_lift_left",
+        "knee_lift_right"
+    ]
+    closest_distances_result = get_closest_distances_dtw_result()
+    squat = [0, 0]
+    biceps_curl_left = [0, 0]
+    biceps_curl_right = [0, 0]
+    knee_lift_left = [0, 0]
+    knee_lift_right = [0, 0]
+    for result in closest_distances_result:
+        for ex in exercises:
+            if ex in result[0] and ex in result[1]:
+                if ex == "squat":
+                    squat[0] += 1
+                if ex == "biceps_curl_left":
+                    biceps_curl_left[0] += 1
+                if ex == "biceps_curl_right":
+                    biceps_curl_right[0] += 1
+                if ex == "knee_lift_left":
+                    knee_lift_left[0] += 1
+                if ex == "knee_lift_right":
+                    knee_lift_right[0] += 1
+                break
+            if ex in result[0] and ex not in result[1]:
+                if ex == "squat":
+                    squat[1] += 1
+                if ex == "biceps_curl_left":
+                    biceps_curl_left[1] += 1
+                if ex == "biceps_curl_right":
+                    biceps_curl_right[1] += 1
+                if ex == "knee_lift_left":
+                    knee_lift_left[1] += 1
+                if ex == "knee_lift_right":
+                    knee_lift_right[1] += 1
+                break
+
+    groups = ['squat', 'biceps_curl_left', 'biceps_curl_right', 'knee_lift_left', 'knee_lift_right']
+    categorical = ['Correct', 'Incorrect']
+    categorical_label = ['Correct', 'Incorrect']
+    # colors = ['green', 'red', 'blue', 'orange']
+    numerical = [
+        [squat[0], biceps_curl_left[0], biceps_curl_right[0], knee_lift_left[0], knee_lift_right[0]],
+        [squat[1], biceps_curl_left[1], biceps_curl_right[1], knee_lift_left[1], knee_lift_right[1]]
+    ]
+    number_groups = len(categorical)
+    bin_width = 1.0 / (number_groups + 1)
+    fig, ax = plt.subplots(figsize=(10, 3))
+    for i in range(number_groups):
+        if i == 0:
+            bars = ax.bar(x=np.arange(5) + i * bin_width, height=numerical[i], width=bin_width, align='center', color="#2ecc71")
+        if i == 1:
+            bars = ax.bar(x=np.arange(5) + i * bin_width, height=numerical[i], width=bin_width, align='center', color="#e74c3c")
+        for bar in bars:
+            ax.text(bar.get_x() + bar.get_width()/2., 3, '%d' % int(bar.get_height()), ha='center', va="bottom", color='black')
+        ax.set_xticks(np.arange(len(groups)) + number_groups/(3*(number_groups+1)))  # number_groups/(2*(number_groups+1)): offset of xticklabelax.set_xticklabels(categorical)
+        ax.set_xticklabels(groups)
+        ax.legend(categorical_label, facecolor='w', loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.9, box.height * 0.9])
+    fig.suptitle(f"Matching Results for All Query Sequences Grouped by Exercises", fontsize=13)
+    plt.xlabel("Exercise")
+    plt.ylabel("Matches")
+    plt.savefig("matching_exercise_result.png",
+                bbox_inches="tight",
+                dpi=300)
+    plt.show()
+
+
+# plot_matching_per_exercise()
+
+
+def plot_distribution(exercise: str):
+    exercises = [
+        "squat",
+        "biceps_curl_left",
+        "biceps_curl_right",
+        "knee_lift_left",
+        "knee_lift_right"
+    ]
+    closest_distances_result = get_closest_distances_dtw_result()
+    squat = 0
+    biceps_curl_left = 0
+    biceps_curl_right = 0
+    knee_lift_left = 0
+    knee_lift_right = 0
+    for result in closest_distances_result:
+        if exercise in result[0]:
+            ex = result[1]
+            if "squat" in ex:
+                squat += 1
+            if "biceps_curl_left" in ex:
+                biceps_curl_left += 1
+                print(result[0], result[2])
+            if "biceps_curl_right" in ex:
+                biceps_curl_right += 1
+            if "knee_lift_left" in ex:
+                knee_lift_left += 1
+            if "knee_lift_right" in ex:
+                knee_lift_right += 1
+    groups = ['squat', 'biceps_curl_left', 'biceps_curl_right', 'knee_lift_left', 'knee_lift_right']
+    categorical = ['Matches']
+    categorical_label = ['Matches']
+    # colors = ['green', 'red', 'blue', 'orange']
+    numerical = [[squat, biceps_curl_left, biceps_curl_right, knee_lift_left, knee_lift_right]]
+    number_groups = len(categorical)
+    bin_width = 1.0 / (number_groups + 1)
+    fig, ax = plt.subplots(figsize=(10, 3))
+    for i in range(number_groups):
+        if i == 0:
+            bars = ax.bar(x=np.arange(5) + i * bin_width, height=numerical[i], width=bin_width, align='center', color=["#e74c3c", "#e74c3c", "#e74c3c", "#e74c3c", "#2ecc71"])
+        for bar in bars:
+            ax.text(bar.get_x() + bar.get_width()/2., 3, '%d' % int(bar.get_height()), ha='center', va="bottom", color='black')
+        ax.set_xticks(np.arange(len(groups)) + number_groups/(3*(number_groups+1)))  # number_groups/(2*(number_groups+1)): offset of xticklabelax.set_xticklabels(categorical)
+        ax.set_xticklabels(groups)
+        # ax.legend(categorical_label, facecolor='w', loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.9, box.height * 0.9])
+    fig.suptitle(f"Matching Result Distribution for Right Knee Lift Exercise Query Sequences", fontsize=13)
+    plt.xlabel("Exercise")
+    plt.ylabel("Matches")
+    plt.savefig("matching_klr_distribution.png",
+                bbox_inches="tight",
+                dpi=300)
+    plt.show()
+
+
+plot_distribution("knee_lift_right")
+
+
+def plot_compare_seqs(exercise: str):
+    exercises = [
+        "squat",
+        "biceps_curl_left",
+        "biceps_curl_right",
+        "knee_lift_left",
+        "knee_lift_right"
+    ]
+    closest_distances_result = get_closest_distances_dtw_result()
+    squat = 0
+    biceps_curl_left = 0
+    biceps_curl_right = 0
+    knee_lift_left = 0
+    knee_lift_right = 0
+    for result in closest_distances_result:
+        if exercise in result[0]:
+            ex = result[1]
+            if "squat" in ex:
+                squat += 1
+            if "biceps_curl_left" in ex:
+                biceps_curl_left += 1
+            if "biceps_curl_right" in ex:
+                biceps_curl_right += 1
+            if "knee_lift_left" in ex:
+                knee_lift_left += 1
+            if "knee_lift_right" in ex:
+                knee_lift_right += 1
+    groups = ['squat', 'biceps_curl_left', 'biceps_curl_right', 'knee_lift_left', 'knee_lift_right']
+    categorical = ['Matches']
+    categorical_label = ['Matches']
+    # colors = ['green', 'red', 'blue', 'orange']
+    numerical = [[squat, biceps_curl_left, biceps_curl_right, knee_lift_left, knee_lift_right]]
+    number_groups = len(categorical)
+    bin_width = 1.0 / (number_groups + 1)
+    fig, ax = plt.subplots(figsize=(10, 3))
+    for i in range(number_groups):
+        if i == 0:
+            bars = ax.bar(x=np.arange(5) + i * bin_width, height=numerical[i], width=bin_width, align='center', color=["#e74c3c", "#e74c3c", "#e74c3c", "#e74c3c", "#2ecc71"])
+        for bar in bars:
+            ax.text(bar.get_x() + bar.get_width()/2., 3, '%d' % int(bar.get_height()), ha='center', va="bottom", color='black')
+        ax.set_xticks(np.arange(len(groups)) + number_groups/(3*(number_groups+1)))  # number_groups/(2*(number_groups+1)): offset of xticklabelax.set_xticklabels(categorical)
+        ax.set_xticklabels(groups)
+        # ax.legend(categorical_label, facecolor='w', loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.9, box.height * 0.9])
+    fig.suptitle(f"Matching Result Distribution for Right Knee Lift Exercise Query Sequences", fontsize=13)
+    plt.xlabel("Exercise")
+    plt.ylabel("Matches")
+    plt.savefig("matching_klr_distribution.png",
+                bbox_inches="tight",
+                dpi=300)
+    plt.show()
