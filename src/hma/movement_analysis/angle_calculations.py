@@ -1,9 +1,7 @@
 from hma.movement_analysis import transformations
 from hma.movement_analysis.enums.angle_types import AngleTypes
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import math
-import matplotlib.pyplot as plt
 
 """ This module contains functions to calculate medical angles for human body joints.
     Functions are Developed for the tracking input of Realsense MOCAP Project (https://gitlab.beuth-hochschule.de/iisy/realsense).
