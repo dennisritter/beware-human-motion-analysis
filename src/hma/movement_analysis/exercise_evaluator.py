@@ -60,7 +60,6 @@ class ExerciseEvaluator:
         self.target_angles = self._get_target_angles()
         self.prio_angles = self._get_prio_angles()
         # And finally process the sequences' ball joint angles again.
-        # NOTE: Will change the Sequences angles!
         self._process_sequence_ball_joint_angles()
 
     def set_exercise(self, ex: Exercise):
@@ -76,7 +75,6 @@ class ExerciseEvaluator:
         # Assign unprocessed sequence to sequence to process the original (unprocessed) angles.
         self.sequence = self.unprocessed_sequence
         # And finally process the sequences' ball joint angles again.
-        # NOTE: Will change the Sequences angles!
         self._process_sequence_ball_joint_angles()
 
     def _get_prio_angles(self) -> list:
@@ -122,7 +120,7 @@ class ExerciseEvaluator:
         self.prio_angles = prio_angles
         return prio_angles
 
-    def _get_target_angles(self) -> list:
+    def _get_target_angles(self) -> np.ndarray:
         """Returns target angles for the exercise of this ExerciseEvaluator instance.
 
         Returns a 4-D ndarray which contain the Exercises' range of target angles for all body_parts, angle types and target states as minimum/maximum.
@@ -202,7 +200,6 @@ class ExerciseEvaluator:
             # Get calculated angles of a specific type for a specific body part for all frames
             angles = seq.joint_angles[:, body_part_idx, angle_type.value]
 
-            # TODO: Find best value for window size (51 seems to work well)
             # Apply a Savitzky-Golay Filter to get a list of 'smoothed' angles.
             savgol_window = 51
             angles_savgol = savgol_filter(angles, savgol_window, 3, mode="nearest")
@@ -210,7 +207,6 @@ class ExerciseEvaluator:
             angles_all_bps[prio_idx] = angles
             angles_legend[prio_idx] = [body_part_idx, angle_type.value]
 
-            # TODO: Find best value for order parameter (10 seems to work well)
             # Find Minima and Maxima of angles after applying a Savitzky-Golay Filter
             maxima = argrelextrema(angles_savgol, np.greater, order=10)[0]
             minima = argrelextrema(angles_savgol, np.less, order=10)[0]
@@ -272,13 +268,12 @@ class ExerciseEvaluator:
 
         iterations = self._confirm_iterations(confirmed_start_frames, confirmed_turning_frames)
 
+        # Plotting
         if plot:
             sns.set_style("ticks")
-            # sns.set_context("paper")
             fig = plt.figure(figsize=(12, 5))
             ax = plt.subplot(111)
 
-            # Major ticks every 20, minor ticks every 5
             angle_major_ticks = np.arange(-180, 200, 20)
             angle_minor_ticks = np.arange(-180, 200, 10)
             frame_major_ticks = np.arange(-100, len(seq) + 100, 100)
@@ -289,7 +284,6 @@ class ExerciseEvaluator:
             ax.set_yticks(angle_major_ticks)
             ax.set_yticks(angle_minor_ticks, minor=True)
 
-            # Or if you want different settings for the grids:
             ax.grid(which='minor', alpha=0.3)
             ax.grid(which='major', alpha=0.85)
             ax.tick_params(which='both', direction='out')
@@ -309,8 +303,6 @@ class ExerciseEvaluator:
                 plt.scatter(maxima, angles_savgol_all_bps[prio_idx][maxima], color='black', marker="^", zorder=2, facecolors='b', label=max_label)
                 plt.scatter(minima, angles_savgol_all_bps[prio_idx][minima], color='black', marker="v", zorder=2, facecolors='b', label=min_label)
             # # Confirmed Extrema
-            # plt.scatter(confirmed_start_frames, np.full(confirmed_start_frames.shape, angles_savgol_all_bps.min() - 10), color='r', marker="v", s=20, zorder=3, label="Removed Turning Frame")
-            # plt.scatter(confirmed_turning_frames, np.full(confirmed_turning_frames.shape, angles_savgol_all_bps.max() + 10), color='r', marker="^", s=20, zorder=3, label="Removed Start/End Frame")
             plt.scatter(confirmed_start_frames, np.full(confirmed_start_frames.shape, angles_savgol_all_bps.min() - 10), color='r', marker="v", s=20, zorder=3, label="Removed Turning Frame")
             plt.scatter(confirmed_turning_frames, np.full(confirmed_turning_frames.shape, angles_savgol_all_bps.max() + 10), color='r', marker="^", s=20, zorder=3, label="Removed Start/End Frame")
             # # Iterations
@@ -474,13 +466,12 @@ class ExerciseEvaluator:
 
         return results
 
-    # TODO: There should be a better, clearer way to process the sequences angles that doesnt change the sequence implicitly.
     def _process_sequence_ball_joint_angles(self, ignore_flex_abd90_delta: int = 20):
         """Processes this ExerciseEvaluators sequences' ball joint angles for all ball joints and applies changes to the sequence. 
 
         Args:
-            ignore_flex_abd90_delta (int):  Determines the maximum distance to a 90 degrees abduction/adduction angle, from where the flexion/extension angle is ignored.
-                                                Default=20;
+            ignore_flex_abd90_delta (int):  Determines the maximum distance to a 90 degrees abduction/adduction angle, 
+                                            from where the flexion/extension angle is ignored. Default=20;
         """
         seq = self.sequence
         bp = seq.body_parts
