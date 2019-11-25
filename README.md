@@ -1,16 +1,24 @@
-## A Tool to visualize motion tracking information.
+## A Tool to analyse human motion sequences of sport exercises.
 
-### Setup
+### Getting Started
 
 1. Clone or download this repository
-2. Load and activate the conda_enviroment.yml Anaconda3 enviroment
-3. Check, run, edit, add scripts in ./src
+2. Load and activate the `enviroment.yml` Anaconda3 enviroment
+3. run, edit, add scripts in `./src`
 
-### Implementation
+### Usage
 
-#### Exercise
+#### Loading and visualising a sequence from file
 
-See [exercises.md](./docs/exercises.md)
+#### Loading an Exercise
+
+#### Assume the type of an exercise
+
+#### Identify subsequences consisting of a single exercise repitition
+
+#### Rating trainees exercise execution performance - Angle Comparison Method
+
+#### Rating trainees exercise execution performance - DTW Distance Method
 
 ### Contributing
 
