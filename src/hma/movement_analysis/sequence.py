@@ -7,10 +7,21 @@ import matplotlib.animation as animation
 
 
 class Sequence:
+    """Represents a motion sequence.
+
+    Attributes:
+        body_parts (dict): A dictionary mapping body part names to position indices in the "positions" attribute array.
+        positions (list): The tracked body part positions for each frame.
+        timestamps (list): The timestamps for each tracked frame.
+        poseformat (PoseFormatEnum): The poseformat of this sequence.
+        name (str): The name of this sequence.
+        joint_angles (list): The calculated angles derived from the tracked positions of this sequence
+    """
+
     def __init__(self,
                  body_parts: dict,
-                 positions: list,
-                 timestamps: list,
+                 positions: np.ndarray,
+                 timestamps: np.ndarray,
                  poseformat: PoseFormatEnum,
                  name: str = 'sequence',
                  joint_angles: list = None):
@@ -20,7 +31,7 @@ class Sequence:
         # Example: { "Head": 0, "RightShoulder": 1, ... }
         self.body_parts = body_parts
 
-        # A Boolean ndarray mask to exclude all frames, where all positions are 0.0
+        # A Boolean mask list to exclude all frames, where all positions are 0.0
         zero_frames_filter_list = self._filter_zero_frames(positions)
         # Defines positions of each bodypart
         # 1. Dimension = Time
@@ -45,14 +56,14 @@ class Sequence:
         self.joint_angles = self._calc_joint_angles(
         ) if joint_angles is None else np.array(joint_angles)
 
-        self.positions_2d = None  # self.get_positions_2d()
-
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.timestamps)
 
-    def __getitem__(self, item):
-        """
-        Returns the sub-sequence item. You can either specifiy one element by index or use numpy-like slicing.
+    def __getitem__(self, item) -> 'Sequence':
+        """Returns the sub-sequence item. You can either specifiy one element by index or use numpy-like slicing.
+
+        Args:
+            item (int/slice): Defines a particular frame or slice from all frames of this sequence.
 
         Raises NotImplementedError if index is given as tuple.
         Raises TypeError if item is not of type int or slice.
@@ -71,10 +82,9 @@ class Sequence:
                         self.timestamps[start:stop:step], self.poseformat,
                         self.name, self.joint_angles[start:stop:step])
 
-    """
-    Returns a 3-D list of joint angles for all frames, body parts and angle types.
-    """
-    def _calc_joint_angles(self) -> list:
+    def _calc_joint_angles(self) -> np.ndarray:
+        """Returns a 3-D list of joint angles for all frames, body parts and angle types.
+        """
         n_frames = len(self.timestamps)
         n_body_parts = len(self.body_parts)
         n_angle_types = 3
@@ -115,17 +125,14 @@ class Sequence:
 
         return joint_angles
 
-    def get_positions_2d(self):
-        """
-        Returns the positions for all keypoints in 
-        shape: (num_frames, num_bodyparts * xyz).
+    def get_positions_2d(self) -> np.ndarray:
+        """Returns the positions for all keypoints in shape: (num_frames, num_bodyparts * xyz).
         """
 
         return np.reshape(self.positions, (self.positions.shape[0], -1))
 
     def merge(self, sequence: 'Sequence') -> 'Sequence':
-        """
-        Returns the merged two sequences.
+        """Returns the merged two sequences.
 
         Raises ValueError if either the body_parts, the poseformat or the body_parts and keys within the joint_angles do not match!
         """
@@ -145,16 +152,19 @@ class Sequence:
         return self
 
     def get_pcs(self, num_components: int = 3):
-        """
-        Calculates n principal components for the tracked positions of this sequence
+        """Calculates n principal components for the tracked positions of this sequence
         """
         pca = PCA(n_components=num_components)
         xPCA = pca.fit_transform(self.get_positions_2d())
         return xPCA
 
-    def visualise(self, fps: int = 10):
+    def visualise(self, fps: int = 30):
+        """Produces an animated plot of the motion sequence.
+
+        Args:
+            fps (int): Defines the animations speed in frames per second.
+        """
         n_frames = len(self)
-        fps = 30
 
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
@@ -178,12 +188,18 @@ class Sequence:
 
         plt.show()
 
-    def _filter_zero_frames(self, positions: list) -> list:
-        """
-        Returns a list of booleans. 
+    def _filter_zero_frames(self, positions: np.ndarray) -> list:
+        """Returns a filter mask list to filter frames where all positions equal 0.0. 
+
         Checks whether the sum of all coordinates for a frame is 0.0
-            True -> keep this frame; 
+            True -> keep this frame
             False -> remove this frame
+
+        Args:
+            positions (np.ndarray): The positions to filter "Zero-Position-Frames" from
+
+        Returns:
+            (list<boolean>): The filter list.
         """
         bool_list = []
         for pos in positions:
