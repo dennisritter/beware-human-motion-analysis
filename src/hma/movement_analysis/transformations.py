@@ -9,30 +9,46 @@ def get_angle(v1, v2):
 
 
 def get_perpendicular_vector(v1, v2):
+    """Returns a vector that is perpendicular to v1 and v2
 
+    Args:
+        v1 (np.ndarray): Vector one, which is perpendicular to the returned vector.
+        v2 (np.ndarray): Vector two, which is perpendicular to the returned vector.
+    """
     v1 = norm(v1)
     v2 = norm(v2)
 
     # If theta 180° (dot product = -1)
     if (np.dot(v1, v2) == -1):
-        # TODO: Arbitrary Vector.. Find method to ensure its not parallel to vx
         return np.cross(np.array([3, 2, 1]), v2)
     else:
         return norm(np.cross(v1, v2))
 
 
-def norm(v):
+def norm(v) -> np.ndarray:
+    """Normalises the given vector v and returns it afterwards.
+
+    Args:
+        v (np.ndarray): The vector to normalise.
+    """
     if math.sqrt(np.dot(v, v)) == 0:
         return np.zeros(3)
     else:
         return v / math.sqrt(np.dot(v, v))
 
 
-def rotation_matrix_4x4(axis, theta):
+def rotation_matrix_4x4(axis, theta) -> np.ndarray:
     # Source: https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
     """
-    Return the rotation matrix associated with counterclockwise rotation about
+    Returns the rotation matrix associated with counterclockwise rotation about
     the given axis by theta in radians as 4x4 Transformation Matrix
+
+    Args:
+        axis(np.array): The vector to rotate about.
+        theta(float): The degrees to rotate about the given axis.
+
+    Returns:
+        (np.ndarray) 4x4 rotation matrix representing a rotation about the given axis
     """
     axis = np.asarray(axis)
     axis = norm(axis)
@@ -46,7 +62,15 @@ def rotation_matrix_4x4(axis, theta):
                      [0, 0, 0, 1]])
 
 
-def translation_matrix_4x4(v):
+def translation_matrix_4x4(v) -> np.ndarray:
+    """Returns a 4x4 Matrix representing a translation.
+
+    Args:
+        v (np.ndarray): A vector defining the translation.
+
+    Returns:
+        (np.ndarray) 4x4 transformation matrix representing a translation as defined by argument v.
+    """
     T = np.array([
         [1.0, 0, 0, 0],
         [0, 1.0, 0, 0],
@@ -63,12 +87,12 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     The X-Axis will be in direction of x_direction-origin.
     The Y-Axis will be in direction of y_direction-origin, without crossing the y_direction point but perpendicular to the new X-Axis.
     The Z-Axis will be perpendicular to the XY-Plane.
-    Parameters
-    ----------
-    origin_bp_idx: int
-    x_direction_bp_idx: int
-    y_direction_bp_idx: int
-    positions: np.ndarray
+
+    Args:
+        origin_bp_idx (int): The body part index whose position represents the origin of the coordinate system.
+        x_direction_bp_idx (int): The body part index whose position denotes the direction of the x-axis.
+        y_direction_bp_idx (int): The body part index whose position denotes the direction of the y-axis.
+        positions (np.ndarray): The tracked positions of all body parts for a motion sequence. 
     """
 
     # Positions of given orientation joints in GCS
