@@ -685,10 +685,10 @@ class ExerciseEvaluator:
         result = {
             "angle": angle,
             "body_part": "LeftShoulder",
-            "angle_type": angle_type,
+            "angle_type": str(angle_type),
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state,
+            "target_state": str(target_state),
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -712,10 +712,10 @@ class ExerciseEvaluator:
         result = {
             "angle": angle,
             "body_part": "RightShoulder",
-            "angle_type": angle_type,
+            "angle_type": str(angle_type),
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state,
+            "target_state": str(target_state),
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -739,10 +739,10 @@ class ExerciseEvaluator:
         result = {
             "angle": angle,
             "body_part": "LeftHip",
-            "angle_type": angle_type,
+            "angle_type": str(angle_type),
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state,
+            "target_state": str(target_state),
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -766,10 +766,10 @@ class ExerciseEvaluator:
         result = {
             "angle": angle,
             "body_part": "RightHip",
-            "angle_type": angle_type,
+            "angle_type": str(angle_type),
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state,
+            "target_state": str(target_state),
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -793,10 +793,10 @@ class ExerciseEvaluator:
         result = {
             "angle": angle,
             "body_part": "LeftElbow",
-            "angle_type": angle_type,
+            "angle_type": str(angle_type),
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state,
+            "target_state": str(target_state),
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -820,10 +820,10 @@ class ExerciseEvaluator:
         result = {
             "angle": angle,
             "body_part": "RightElbow",
-            "angle_type": angle_type,
+            "angle_type": str(angle_type),
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state,
+            "target_state": str(target_state),
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -847,10 +847,10 @@ class ExerciseEvaluator:
         result = {
             "angle": angle,
             "body_part": "LeftKnee",
-            "angle_type": angle_type,
+            "angle_type": str(angle_type),
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state,
+            "target_state": str(target_state),
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -874,10 +874,10 @@ class ExerciseEvaluator:
         result = {
             "angle": angle,
             "body_part": "RightKnee",
-            "angle_type": angle_type,
+            "angle_type": str(angle_type),
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state,
+            "target_state": str(target_state),
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
