@@ -298,7 +298,7 @@ class ExerciseEvaluator:
                          angles_savgol_all_bps[prio_idx],
                          zorder=1,
                          linewidth="2.0",
-                         label=self.get_label(angles_legend[prio_idx]))
+                         label=self._get_label(angles_legend[prio_idx]))
                 # Minima/Maxima
                 plt.scatter(maxima, angles_savgol_all_bps[prio_idx][maxima], color='black', marker="^", zorder=2, facecolors='b', label=max_label)
                 plt.scatter(minima, angles_savgol_all_bps[prio_idx][minima], color='black', marker="v", zorder=2, facecolors='b', label=min_label)
@@ -316,14 +316,14 @@ class ExerciseEvaluator:
             plt.xlabel("Frame")
             plt.ylabel("Angle")
             fig.suptitle(f"{seq.name}\nsavgol_window: 51  |  savgol_order: 3  |  argrelextrema_order: 10  |  extrema_group_window_size: 30", fontsize=13)
-            plt.savefig("matching_knee_lift_left_groundtruth.png",
-                        bbox_inches="tight",
-                        dpi=300)
+            # plt.savefig("find_iteration_keypoints_result.png",
+            #             bbox_inches="tight",
+            #             dpi=300)
             plt.show()
 
         return iterations
 
-    def get_label(self, angle_idx_type: np.ndarray):
+    def _get_label(self, angle_idx_type: np.ndarray):
         for key, val in self.sequence.body_parts.items():
             if val == angle_idx_type[0]:
                 if angle_idx_type[1] == 0:
