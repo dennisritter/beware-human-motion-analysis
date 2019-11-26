@@ -27,7 +27,7 @@ The following examples shall clarify how to use the features of this module.
 A list of example functions very similar to the following, can be found in the `src/hma/examples.py` script file.
 <br/>
 <br/>
-Exercise and Sequence `JSON` files can be found in `data/exercises` and `data/sequences/191024_tracking`.
+Exercise and Sequence `JSON` files can be found in `data/exercises` and `data/sequences/191024_tracking` folders.
 
 ### Loading a Sequence from file
 
