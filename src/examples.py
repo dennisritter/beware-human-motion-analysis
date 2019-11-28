@@ -45,8 +45,8 @@ def identify_exercise_type_example():
     angles_squat_gt = reformat_angles_dtw(sequence_squat_gt)
     angles_biceps_curl_left_gt = reformat_angles_dtw(sequence_biceps_curl_left_gt)
 
-    path_squat_gt, dist_squat_gt = ts.dtw_path(angles_q, angles_squat_gt)[1]
-    path_biceps_curl_left_gt, dist_biceps_curl_left_gt = ts.dtw_path(angles_q, angles_biceps_curl_left_gt)[1]
+    path_squat_gt, dist_squat_gt = ts.dtw_path(angles_q, angles_squat_gt)
+    path_biceps_curl_left_gt, dist_biceps_curl_left_gt = ts.dtw_path(angles_q, angles_biceps_curl_left_gt)
 
     # The Ground-Truth Sequences Exercise type that results in the lowest distance is assumed to be the same exercise as performed in the Query Sequence.
     print("-- Listing distances between Query Sequence and Ground-Truth Sequences --")
