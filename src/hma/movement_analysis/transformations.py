@@ -20,6 +20,8 @@ def get_perpendicular_vector(v1, v2):
 
     # If theta 180° (dot product = -1)
     if (np.dot(v1, v2) == -1):
+        # Whenever v1 and v2 are parallel to each other, we can use an arbitrary vector that is NOT parallel to v1 and v2
+        # TODO: Find method to ensure its not parallel to vx_new! -> e.g.: check if dot product of v1/v2 and arbitrary vector is -1 again.
         return np.cross(np.array([3, 2, 1]), v2)
     else:
         return norm(np.cross(v1, v2))
