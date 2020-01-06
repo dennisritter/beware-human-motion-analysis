@@ -94,7 +94,7 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
         origin_bp_idx (int): The body part index whose position represents the origin of the coordinate system.
         x_direction_bp_idx (int): The body part index whose position denotes the direction of the x-axis.
         y_direction_bp_idx (int): The body part index whose position denotes the direction of the y-axis.
-        positions (np.ndarray): The tracked positions of all body parts for a motion sequence. 
+        positions (np.ndarray): The tracked positions of all body parts for one frame of a motion sequence. 
     """
 
     # Positions of given orientation joints in GCS
