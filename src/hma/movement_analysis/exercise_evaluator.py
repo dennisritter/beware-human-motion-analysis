@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.signal import argrelextrema, savgol_filter
+from statistics import mean
 
 
 # TODO: Check whether Sequence parameter for some function are really necessary.
@@ -46,7 +47,6 @@ class ExerciseEvaluator:
         self.prio_angles = self._get_prio_angles()
 
         # Process all ball joint angles of the sequence attribute
-        # NOTE: Will change the Sequences angles!
         self._process_sequence_ball_joint_angles()
 
     def set_sequence(self, seq: Sequence):
@@ -60,7 +60,6 @@ class ExerciseEvaluator:
         self.target_angles = self._get_target_angles()
         self.prio_angles = self._get_prio_angles()
         # And finally process the sequences' ball joint angles again.
-        # NOTE: Will change the Sequences angles!
         self._process_sequence_ball_joint_angles()
 
     def set_exercise(self, ex: Exercise):
@@ -76,7 +75,6 @@ class ExerciseEvaluator:
         # Assign unprocessed sequence to sequence to process the original (unprocessed) angles.
         self.sequence = self.unprocessed_sequence
         # And finally process the sequences' ball joint angles again.
-        # NOTE: Will change the Sequences angles!
         self._process_sequence_ball_joint_angles()
 
     def _get_prio_angles(self) -> list:
@@ -122,7 +120,7 @@ class ExerciseEvaluator:
         self.prio_angles = prio_angles
         return prio_angles
 
-    def _get_target_angles(self) -> list:
+    def _get_target_angles(self) -> np.ndarray:
         """Returns target angles for the exercise of this ExerciseEvaluator instance.
 
         Returns a 4-D ndarray which contain the Exercises' range of target angles for all body_parts, angle types and target states as minimum/maximum.
@@ -177,8 +175,6 @@ class ExerciseEvaluator:
         based on shared minimum and maximum values of prioritised body part angles.
 
         Args:
-            start_frame_min_dist (int): 
-            end_frame_min_dist (int):
             plot (Boolean): Determines whether to plot partial results of an execution of this function. 
 
         Returns:
@@ -193,46 +189,48 @@ class ExerciseEvaluator:
         turning_frame_matrix = np.zeros((len(self.prio_angles), len(seq)))
         # Gather information for plotting a summary graph
         angles_savgol_all_bps = np.zeros((len(self.prio_angles), len(seq)))
+        angles_all_bps = np.zeros((len(self.prio_angles), len(seq)))
+        angles_legend = np.zeros((len(self.prio_angles), 2))
         minima_all_bps = [None]*len(self.prio_angles)
         maxima_all_bps = [None]*len(self.prio_angles)
-        # minima_all_bps = np.zeros((len(self.prio_angles)))
-        # maxima_all_bps = np.zeros((len(self.prio_angles)))
 
-        # self.prio_angles element example format (idx, AngleType) -> (1, AngleType.FLEX_EX)
+        # self.prio_angles element example format: (idx, AngleType) -> (1, AngleType.FLEX_EX)
         for prio_idx, (body_part_idx, angle_type) in enumerate(self.prio_angles):
 
             # Get calculated angles of a specific type for a specific body part for all frames
             angles = seq.joint_angles[:, body_part_idx, angle_type.value]
 
-            # TODO: Find best value for window size (51 seems to work well)
             # Apply a Savitzky-Golay Filter to get a list of 'smoothed' angles.
-            # savgol_window_max = 51
-            # savgol_window_generic = int(math.floor(len(angles)/1.5)+1 if math.floor(len(angles)/1.5) % 2 == 0 else math.floor(len(angles)/1.5))
-            # savgol_window = min(savgol_window_max, savgol_window_generic)
             savgol_window = 51
             angles_savgol = savgol_filter(angles, savgol_window, 3, mode="nearest")
             angles_savgol_all_bps[prio_idx] = angles_savgol
+            angles_all_bps[prio_idx] = angles
+            angles_legend[prio_idx] = [body_part_idx, angle_type.value]
 
-            # TODO: Find best value for order parameter (10 seems to work well)
-            # Find Minima and Maxima of angles after applying a Savitzky-Golay Filter filter
+            # Find Minima and Maxima of angles after applying a Savitzky-Golay Filter
             maxima = argrelextrema(angles_savgol, np.greater, order=10)[0]
             minima = argrelextrema(angles_savgol, np.less, order=10)[0]
-
-            # Add minimum to first and last frame if start_frame_min_dist/end_frame_min_dist
-            # param value is not less than the actual distance to the target angle
-            target_distance_tolerance = 20
-            angles_savgol = np.array(angles_savgol)
-            target_start_range = self.target_angles[body_part_idx][angle_type.value][AngleTargetStates.START.value]
-            if (min(target_start_range) - target_distance_tolerance < angles_savgol[0] < max(target_start_range) + target_distance_tolerance):
-                minima = np.insert(minima, 0, 0)
-            if (min(target_start_range) - target_distance_tolerance < angles_savgol[-1] < max(target_start_range) + target_distance_tolerance):
-                minima = np.append(minima, len(angles_savgol)-1)
 
             # Get Exercise targets for the current angle type
             ex_targets = self.target_angles[body_part_idx][angle_type.value]
             # Check if Exercise targets of target state END are greater than targets of START
             # We need this information to identify whether local MAXIMA or MINIMA represent start/end of a subsequence
             target_end_greater_start = min(ex_targets[AngleTargetStates.END.value]) > min(ex_targets[AngleTargetStates.START.value])
+            # Add minimum to first and last frame if start_frame_min_dist/end_frame_min_dist
+            # param value is not less than the actual distance to the target angle
+            target_distance_tolerance = abs(int(mean(ex_targets[AngleTargetStates.END.value]) - mean(ex_targets[AngleTargetStates.START.value])))
+            angles_savgol = np.array(angles_savgol)
+            target_start_range = self.target_angles[body_part_idx][angle_type.value][AngleTargetStates.START.value]
+            if (min(target_start_range) - target_distance_tolerance < angles_savgol[0] < max(target_start_range) + target_distance_tolerance):
+                if target_end_greater_start:
+                    minima = np.insert(minima, 0, 0)
+                else:
+                    maxima = np.insert(maxima, 0, 0)
+            if (min(target_start_range) - target_distance_tolerance < angles_savgol[-1] < max(target_start_range) + target_distance_tolerance):
+                if target_end_greater_start:
+                    minima = np.append(minima, len(angles_savgol)-1)
+                else:
+                    maxima = np.append(maxima, len(angles_savgol)-1)
 
             # Check if distance to Exercise START target angle is greater than Exercise END target angle
             # in order to remove falsy maxima/minima
@@ -264,30 +262,28 @@ class ExerciseEvaluator:
         # For n < 3, n extrema must be in range of the window to confirm an extremum.
         confirm_extrema_thresh = len(self.prio_angles) if len(self.prio_angles) <= 2 else len(self.prio_angles) - 1
         # Window size that determines the range of frames minima/maxima of different body parts belong to each other.
-        w_size = 30
-        confirmed_start_frames = self._confirm_extrema(start_frame_matrix, w_size, confirm_extrema_thresh)
-        confirmed_turning_frames = self._confirm_extrema(turning_frame_matrix, w_size, confirm_extrema_thresh)
+        extrema_group_window_size = 30
+        confirmed_start_frames = self._confirm_extrema(start_frame_matrix, extrema_group_window_size, confirm_extrema_thresh)
+        confirmed_turning_frames = self._confirm_extrema(turning_frame_matrix, extrema_group_window_size, confirm_extrema_thresh)
 
         iterations = self._confirm_iterations(confirmed_start_frames, confirmed_turning_frames)
 
+        # Plotting
         if plot:
             sns.set_style("ticks")
-            sns.set_context("paper")
-            fig = plt.figure(figsize=(15, 5))
+            fig = plt.figure(figsize=(12, 5))
             ax = plt.subplot(111)
 
-            # Major ticks every 20, minor ticks every 5
-            angle_major_ticks = np.arange(-180, 180, 20)
-            angle_minor_ticks = np.arange(-180, 180, 10)
-            frame_major_ticks = np.arange(-100, len(seq) + 100, 50)
-            frame_minor_ticks = np.arange(-100, len(seq) + 100, 10)
+            angle_major_ticks = np.arange(-180, 200, 20)
+            angle_minor_ticks = np.arange(-180, 200, 10)
+            frame_major_ticks = np.arange(-100, len(seq) + 100, 100)
+            frame_minor_ticks = np.arange(-100, len(seq) + 100, 20)
 
             ax.set_xticks(frame_major_ticks)
             ax.set_xticks(frame_minor_ticks, minor=True)
             ax.set_yticks(angle_major_ticks)
             ax.set_yticks(angle_minor_ticks, minor=True)
 
-            # Or if you want different settings for the grids:
             ax.grid(which='minor', alpha=0.3)
             ax.grid(which='major', alpha=0.85)
             ax.tick_params(which='both', direction='out')
@@ -297,25 +293,43 @@ class ExerciseEvaluator:
                 maxima = maxima_all_bps[prio_idx].astype(int)
                 minima = minima_all_bps[prio_idx].astype(int)
                 # Savgol angles
-                plt.plot(range(0, len(angles_savgol_all_bps[prio_idx])), angles_savgol_all_bps[prio_idx], color='r', zorder=1, linewidth="1.0", label=savgol_angles_label)
+                sns.color_palette()
+                plt.plot(range(0, len(angles_savgol_all_bps[prio_idx])),
+                         angles_savgol_all_bps[prio_idx],
+                         zorder=1,
+                         linewidth="2.0",
+                         label=self._get_label(angles_legend[prio_idx]))
                 # Minima/Maxima
-                plt.scatter(maxima, angles_savgol_all_bps[prio_idx][maxima], color='b', marker="^", zorder=2, facecolors='none', label=min_label)
-                plt.scatter(minima, angles_savgol_all_bps[prio_idx][minima], color='b', marker="v", zorder=2, facecolors='none', label=max_label)
-            # Confirmed Extrema
+                plt.scatter(maxima, angles_savgol_all_bps[prio_idx][maxima], color='black', marker="^", zorder=2, facecolors='b', label=max_label)
+                plt.scatter(minima, angles_savgol_all_bps[prio_idx][minima], color='black', marker="v", zorder=2, facecolors='b', label=min_label)
+            # # Confirmed Extrema
             plt.scatter(confirmed_start_frames, np.full(confirmed_start_frames.shape, angles_savgol_all_bps.min() - 10), color='r', marker="v", s=20, zorder=3, label="Removed Turning Frame")
             plt.scatter(confirmed_turning_frames, np.full(confirmed_turning_frames.shape, angles_savgol_all_bps.max() + 10), color='r', marker="^", s=20, zorder=3, label="Removed Start/End Frame")
-            # Iterations
-            plt.scatter(iterations[:, 1], np.full((len(iterations), ), angles_savgol_all_bps.max() + 10), color="g", zorder=4, marker="^", s=50, label="Turning Frame")
-            plt.scatter(iterations[:, 0:3:2], np.full((len(iterations), 2), angles_savgol_all_bps.min() - 10), color="g", zorder=4, marker="v", s=50, label="Start/End Frame")
+            # # Iterations
+            if len(iterations) > 0:
+                plt.scatter(iterations[:, 1], np.full((len(iterations), ), angles_savgol_all_bps.max() + 10), color="g", zorder=4, marker="^", s=50, label="Turning Frame")
+                plt.scatter(iterations[:, 0:3:2], np.full((len(iterations), 2), angles_savgol_all_bps.min() - 10), color="g", zorder=4, marker="v", s=50, label="Start/End Frame")
 
             box = ax.get_position()
             ax.set_position([box.x0, box.y0, box.width * 0.9, box.height])
             plt.legend(loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
             plt.xlabel("Frame")
             plt.ylabel("Angle")
+            fig.suptitle(f"{seq.name}\nsavgol_window: 51  |  savgol_order: 3  |  argrelextrema_order: 10  |  extrema_group_window_size: 30", fontsize=13)
+            # plt.savefig("find_iteration_keypoints_result.png",
+            #             bbox_inches="tight",
+            #             dpi=300)
             plt.show()
 
         return iterations
+
+    def _get_label(self, angle_idx_type: np.ndarray):
+        for key, val in self.sequence.body_parts.items():
+            if val == angle_idx_type[0]:
+                if angle_idx_type[1] == 0:
+                    return key + " Flex/Ex"
+                if angle_idx_type[1] == 1:
+                    return key + " Abd/Add"
 
     def _confirm_iterations(self, confirmed_start_frames: np.ndarray, confirmed_turning_frames: np.ndarray) -> list:
         """Checks for correct order of start and turning frames.
@@ -452,13 +466,12 @@ class ExerciseEvaluator:
 
         return results
 
-    # TODO: There should be a better, clearer way to process the sequences angles that doesnt change the sequence implicitly.
     def _process_sequence_ball_joint_angles(self, ignore_flex_abd90_delta: int = 20):
         """Processes this ExerciseEvaluators sequences' ball joint angles for all ball joints and applies changes to the sequence. 
 
         Args:
-            ignore_flex_abd90_delta (int):  Determines the maximum distance to a 90 degrees abduction/adduction angle, from where the flexion/extension angle is ignored.
-                                                Default=20;
+            ignore_flex_abd90_delta (int):  Determines the maximum distance to a 90 degrees abduction/adduction angle, 
+                                            from where the flexion/extension angle is ignored. Default=20;
         """
         seq = self.sequence
         bp = seq.body_parts
@@ -672,10 +685,10 @@ class ExerciseEvaluator:
         result = {
             "angle": angle,
             "body_part": "LeftShoulder",
-            "angle_type": angle_type,
+            "angle_type": str(angle_type),
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state,
+            "target_state": str(target_state),
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -699,10 +712,10 @@ class ExerciseEvaluator:
         result = {
             "angle": angle,
             "body_part": "RightShoulder",
-            "angle_type": angle_type,
+            "angle_type": str(angle_type),
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state,
+            "target_state": str(target_state),
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -726,10 +739,10 @@ class ExerciseEvaluator:
         result = {
             "angle": angle,
             "body_part": "LeftHip",
-            "angle_type": angle_type,
+            "angle_type": str(angle_type),
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state,
+            "target_state": str(target_state),
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -753,10 +766,10 @@ class ExerciseEvaluator:
         result = {
             "angle": angle,
             "body_part": "RightHip",
-            "angle_type": angle_type,
+            "angle_type": str(angle_type),
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state,
+            "target_state": str(target_state),
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -780,10 +793,10 @@ class ExerciseEvaluator:
         result = {
             "angle": angle,
             "body_part": "LeftElbow",
-            "angle_type": angle_type,
+            "angle_type": str(angle_type),
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state,
+            "target_state": str(target_state),
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -807,10 +820,10 @@ class ExerciseEvaluator:
         result = {
             "angle": angle,
             "body_part": "RightElbow",
-            "angle_type": angle_type,
+            "angle_type": str(angle_type),
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state,
+            "target_state": str(target_state),
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -834,10 +847,10 @@ class ExerciseEvaluator:
         result = {
             "angle": angle,
             "body_part": "LeftKnee",
-            "angle_type": angle_type,
+            "angle_type": str(angle_type),
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state,
+            "target_state": str(target_state),
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
@@ -861,10 +874,10 @@ class ExerciseEvaluator:
         result = {
             "angle": angle,
             "body_part": "RightKnee",
-            "angle_type": angle_type,
+            "angle_type": str(angle_type),
             "target_min": target_min,
             "target_max": target_max,
-            "target_state": target_state,
+            "target_state": str(target_state),
             "result_state": self._get_angle_analysis_result_state(angle, target_state, target_start, target_end, target_min, target_max, tolerance),
         }
         return result
