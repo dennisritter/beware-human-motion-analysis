@@ -57,7 +57,7 @@ class Sequence:
         ) if joint_angles is None else np.array(joint_angles)
 
     def __len__(self) -> int:
-        return len(self.timestamps)
+        return len(self.joint_angles)
 
     def __getitem__(self, item) -> 'Sequence':
         """Returns the sub-sequence item. You can either specifiy one element by index or use numpy-like slicing.
