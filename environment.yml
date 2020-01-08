@@ -14,3 +14,4 @@ dependencies:
   - scipy=1.2.*
   - seaborn=0.9.*
   - tslearn=0.1.*
+  - igl=0.4.*
