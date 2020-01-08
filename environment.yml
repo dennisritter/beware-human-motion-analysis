@@ -1,5 +1,6 @@
 name: hma
 channels:
+  - plotly
   - bioconda
   - conda-forge
   - defaults
@@ -14,3 +15,4 @@ dependencies:
   - scipy=1.2.*
   - seaborn=0.9.*
   - tslearn=0.1.*
+  - plotly=3.6.*
