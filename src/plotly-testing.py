@@ -31,9 +31,51 @@ scene = dict(
     )
 )
 
+slider = {
+    "args": [
+        "transition",
+        { "duration": 400, "easing": "cubic-in-out" }
+    ],
+    "initialValue": "0",
+    "plotlycommand": "animate",
+    "values": range(0, len(p)),
+    "visible": True
+}
+
+sliders_dict = {
+    "active": 0,
+    "yanchor": "top",
+    "xanchor": "left",
+    "currentvalue": {
+        "font": {"size": 20},
+        "prefix": "Frame: ",
+        "visible": True,
+        "xanchor": "right"
+    },
+    "transition": {"duration": 300, "easing": "cubic-in-out"},
+    "pad": {"b": 10, "t": 50},
+    "len": 0.9,
+    "x": 0.1,
+    "y": 0,
+    "steps": []
+}
+
+
+for frame in range(0, len(p)):
+    slider_step = {"args": [
+        [frame],
+        {"frame": {"duration": 300, "redraw": False},
+         "mode": "immediate",
+         "transition": {"duration": 300}}
+    ],
+        "label": frame,
+        "method": "animate"}
+    sliders_dict["steps"].append(slider_step)
+
 layout = go.Layout(
     scene=scene,
-    showlegend=False
+    showlegend=False,
+    sliders=[sliders_dict]
 )
 
 def get_lcs_trace(origin, x_direction_pos, y_direction_pos):
