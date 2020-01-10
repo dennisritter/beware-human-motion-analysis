@@ -28,7 +28,7 @@ def visualise_sequence_example(frames_from_to: list = [0, 1]):
     skeleton_vis.show()
 
 
-visualise_sequence_example([0, 1])
+# visualise_sequence_example([0, 1])
 
 
 def load_exercise_example():
@@ -60,8 +60,11 @@ def identify_exercise_type_example():
     # The Ground-Truth Sequences Exercise type that results in the lowest distance is assumed to be the same exercise as performed in the Query Sequence.
     print("-- Listing distances between Query Sequence and Ground-Truth Sequences --")
     print(f"Query Sequences DTW distance to {sequence_squat_gt.name}: {dist_squat_gt}")
+    print(f"path {path_squat_gt}")
+    print(f"-----")
     print(f"Query Sequences DTW distance to {sequence_biceps_curl_left_gt.name}: {dist_biceps_curl_left_gt}")
-
+    print(f"path: {path_biceps_curl_left_gt}")
+    print(f"-----")
 
 # identify_exercise_type_example()
 
@@ -98,7 +101,7 @@ def rate_exercise_performance(plot=False):
     # NOTE: The Angle Comparison rating method needs the Turning Frame index as parameter,
     #       thus we first have to utilise the find_iteration_keypoints method of the ExerciseEvaluator.
     iterations = EE.find_iteration_keypoints(plot)
-    if len(iterations) > 0:
+    if len(iterations) >= 1:
         print(f"Subsequencing results for '{sequence.name}'")
         print(f"Identified Iterations: {len(iterations)}")
         print(f"IdentifiedSubsequences Start/Turn/End Frame Indices:\n{iterations}")

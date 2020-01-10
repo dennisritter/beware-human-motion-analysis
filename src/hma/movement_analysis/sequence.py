@@ -15,7 +15,6 @@ class Sequence:
         name (str): The name of this sequence.
         joint_angles (list): The calculated angles derived from the tracked positions of this sequence
     """
-
     def __init__(self,
                  body_parts: dict,
                  positions: np.ndarray,
@@ -33,7 +32,7 @@ class Sequence:
         zero_frames_filter_list = self._filter_zero_frames(positions)
         # Defines positions of each bodypart
         # 1. Dimension = Time
-        # 2. Dimension = Bodypart 
+        # 2. Dimension = Bodypart
         # 3. Dimension = x, y, z
         # Example: [
         #           [[f1_bp1_x, f1_bp1_x, f1_bp1_x], [f1_bp2_x, f1_bp2_x, f1_bp2_x], ...],
@@ -51,8 +50,7 @@ class Sequence:
         # NOTE: If angles have been computed, the stored value is a dictionary with at least one key "flexion_extension"
         #       and a "abduction_adduction" key for ball joints.
         # NOTE: If no angles have been computed for a particular joint, the stored value is None.
-        self.joint_angles = self._calc_joint_angles(
-        ) if joint_angles is None else np.array(joint_angles)
+        self.joint_angles = self._calc_joint_angles() if joint_angles is None else np.array(joint_angles)
 
     def __len__(self) -> int:
         return len(self.joint_angles)
@@ -76,9 +74,8 @@ class Sequence:
         else:
             raise TypeError(f"Invalid argument type: {type(item)}")
 
-        return Sequence(self.body_parts, self.positions[start:stop:step],
-                        self.timestamps[start:stop:step], self.poseformat,
-                        self.name, self.joint_angles[start:stop:step])
+        return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.poseformat, self.name,
+                        self.joint_angles[start:stop:step])
 
     def _calc_joint_angles(self) -> np.ndarray:
         """Returns a 3-D list of joint angles for all frames, body parts and angle types.
@@ -88,27 +85,14 @@ class Sequence:
         n_angle_types = 3
         bp = self.body_parts
 
-        ls = acm.calc_angles_shoulder_left(self.positions, bp["LeftShoulder"],
-                                           bp["RightShoulder"], bp["Torso"],
-                                           bp["LeftElbow"])
-        rs = acm.calc_angles_shoulder_right(self.positions,
-                                            bp["RightShoulder"],
-                                            bp["LeftShoulder"], bp["Torso"],
-                                            bp["RightElbow"])
-        lh = acm.calc_angles_hip_left(self.positions, bp["LeftHip"],
-                                      bp["RightHip"], bp["Torso"],
-                                      bp["LeftKnee"])
-        rh = acm.calc_angles_hip_right(self.positions, bp["RightHip"],
-                                       bp["LeftHip"], bp["Torso"],
-                                       bp["RightKnee"])
-        le = acm.calc_angles_elbow(self.positions, bp["LeftElbow"],
-                                   bp["LeftShoulder"], bp["LeftWrist"])
-        re = acm.calc_angles_elbow(self.positions, bp["RightElbow"],
-                                   bp["RightShoulder"], bp["RightWrist"])
-        lk = acm.calc_angles_knee(self.positions, bp["LeftKnee"],
-                                  bp["LeftHip"], bp["LeftAnkle"])
-        rk = acm.calc_angles_knee(self.positions, bp["RightKnee"],
-                                  bp["RightHip"], bp["RightAnkle"])
+        ls = acm.calc_angles_shoulder_left(self.positions, bp["LeftShoulder"], bp["RightShoulder"], bp["Torso"], bp["LeftElbow"])
+        rs = acm.calc_angles_shoulder_right(self.positions, bp["RightShoulder"], bp["LeftShoulder"], bp["Torso"], bp["RightElbow"])
+        lh = acm.calc_angles_hip_left(self.positions, bp["LeftHip"], bp["RightHip"], bp["Torso"], bp["LeftKnee"])
+        rh = acm.calc_angles_hip_right(self.positions, bp["RightHip"], bp["LeftHip"], bp["Torso"], bp["RightKnee"])
+        le = acm.calc_angles_elbow(self.positions, bp["LeftElbow"], bp["LeftShoulder"], bp["LeftWrist"])
+        re = acm.calc_angles_elbow(self.positions, bp["RightElbow"], bp["RightShoulder"], bp["RightWrist"])
+        lk = acm.calc_angles_knee(self.positions, bp["LeftKnee"], bp["LeftHip"], bp["LeftAnkle"])
+        rk = acm.calc_angles_knee(self.positions, bp["RightKnee"], bp["RightHip"], bp["RightAnkle"])
 
         joint_angles = np.zeros((n_frames, n_body_parts, n_angle_types))
         for frame in range(0, n_frames):
@@ -140,12 +124,9 @@ class Sequence:
             raise ValueError('poseformat of both sequences do not match!')
 
         # concatenate positions, timestamps and angles
-        self.positions = np.concatenate((self.positions, sequence.positions),
-                                        axis=0)
-        self.timestamps = np.concatenate(
-            (self.timestamps, sequence.timestamps), axis=0)
-        self.joint_angles = np.concatenate(
-            (self.joint_angles, sequence.joint_angles), axis=0)
+        self.positions = np.concatenate((self.positions, sequence.positions), axis=0)
+        self.timestamps = np.concatenate((self.timestamps, sequence.timestamps), axis=0)
+        self.joint_angles = np.concatenate((self.joint_angles, sequence.joint_angles), axis=0)
 
         return self
 
@@ -157,7 +138,7 @@ class Sequence:
         return xPCA
 
     def _filter_zero_frames(self, positions: np.ndarray) -> list:
-        """Returns a filter mask list to filter frames where all positions equal 0.0. 
+        """Returns a filter mask list to filter frames where all positions equal 0.0.
 
         Checks whether the sum of all coordinates for a frame is 0.0
             True -> keep this frame

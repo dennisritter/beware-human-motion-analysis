@@ -8,7 +8,7 @@ class SkeletonVisualiser:
 
 
     Attributes:
-        sequence (Sequence): The motion sequence to visualise the skeleton from. 
+        sequence (Sequence): The motion sequence to visualise the skeleton from.
     """
     def __init__(
             self,
@@ -28,6 +28,8 @@ class SkeletonVisualiser:
         fig.show()
 
     def _get_layout(self):
+        """ Returns a Plotly layout.
+        """
         updatemenus = []
         sliders = []
         if len(self.sequence) > 1:
@@ -35,21 +37,11 @@ class SkeletonVisualiser:
             sliders = self._make_sliders()
 
         scene = dict(
-            xaxis=dict(
-                range=[-1000, 1000],
-            ),
-            yaxis=dict(
-                range=[-1000, 1000],
-            ),
-            zaxis=dict(
-                range=[-1000, 1000],
-            ),
-            camera=dict(
-                up=dict(x=0, y=1, z=0),
-                eye=dict(x=-1.5, y=1.5, z=-1.5)
-            ),
+            xaxis=dict(range=[-1000, 1000], ),
+            yaxis=dict(range=[-1000, 1000], ),
+            zaxis=dict(range=[-1000, 1000], ),
+            camera=dict(up=dict(x=0, y=1, z=0), eye=dict(x=-1.5, y=1.5, z=-1.5)),
         )
-
 
         layout = go.Layout(
             scene=scene,
@@ -61,6 +53,8 @@ class SkeletonVisualiser:
         return layout
 
     def _make_sliders(self):
+        """ Returns a list including one Plotly slider that allows users to controll the displayed frame.
+        """
         p = self.sequence.positions
         # Frame Slider
         slider = {
@@ -68,13 +62,21 @@ class SkeletonVisualiser:
             "yanchor": "top",
             "xanchor": "left",
             "currentvalue": {
-                "font": {"size": 20},
+                "font": {
+                    "size": 20
+                },
                 "prefix": "Frame: ",
                 "visible": True,
                 "xanchor": "right"
             },
-            "transition": {"duration": 0, "easing": "linear"},
-            "pad": {"b": 10, "t": 50},
+            "transition": {
+                "duration": 0,
+                "easing": "linear"
+            },
+            "pad": {
+                "b": 10,
+                "t": 50
+            },
             "len": 0.9,
             "x": 0.1,
             "y": 0,
@@ -101,37 +103,55 @@ class SkeletonVisualiser:
         return [slider]
 
     def _make_buttons(self):
+        """ Returns a list of Plotly buttons to start and stop the animation.
+        """
         # Play / Pause Buttons
         buttons = [{
-            "buttons": [
-                {
-                    "label": "Play",
-                    "args": [None, {"frame": {"duration": 33, "redraw": True},
-                                    "fromcurrent": True, "transition": {"duration": 33,
-                                                                        "easing": "linear"}}],
-                    "method": "animate"
-                },
-                {
-                    "label": "Pause",
-                    "args": [[None], {"frame": {"duration": 33, "redraw": False},
-                                      "mode": "immediate",
-                                      "transition": {"duration": 33}}],
-                    "method": "animate"
-                }
-            ],
+            "buttons": [{
+                "label": "Play",
+                "args": [None, {
+                    "frame": {
+                        "duration": 33,
+                        "redraw": True
+                    },
+                    "fromcurrent": True,
+                    "transition": {
+                        "duration": 33,
+                        "easing": "linear"
+                    }
+                }],
+                "method": "animate"
+            }, {
+                "label": "Pause",
+                "args": [[None], {
+                    "frame": {
+                        "duration": 33,
+                        "redraw": False
+                    },
+                    "mode": "immediate",
+                    "transition": {
+                        "duration": 33
+                    }
+                }],
+                "method": "animate"
+            }],
             "direction": "left",
-            "pad": {"r": 10, "t": 87},
+            "pad": {
+                "r": 10,
+                "t": 87
+            },
             "showactive": False,
             "type": "buttons",
             "x": 0.1,
             "xanchor": "right",
             "y": 0,
             "yanchor": "top"
-        }]
+        }] # yapf: disable
         return buttons
 
-
     def _get_frames(self):
+        """ Returns a list of frames. Each frame represents a single scatter plot showing the skeleton.
+        """
         # No animation frames needed when visualising only one frame
         if len(self.sequence) <= 1:
             return []
@@ -162,47 +182,26 @@ class SkeletonVisualiser:
             limb_traces.append(limb_trace)
         return limb_traces
 
-
     def _make_lcs_trace(self, origin, x_direction_pos, y_direction_pos):
         """ Returns a list that contains a plotly trace object the X, Y and Z axes of the local joint coordinate system
             calculated from an origin, a X-axis-direction and a Y-axis-direction.
         """
 
         # Get Local Coordinate System vectors
-        lcs = transformations.get_local_coordinate_system_direction_vectors(
-            origin,
-            x_direction_pos,
-            y_direction_pos
-        )
+        lcs = transformations.get_local_coordinate_system_direction_vectors(origin, x_direction_pos, y_direction_pos)
 
-        # Set Local Coordinate System vectors' length to 100 and move relative to local origin
+        # Set Local Coordinate System vectors' length to 100 and move relative to local origin.
         lcs[0] = lcs[0] * 100 + origin
         lcs[1] = lcs[1] * 100 + origin
         lcs[2] = lcs[2] * 100 + origin
-        trace_x = go.Scatter3d(
-            x=[origin[0], lcs[0, 0]],
-            y=[origin[1], lcs[0, 1]],
-            z=[origin[2], lcs[0, 2]],
-            mode="lines",
-            marker=dict(color="red")
-        )
-        trace_y = go.Scatter3d(
-            x=[origin[0], lcs[1, 0]],
-            y=[origin[1], lcs[1, 1]],
-            z=[origin[2], lcs[1, 2]],
-            mode="lines",
-            marker=dict(color="green")
-        )
-        trace_z = go.Scatter3d(
-            x=[origin[0], lcs[2, 0]],
-            y=[origin[1], lcs[2, 1]],
-            z=[origin[2], lcs[2, 2]],
-            mode="lines",
-            marker=dict(color="blue")
-        )
+        trace_x = go.Scatter3d(x=[origin[0], lcs[0, 0]], y=[origin[1], lcs[0, 1]], z=[origin[2], lcs[0, 2]], mode="lines", marker=dict(color="red"))
+        trace_y = go.Scatter3d(x=[origin[0], lcs[1, 0]], y=[origin[1], lcs[1, 1]], z=[origin[2], lcs[1, 2]], mode="lines", marker=dict(color="green"))
+        trace_z = go.Scatter3d(x=[origin[0], lcs[2, 0]], y=[origin[1], lcs[2, 1]], z=[origin[2], lcs[2, 2]], mode="lines", marker=dict(color="blue"))
         return [trace_x, trace_y, trace_z]
 
     def _make_jcs_traces(self, frame):
+        """ Returns a list of Plotly  traces that display a Joint Coordinate System for each ball joint respectively.
+        """
         p = self.sequence.positions
         bps = self.sequence.body_parts
         ls_lcs_traces = self._make_lcs_trace(p[frame, bps["LeftShoulder"]], p[frame, bps["RightShoulder"]], p[frame, bps["Torso"]])
@@ -214,6 +213,8 @@ class SkeletonVisualiser:
         return jcs_traces
 
     def _get_traces(self, frame):
+        """ Returns joint, limb and JCS Plotly traces.
+        """
         joint_traces = self._make_joint_traces(frame)
         limb_traces = self._make_limb_traces(frame)
         jcs_traces = self._make_jcs_traces(frame)
