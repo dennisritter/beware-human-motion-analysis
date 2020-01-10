@@ -2,8 +2,6 @@ import numpy as np
 from sklearn.decomposition import PCA
 from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
 from hma.movement_analysis import angle_calculations as acm
-from matplotlib import pyplot as plt
-import matplotlib.animation as animation
 
 
 class Sequence:
@@ -35,7 +33,7 @@ class Sequence:
         zero_frames_filter_list = self._filter_zero_frames(positions)
         # Defines positions of each bodypart
         # 1. Dimension = Time
-        # 2. Dimension = Bodypart
+        # 2. Dimension = Bodypart 
         # 3. Dimension = x, y, z
         # Example: [
         #           [[f1_bp1_x, f1_bp1_x, f1_bp1_x], [f1_bp2_x, f1_bp2_x, f1_bp2_x], ...],

@@ -1,13 +1,11 @@
+import json
 import tslearn.metrics as ts
-import numpy as np
 from hma.movement_analysis.pose_processor import PoseProcessor
 from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
-from hma.movement_analysis.exercise import Exercise
 from hma.movement_analysis import exercise_loader
 from hma.movement_analysis.helpers import reformat_angles_dtw
 from hma.movement_analysis.exercise_evaluator import ExerciseEvaluator
 from hma.movement_analysis.skeleton_visualiser import SkeletonVisualiser
-import json
 
 
 def load_sequence_example():
@@ -30,7 +28,7 @@ def visualise_sequence_example(frames_from_to: list = [0, 1]):
     skeleton_vis.show()
 
 
-# visualise_sequence_example([0, 1])
+visualise_sequence_example([0, 1])
 
 
 def load_exercise_example():
