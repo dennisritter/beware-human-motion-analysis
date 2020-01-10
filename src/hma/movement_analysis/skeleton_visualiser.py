@@ -31,7 +31,7 @@ class SkeletonVisualiser:
     def _get_layout(self):
         updatemenus = []
         sliders = []
-        if len(self.sequence) >= 1:
+        if len(self.sequence) > 1:
             updatemenus = self._make_buttons()
             sliders = self._make_sliders()
 
