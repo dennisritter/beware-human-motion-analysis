@@ -82,6 +82,22 @@ def translation_matrix_4x4(v) -> np.ndarray:
     T[:3, 3] = v
     return T
 
+def get_local_coordinate_system_direction_vectors(origin, x_direction_bp_pos, y_direction_bp_pos):
+    # New X-Axis from origin to x_direction
+    vx = x_direction_bp_pos - origin
+    if vx[0] < 0:
+        vx = -vx
+    # New Z-Axis is perpendicular to the origin-y_direction vector and vx
+    vz = get_perpendicular_vector((y_direction_bp_pos - origin), vx)
+    if vz[2] < 0:
+        vz = -vz
+    # New Y-Axis is perpendicular to new X-Axis and Z-Axis
+    vy = get_perpendicular_vector(vx, vz)
+    if vy[1] < 0:
+        vy = -vy
+
+    return np.array([norm(vx), norm(vy), norm(vz)])
+
 
 def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_direction_bp_idx: int, positions: np.ndarray):
     """
@@ -101,6 +117,7 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     origin = positions[origin_bp_idx]
     x_direction_bp_pos = positions[x_direction_bp_idx]
     y_direction_bp_pos = positions[y_direction_bp_idx]
+
 
     # New X-Axis from origin to x_direction
     vx = x_direction_bp_pos - origin
