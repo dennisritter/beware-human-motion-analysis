@@ -12,71 +12,8 @@ filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__s
 sequence = mocap_poseprocessor.load(filename)
 
 
-p = sequence.positions
-frame = 0
+p = sequence.positions[40:60]
 
-scene = dict(
-    xaxis=dict(
-        range=[-1000, 1000],
-    ),
-    yaxis=dict(
-        range=[-1000, 1000],
-    ),
-    zaxis=dict(
-        range=[-1000, 1000],
-    ),
-    camera=dict(
-        up=dict(x=0, y=1, z=0),
-        eye=dict(x=-1.5, y=1.5, z=-1.5)
-    )
-)
-
-slider = {
-    "args": [
-        "transition",
-        { "duration": 400, "easing": "cubic-in-out" }
-    ],
-    "initialValue": "0",
-    "plotlycommand": "animate",
-    "values": range(0, len(p)),
-    "visible": True
-}
-
-sliders_dict = {
-    "active": 0,
-    "yanchor": "top",
-    "xanchor": "left",
-    "currentvalue": {
-        "font": {"size": 20},
-        "prefix": "Frame: ",
-        "visible": True,
-        "xanchor": "right"
-    },
-    "transition": {"duration": 300, "easing": "cubic-in-out"},
-    "pad": {"b": 10, "t": 50},
-    "len": 0.9,
-    "x": 0.1,
-    "y": 0,
-    "steps": []
-}
-
-
-for frame in range(0, len(p)):
-    slider_step = {"args": [
-        [frame],
-        {"frame": {"duration": 300, "redraw": False},
-         "mode": "immediate",
-         "transition": {"duration": 300}}
-    ],
-        "label": frame,
-        "method": "animate"}
-    sliders_dict["steps"].append(slider_step)
-
-layout = go.Layout(
-    scene=scene,
-    showlegend=False,
-    sliders=[sliders_dict]
-)
 
 def get_lcs_trace(origin, x_direction_pos, y_direction_pos):
     """ Returns a list that contains a plotly trace object the X, Y and Z axes of the local joint coordinate system calculated from and origin, a X-axis-direction and a Y-axis-direction.
@@ -117,7 +54,7 @@ def get_lcs_trace(origin, x_direction_pos, y_direction_pos):
     return [trace_x, trace_y, trace_z]
 
 
-def get_traces():
+def get_traces(frame):
     trace_joints = go.Scatter3d(
         x=p[frame, :, 0],
         y=p[frame, :, 1],
@@ -231,13 +168,17 @@ def get_traces():
         line=dict(color="firebrick", width=5)
     )
 
-    # Get Local Joint Coordinate System Axis traces 
+    # Get Local Joint Coordinate System Axis traces
     bps = sequence.body_parts
-    ls_lcs_traces = get_lcs_trace(p[frame, bps["LeftShoulder"]], p[frame, bps["RightShoulder"]], p[frame, bps["Torso"]])
-    rs_lcs_traces = get_lcs_trace(p[frame, bps["RightShoulder"]], p[frame, bps["LeftShoulder"]], p[frame, bps["Torso"]])
-    lh_lcs_traces = get_lcs_trace(p[frame, bps["LeftHip"]], p[frame, bps["RightHip"]], p[frame, bps["Torso"]])
-    rh_lcs_traces = get_lcs_trace(p[frame, bps["RightHip"]], p[frame, bps["LeftHip"]], p[frame, bps["Torso"]])
-    
+    ls_lcs_traces = get_lcs_trace(
+        p[frame, bps["LeftShoulder"]], p[frame, bps["RightShoulder"]], p[frame, bps["Torso"]])
+    rs_lcs_traces = get_lcs_trace(
+        p[frame, bps["RightShoulder"]], p[frame, bps["LeftShoulder"]], p[frame, bps["Torso"]])
+    lh_lcs_traces = get_lcs_trace(
+        p[frame, bps["LeftHip"]], p[frame, bps["RightHip"]], p[frame, bps["Torso"]])
+    rh_lcs_traces = get_lcs_trace(
+        p[frame, bps["RightHip"]], p[frame, bps["LeftHip"]], p[frame, bps["Torso"]])
+
     traces = [
         trace_joints,
         trace_head_neck,
@@ -271,8 +212,110 @@ def get_traces():
 
     return traces
 
+slider = {
+    "args": [
+        "transition",
+        {"duration": 400, "easing": "cubic-in-out"}
+    ],
+    "initialValue": "0",
+    "plotlycommand": "animate",
+    "values": range(0, len(p)),
+    "visible": True
+}
+
+sliders_dict = {
+    "active": 0,
+    "yanchor": "top",
+    "xanchor": "left",
+    "currentvalue": {
+        "font": {"size": 20},
+        "prefix": "Frame: ",
+        "visible": True,
+        "xanchor": "right"
+    },
+    "transition": {"duration": 300, "easing": "cubic-in-out"},
+    "pad": {"b": 10, "t": 50},
+    "len": 0.9,
+    "x": 0.1,
+    "y": 0,
+    "steps": []
+}
+
+frames = []
+for i in range(0, len(p)):
+    # Create slider step for each frame
+    slider_step = {"args": [
+        [i],
+        {"frame": {"duration": 300, "redraw": True},
+         "mode": "immediate",
+         "transition": {"duration": 300}}
+    ],
+        "label": i,
+        "method": "animate"}
+    sliders_dict["steps"].append(slider_step)
+
+    # Create data frame
+    frame = {"data": get_traces(i), "name": i}
+    frames.append(frame)
+
+
+updatemenus = [
+    {
+        "buttons": [
+            {
+                "args": [None, {"frame": {"duration": 100, "redraw": True},
+                                "fromcurrent": True, "transition": {"duration": 100,
+                                                                    "easing": "quadratic-in-out"}}],
+                "label": "Play",
+                "method": "animate"
+            },
+            {
+                "args": [[None], {"frame": {"duration": 0, "redraw": False},
+                                  "mode": "immediate",
+                                  "transition": {"duration": 0}}],
+                "label": "Pause",
+                "method": "animate"
+            }
+        ],
+        "direction": "left",
+        "pad": {"r": 10, "t": 87},
+        "showactive": False,
+        "type": "buttons",
+        "x": 0.1,
+        "xanchor": "right",
+        "y": 0,
+        "yanchor": "top"
+    }
+]
+
+
+scene = dict(
+    xaxis=dict(
+        range=[-1000, 1000],
+    ),
+    yaxis=dict(
+        range=[-1000, 1000],
+    ),
+    zaxis=dict(
+        range=[-1000, 1000],
+    ),
+    camera=dict(
+        up=dict(x=0, y=1, z=0),
+        eye=dict(x=-1.5, y=1.5, z=-1.5)
+    ),
+)
+
+layout = go.Layout(
+    scene=scene,
+    showlegend=False,
+    sliders=[sliders_dict],
+    scene_aspectmode="cube",
+    updatemenus=updatemenus
+)
+
 fig = go.Figure(
-    data=get_traces(),
-    layout=layout
+    data=get_traces(0),
+    layout=layout,
+    frames=frames
 )
 fig.show()
