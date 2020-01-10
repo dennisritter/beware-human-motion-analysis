@@ -213,17 +213,6 @@ def get_traces(frame):
     return traces
 
 slider = {
-    "args": [
-        "transition",
-        {"duration": 400, "easing": "cubic-in-out"}
-    ],
-    "initialValue": "0",
-    "plotlycommand": "animate",
-    "values": range(0, len(p)),
-    "visible": True
-}
-
-sliders_dict = {
     "active": 0,
     "yanchor": "top",
     "xanchor": "left",
@@ -233,7 +222,7 @@ sliders_dict = {
         "visible": True,
         "xanchor": "right"
     },
-    "transition": {"duration": 300, "easing": "cubic-in-out"},
+    "transition": {"duration": 0, "easing": "linear"},
     "pad": {"b": 10, "t": 50},
     "len": 0.9,
     "x": 0.1,
@@ -246,13 +235,13 @@ for i in range(0, len(p)):
     # Create slider step for each frame
     slider_step = {"args": [
         [i],
-        {"frame": {"duration": 300, "redraw": True},
+        {"frame": {"duration": 33, "redraw": True},
          "mode": "immediate",
-         "transition": {"duration": 300}}
+         "transition": {"duration": 0}}
     ],
         "label": i,
         "method": "animate"}
-    sliders_dict["steps"].append(slider_step)
+    slider["steps"].append(slider_step)
 
     # Create data frame
     frame = {"data": get_traces(i), "name": i}
@@ -263,16 +252,16 @@ updatemenus = [
     {
         "buttons": [
             {
-                "args": [None, {"frame": {"duration": 100, "redraw": True},
-                                "fromcurrent": True, "transition": {"duration": 100,
-                                                                    "easing": "quadratic-in-out"}}],
+                "args": [None, {"frame": {"duration": 33, "redraw": True},
+                                "fromcurrent": True, "transition": {"duration": 33,
+                                                                    "easing": "linear"}}],
                 "label": "Play",
                 "method": "animate"
             },
             {
-                "args": [[None], {"frame": {"duration": 0, "redraw": False},
+                "args": [[None], {"frame": {"duration": 33, "redraw": False},
                                   "mode": "immediate",
-                                  "transition": {"duration": 0}}],
+                                  "transition": {"duration": 33}}],
                 "label": "Pause",
                 "method": "animate"
             }
@@ -308,7 +297,7 @@ scene = dict(
 layout = go.Layout(
     scene=scene,
     showlegend=False,
-    sliders=[sliders_dict],
+    sliders=[slider],
     scene_aspectmode="cube",
     updatemenus=updatemenus
 )
