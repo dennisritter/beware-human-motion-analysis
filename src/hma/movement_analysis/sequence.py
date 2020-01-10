@@ -158,36 +158,6 @@ class Sequence:
         xPCA = pca.fit_transform(self.get_positions_2d())
         return xPCA
 
-    def visualise(self, fps: int = 30):
-        """Produces an animated plot of the motion sequence.
-
-        Args:
-            fps (int): Defines the animations speed in frames per second.
-        """
-        n_frames = len(self)
-
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        sct, = ax.plot([], [], [], "o", markersize=5)
-
-        def update(ifrm, xa, ya, za):
-            sct.set_data(xa[ifrm], ya[ifrm])
-            sct.set_3d_properties(za[ifrm])
-
-        ax.set_xlim(-1000, 1000)
-        ax.set_ylim(-1000, 1000)
-        ax.set_zlim(-1000, 3000)
-        ax.view_init(elev=-45, azim=90)
-        ani = animation.FuncAnimation(fig,
-                                      update,
-                                      n_frames,
-                                      fargs=(self.positions[:, :, 0],
-                                             self.positions[:, :, 1],
-                                             self.positions[:, :, 2]),
-                                      interval=1000 / fps)
-
-        plt.show()
-
     def _filter_zero_frames(self, positions: np.ndarray) -> list:
         """Returns a filter mask list to filter frames where all positions equal 0.0. 
 
