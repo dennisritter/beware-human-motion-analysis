@@ -6,20 +6,31 @@ from hma.movement_analysis.exercise import Exercise
 from hma.movement_analysis import exercise_loader
 from hma.movement_analysis.helpers import reformat_angles_dtw
 from hma.movement_analysis.exercise_evaluator import ExerciseEvaluator
+from hma.movement_analysis.skeleton_visualiser import SkeletonVisualiser
 import json
 
 
-def load_sequence_example(visualise=False):
+def load_sequence_example():
+    """Loading a sequence from file"""
+    mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
+    filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json"
+    sequence = mocap_poseprocessor.load(filename)
+    return sequence
+
+
+# load_sequence_example()
+
+
+def visualise_sequence_example(frames_from_to: list = [0, 1]):
     """Loading and visualising a sequence from file"""
     mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
     filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json"
     sequence = mocap_poseprocessor.load(filename)
-    if visualise:
-        sequence.visualise()
-    return sequence
+    skeleton_vis = SkeletonVisualiser(sequence[frames_from_to[0]:frames_from_to[1]])
+    skeleton_vis.show()
 
 
-# load_sequence_example(visualise=True)
+# visualise_sequence_example([0, 1])
 
 
 def load_exercise_example():
