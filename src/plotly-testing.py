@@ -33,6 +33,7 @@ scene = dict(
 
 layout = go.Layout(
     scene=scene,
+    showlegend=False
 )
 
 def get_lcs_trace(origin, x_direction_pos, y_direction_pos):
