@@ -57,7 +57,7 @@ def calc_angles_hip_left(positions: np.ndarray, hip_left_idx: int, hip_right_idx
         kr = math.sqrt(kx**2 + ky**2 + kz**2)
 
         # Theta is the angle of the Hip-Knee Vector to the YZ-Plane
-        theta = math.degrees(math.acos(kx/kr))
+        theta = math.degrees(math.acos(-kx/kr))
         theta = 90 - theta
         abduction_adduction = theta
 
@@ -110,7 +110,7 @@ def calc_angles_hip_right(positions: np.ndarray, hip_right_idx: int, hip_left_id
         kr = math.sqrt(kx**2 + ky**2 + kz**2)
 
         # Theta is the angle of the Hip-Knee Vector to the YZ-Plane
-        theta = math.degrees(math.acos(-kx/kr))
+        theta = math.degrees(math.acos(kx/kr))
         theta = 90 - theta
         abduction_adduction = theta
 
@@ -187,7 +187,7 @@ def calc_angles_shoulder_left(positions: list, shoulder_left_idx: int, shoulder_
         er = math.sqrt(ex**2 + ey**2 + ez**2)
 
         # Theta is the angle of the Shoulder-Elbow Vector to the YZ-Plane and represents an abduction/adduction.
-        theta = math.degrees(math.acos(ex/er))
+        theta = math.degrees(math.acos(-ex/er))
         theta = 90.0 - theta
         abduction_adduction = theta
 
@@ -240,7 +240,7 @@ def calc_angles_shoulder_right(positions: list, shoulder_right_idx: int, shoulde
         er = math.sqrt(ex**2 + ey**2 + ez**2)
 
         # Theta is the angle of the Shoulder-Elbow Vector to the YZ-Plane
-        theta = math.degrees(math.acos(-ex/er))
+        theta = math.degrees(math.acos(ex/er))
         theta = 90 - theta
         abduction_adduction = theta
 
