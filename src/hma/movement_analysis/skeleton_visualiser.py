@@ -10,6 +10,7 @@ class SkeletonVisualiser:
     Attributes:
         sequence (Sequence): The motion sequence to visualise the skeleton from.
     """
+
     def __init__(
             self,
             sequence: Sequence,
@@ -37,10 +38,10 @@ class SkeletonVisualiser:
             sliders = self._make_sliders()
 
         scene = dict(
-            xaxis=dict(range=[-1000, 1000], ),
-            yaxis=dict(range=[-1000, 1000], ),
-            zaxis=dict(range=[-1000, 1000], ),
-            camera=dict(up=dict(x=0, y=1, z=0), eye=dict(x=-1.5, y=1.5, z=-1.5)),
+            xaxis=dict(range=[-1500, 1500], ),
+            yaxis=dict(range=[-1500, 1500], ),
+            zaxis=dict(range=[-1500, 1500], ),
+            camera=dict(up=dict(x=0, y=1.25, z=0), eye=dict(x=-1.2, y=1.2, z=-1.2)),
         )
 
         layout = go.Layout(
@@ -146,7 +147,7 @@ class SkeletonVisualiser:
             "xanchor": "right",
             "y": 0,
             "yanchor": "top"
-        }] # yapf: disable
+        }]  # yapf: disable
         return buttons
 
     def _get_frames(self):
@@ -165,7 +166,7 @@ class SkeletonVisualiser:
 
     def _make_joint_traces(self, frame):
         p = self.sequence.positions
-        trace_joints = go.Scatter3d(x=p[frame, :, 0], y=p[frame, :, 1], z=p[frame, :, 2], mode="markers", marker=dict(color="royalblue"))
+        trace_joints = go.Scatter3d(x=p[frame, :, 0], y=p[frame, :, 1], z=p[frame, :, 2], mode="markers", marker=dict(color="royalblue", size=5))
         return [trace_joints]
 
     def _make_limb_traces(self, frame):
