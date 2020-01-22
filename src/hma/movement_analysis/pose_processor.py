@@ -1,6 +1,7 @@
 from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
 import json
 import numpy as np
+from hma.movement_analysis.models.sequence import Sequence
 
 
 class PoseProcessor:
