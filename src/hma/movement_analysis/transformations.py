@@ -120,6 +120,30 @@ def get_pelvis_coordinate_system(pelvis: np.ndarray, hip_l: np.ndarray, hip_r: n
         hip_l (np.ndarray): The X, Y and Z coordinates of the hip_r body part. 
     """
 
+    # X-Axis
+    hip_l_hip_r = hip_r - hip_l
+    # X-Axis direction starting at coordinate system origin (pelvis)
+    vx = norm(hip_l_hip_r)
+
+    projection_matrix = np.matmul(np.reshape(vx, (3, 1)), np.reshape(vx, (1, 3)))
+    p = pelvis
+    po = -np.matmul(projection_matrix, np.reshape(pelvis, (3, 1)))
+    po = np.squeeze(np.asarray(po))
+
+    vy = norm(p-po)
+
+    vz = get_perpendicular_vector(vx, vy)
+
+    # https: // studyflix.de/informatik/orthogonale-projektion-1468
+
+    print(f"vx vy: {np.dot(vx, vy)} -> {np.dot(vx, vy) < 0.001}")
+    print(f"vx vz: {np.dot(vx, vz)} -> {np.dot(vx, vz) < 0.001}")
+    print(f"vy vz: {np.dot(vy, vz)} -> {np.dot(vy, vz) < 0.001}")
+    print("-------------------")
+    print(f"vx: {vx}")
+    print(f"vy: {vy}")
+    print(f"vz: {vz}")
+
 
 def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_direction_bp_idx: int, positions: np.ndarray):
     """
