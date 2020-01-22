@@ -82,6 +82,7 @@ def translation_matrix_4x4(v) -> np.ndarray:
     T[:3, 3] = v
     return T
 
+
 def get_local_coordinate_system_direction_vectors(origin, x_direction_bp_pos, y_direction_bp_pos):
     # New X-Axis from origin to x_direction
     vx = x_direction_bp_pos - origin
@@ -97,6 +98,26 @@ def get_local_coordinate_system_direction_vectors(origin, x_direction_bp_pos, y_
         vy = -vy
 
     return np.array([norm(vx), norm(vy), norm(vz)])
+
+
+# TODO: Decide where is the best place for this function. Maybe a new module makes sense so transformations.py holds general functions only
+#       and another module/class implements more specific functions like get_pelvis_coordinate_system.
+#           Transformation module (keep here)?
+#           Sequence class?
+#           New module?
+def get_pelvis_coordinate_system(pelvis: np.ndarray, hip_l: np.ndarray, hip_r: np.ndarray):
+    """Returns a pelvis coordinate system defined as an origin point and three normalised direction vectors. 
+
+    Constructs direction vectors that define the axes directions of the pelvis coordinate system.
+    X-Axis-Direction: Normalised vector from hip_l to hip_r.
+    Y-Axis-Direction: Normalised vector that is perpendicular to the hip_l-hip_r vector, whose origin also lies on the hip_l-hip_r vector and points to the pelvis. 
+    Z-Axis-Direction: The normalised cross product vector between X-Axis and Y-Axis that results in a right handed Coordinate System.
+
+    Args:
+        pelvis (np.ndarray): The X, Y and Z coordinates of the pelvis body part.
+        hip_r (np.ndarray): The X, Y and Z coordinates of the hip_l body part. 
+        hip_l (np.ndarray): The X, Y and Z coordinates of the hip_r body part. 
+    """
 
 
 def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_direction_bp_idx: int, positions: np.ndarray):
@@ -117,7 +138,6 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     origin = positions[origin_bp_idx]
     x_direction_bp_pos = positions[x_direction_bp_idx]
     y_direction_bp_pos = positions[y_direction_bp_idx]
-
 
     # New X-Axis from origin to x_direction
     vx = x_direction_bp_pos - origin
