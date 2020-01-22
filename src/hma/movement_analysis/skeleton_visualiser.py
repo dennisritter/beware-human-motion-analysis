@@ -1,5 +1,4 @@
 import plotly.graph_objects as go
-from hma.movement_analysis.models.sequence import Sequence
 from hma.movement_analysis import transformations
 
 
@@ -13,7 +12,7 @@ class SkeletonVisualiser:
 
     def __init__(
             self,
-            sequence: Sequence,
+            sequence: 'Sequence',
     ):
 
         self.sequence = sequence[:]

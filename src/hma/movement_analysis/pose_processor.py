@@ -1,5 +1,4 @@
 from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
-from hma.movement_analysis.models.sequence import Sequence
 import json
 import numpy as np
 
@@ -28,7 +27,7 @@ class PoseProcessor:
                 "'poseformat' parameter must be a member of 'PoseFormat' enumeration.")
         self.poseformat = poseformat
 
-    def load(self, path: str, name: str = 'Some Sequence') -> Sequence:
+    def load(self, path: str, name: str = 'Some Sequence') -> 'Sequence':
         """ Loads a Sequence from path and maps it to the specified poseformat.
 
         Args:
@@ -42,7 +41,7 @@ class PoseProcessor:
             seq = myfile.read()
         return self.process(seq, name)
 
-    def process(self, input: str, name: str = 'Some Sequence') -> Sequence:
+    def process(self, input: str, name: str = 'Some Sequence') -> 'Sequence':
         """
         Args:
             input (str): The motion sequence input string to convert.
@@ -53,7 +52,7 @@ class PoseProcessor:
         if (self.poseformat == PoseFormatEnum.MOCAP):
             return self.process_sequence_mocap(input, name=name)
 
-    def process_sequence_mocap(self, input: str, name='Some Sequence') -> Sequence:
+    def process_sequence_mocap(self, input: str, name='Some Sequence') -> 'Sequence':
         """
         Args
             input (str): The MoCap motion sequence input string to convert.
