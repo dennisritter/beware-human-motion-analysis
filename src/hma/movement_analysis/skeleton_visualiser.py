@@ -1,5 +1,5 @@
 import plotly.graph_objects as go
-from hma.movement_analysis.sequence import Sequence
+from hma.movement_analysis.models.sequence import Sequence
 from hma.movement_analysis import transformations
 
 
