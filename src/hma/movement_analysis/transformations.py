@@ -109,9 +109,10 @@ def get_pelvis_coordinate_system(pelvis: np.ndarray, hip_l: np.ndarray, hip_r: n
     """Returns a pelvis coordinate system defined as an origin point and three normalised direction vectors. 
 
     Constructs direction vectors that define the axes directions of the pelvis coordinate system.
-    X-Axis-Direction: Normalised vector from hip_l to hip_r.
-    Y-Axis-Direction: Normalised vector that is perpendicular to the hip_l-hip_r vector, whose origin also lies on the hip_l-hip_r vector and points to the pelvis. 
-    Z-Axis-Direction: The normalised cross product vector between X-Axis and Y-Axis that results in a right handed Coordinate System.
+    X-Axis-Direction:   Normalised vector whose direction points from hip_l to hip_r. Afterwards, it is translated so that it starts at the pelvis.
+    Y-Axis-Direction:   Normalised vector whose direction is determined so that it is perpendicular to the hip_l-hip_r vector and points to the pelvis.
+                        Afterwards, it is translated so that it starts at the pelvis.
+    Z-Axis-Direction:   The normalised cross product vector between X-Axis and Y-Axis that starts at the pelvis and results in a right handed Coordinate System.
 
     Args:
         pelvis (np.ndarray): The X, Y and Z coordinates of the pelvis body part.
