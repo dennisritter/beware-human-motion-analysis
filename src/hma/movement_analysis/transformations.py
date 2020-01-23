@@ -1,7 +1,7 @@
+import math
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
-import math
 
 
 def get_angle(v1, v2):
@@ -19,10 +19,12 @@ def get_perpendicular_vector(v1, v2):
     v2 = norm(v2)
 
     # If theta 180° (dot product = -1)
-    if (np.dot(v1, v2) == -1):
+    # print(np.dot(v1, v2))
+    v1_dot_v2 = np.dot(v1, v2)
+    if v1_dot_v2 == -1 or v1_dot_v2 == 1:
         # Whenever v1 and v2 are parallel to each other, we can use an arbitrary vector that is NOT parallel to v1 and v2
-        # TODO: Find method to ensure its not parallel to vx_new! -> e.g.: check if dot product of v1/v2 and arbitrary vector is -1 again.
-        return np.cross(np.array([3, 2, 1]), v2)
+        # So call this function recursively until a non-parallel vector has been found
+        return get_perpendicular_vector(np.random.rand(3), v2)
     else:
         return norm(np.cross(v1, v2))
 
@@ -33,10 +35,10 @@ def norm(v) -> np.ndarray:
     Args:
         v (np.ndarray): The vector to normalise.
     """
-    if math.sqrt(np.dot(v, v)) == 0:
+    v_norm = np.linalg.norm(v)
+    if v_norm == 0:
         return np.zeros(3)
-    else:
-        return v / math.sqrt(np.dot(v, v))
+    return v / v_norm
 
 
 def rotation_matrix_4x4(axis, theta) -> np.ndarray:
@@ -58,10 +60,12 @@ def rotation_matrix_4x4(axis, theta) -> np.ndarray:
     b, c, d = -axis * math.sin(theta / 2.0)
     aa, bb, cc, dd = a * a, b * b, c * c, d * d
     bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
-    return np.array([[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac), 0],
-                     [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab), 0],
-                     [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc, 0],
-                     [0, 0, 0, 1]])
+    return np.array([
+        [aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac), 0],
+        [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab), 0],
+        [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc, 0],
+        [0, 0, 0, 1]
+    ]) # yapf: disable
 
 
 def translation_matrix_4x4(v) -> np.ndarray:
@@ -78,7 +82,7 @@ def translation_matrix_4x4(v) -> np.ndarray:
         [0, 1.0, 0, 0],
         [0, 0, 1.0, 0],
         [0, 0, 0, 1.0]
-    ])
+    ]) # yapf: disable
     T[:3, 3] = v
     return T
 
@@ -106,7 +110,7 @@ def get_local_coordinate_system_direction_vectors(origin, x_direction_bp_pos, y_
 #           Sequence class?
 #           New module?
 def get_pelvis_coordinate_system(pelvis: np.ndarray, hip_l: np.ndarray, hip_r: np.ndarray):
-    """Returns a pelvis coordinate system defined as an origin point and three normalised direction vectors. 
+    """Returns a pelvis coordinate system defined as a tuple containing an origin point and a list of three normalised direction vectors.
 
     Constructs direction vectors that define the axes directions of the pelvis coordinate system.
     X-Axis-Direction:   Normalised vector whose direction points from hip_l to hip_r. Afterwards, it is translated so that it starts at the pelvis.
@@ -116,16 +120,17 @@ def get_pelvis_coordinate_system(pelvis: np.ndarray, hip_l: np.ndarray, hip_r: n
 
     Args:
         pelvis (np.ndarray): The X, Y and Z coordinates of the pelvis body part.
-        hip_r (np.ndarray): The X, Y and Z coordinates of the hip_l body part. 
-        hip_l (np.ndarray): The X, Y and Z coordinates of the hip_r body part. 
+        hip_r (np.ndarray): The X, Y and Z coordinates of the hip_l body part.
+        hip_l (np.ndarray): The X, Y and Z coordinates of the hip_r body part.
     """
 
-    # X-Axis
+    # Direction of hip_l -> hip_r is the direction of the X-Axis
     hip_l_hip_r = hip_r - hip_l
 
-    # Orthogonal Projection
+    # Orthogonal Projection to determine Y-Axis direction
     a = pelvis - hip_l
     b = hip_r - hip_l
+
     scalar = np.dot(a, b) / np.dot(b, b)
     a_on_b = (scalar * b) + hip_l
     v = pelvis - a_on_b
@@ -150,7 +155,7 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
         origin_bp_idx (int): The body part index whose position represents the origin of the coordinate system.
         x_direction_bp_idx (int): The body part index whose position denotes the direction of the x-axis.
         y_direction_bp_idx (int): The body part index whose position denotes the direction of the y-axis.
-        positions (np.ndarray): The tracked positions of all body parts for one frame of a motion sequence. 
+        positions (np.ndarray): The tracked positions of all body parts for one frame of a motion sequence.
     """
 
     # Positions of given orientation joints in GCS
@@ -172,7 +177,7 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
         vy = -vy
 
     # Construct translation Matrix to move given origin to zero-position
-    T = translation_matrix_4x4(np.array([0, 0, 0])-origin)
+    T = translation_matrix_4x4(np.array([0, 0, 0]) - origin)
     # Construct rotation matrix for X-Alignment to rotate about x_rot_axis for the angle theta
     x_rot_axis = get_perpendicular_vector(vx, np.array([1, 0, 0]))
     theta_x = get_angle(vx, np.array([1, 0, 0]))
