@@ -136,10 +136,9 @@ def get_pelvis_coordinate_system(pelvis: np.ndarray, hip_l: np.ndarray, hip_r: n
     v = pelvis - a_on_b
 
     origin = pelvis
-    # TODO: Switch vy and vz after changing Axes format of sequence positions
     vx = norm(hip_l_hip_r)
-    vy = norm(v)
-    vz = get_perpendicular_vector(vx, vy)
+    vz = norm(v)
+    vy = get_perpendicular_vector(vx, vz)
 
     return [(origin, [vx, vy, vz])]
 
