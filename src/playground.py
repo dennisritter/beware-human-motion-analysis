@@ -17,9 +17,9 @@ mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json"
 sequence = mocap_poseprocessor.load(filename)
 pcs = get_pelvis_coordinate_system(sequence.positions[0][5], sequence.positions[0][11], sequence.positions[0][8])
-# get_pelvis_coordinate_system(np.asarray([-1, 2, 2]), np.asarray([0, 0, 0]), np.asarray([3, 4, -5]))
+# pcs = get_pelvis_coordinate_system(np.array([[-1, 2, 2], [-1, 2, 2], [-1, 2, 2]]), np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]]),
+#                                    np.array([[3, 4, -5], [3, 4, -5], [3, 4, -5]]))
 # get_pelvis_coordinate_system(pelvis=np.array([0, 0, 0]), hip_l=np.array([-1, -1, 0]), hip_r=np.array([1, 1, 0]))
-print(pcs)
-print(np.dot(pcs[0][1][0], pcs[0][1][1]))
-print(np.dot(pcs[0][1][0], pcs[0][1][2]))
-print(np.dot(pcs[0][1][1], pcs[0][1][2]))
+print(f"{np.dot(pcs[0][1][0], pcs[0][1][1])}, {np.dot(pcs[0][1][1], pcs[0][1][2])}, {np.dot(pcs[0][1][0], pcs[0][1][2])}")
+# for i in range(len(pcs)):
+#     print(f"{np.dot(pcs[i][1][0], pcs[i][1][1])}, {np.dot(pcs[i][1][1], pcs[i][1][2])}, {np.dot(pcs[i][1][0], pcs[i][1][2])}")
