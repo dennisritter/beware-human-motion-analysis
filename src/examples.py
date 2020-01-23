@@ -19,16 +19,16 @@ def load_sequence_example():
 # load_sequence_example()
 
 
-def visualise_sequence_example(frames_from_to: list = [0, 1]):
+def visualise_sequence_example(filename: str = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json",
+                               frames_from_to: list = [0, 1]):
     """Loading and visualising a sequence from file"""
     mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
-    filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json"
     sequence = mocap_poseprocessor.load(filename)
     skeleton_vis = SkeletonVisualiser(sequence[frames_from_to[0]:frames_from_to[1]])
     skeleton_vis.show()
 
 
-# visualise_sequence_example([0, 1])
+# visualise_sequence_example()
 
 
 def load_exercise_example():
@@ -66,6 +66,7 @@ def identify_exercise_type_example():
     print(f"path: {path_biceps_curl_left_gt}")
     print(f"-----")
 
+
 # identify_exercise_type_example()
 
 
@@ -88,11 +89,12 @@ def identify_single_iteration_subsequences(plot=False):
 # identify_single_iteration_subsequences(plot=True)
 
 
-def rate_exercise_performance(plot=False):
+def rate_exercise_performance(filename: str = "data/sequences/191024_tracking/multi/squat/user-2/191024__multi__squat__user-2__1.json",
+                              output_name: str = "data/rating_result_",
+                              plot=False):
     """Rating trainees exercise execution performance - Angle Comparison Method"""
     # Load Sequence and Exercise
     mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
-    filename = "data/sequences/191024_tracking/multi/squat/user-2/191024__multi__squat__user-2__1.json"
     sequence = mocap_poseprocessor.load(filename, str(filename).split('\\')[-1])
     squat = exercise_loader.load("data/exercises/squat.json")
     # Init ExerciseEvaluiator with an Exercise and a Sequence
@@ -112,7 +114,7 @@ def rate_exercise_performance(plot=False):
             turning_frame = it[1]
             rating_result = EE.evaluate(turning_frame)
             # Create result JSON file
-            with open(f"data/rating_result_{i}.json", 'w') as outfile:
+            with open(f"{output_name}{i}.json", 'w') as outfile:
                 # The Results are structured in the following way:
                 # 1. Dimension = Frame
                 # 2. Dimension = Body Part (null means there are no angles for that body part)
@@ -122,4 +124,4 @@ def rate_exercise_performance(plot=False):
         print("No iterations identified. Unable to rate execution performance.")
 
 
-# rate_exercise_performance()
+# rate_exercise_performance(plot=True)
