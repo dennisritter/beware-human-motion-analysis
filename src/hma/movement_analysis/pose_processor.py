@@ -14,7 +14,6 @@ class PoseProcessor:
     Attributes:
         poseformat (PoseFormatEnum): Specifies the pose format of sequences that will are imported. 
     """
-
     def __init__(self, poseformat: PoseFormatEnum):
         """ PoseProcessor Constructor
         Args:
@@ -23,9 +22,8 @@ class PoseProcessor:
         Returns:
             (PoseProcessor) A PoseProcessor instance.
         """
-        if(not isinstance(poseformat, PoseFormatEnum)):
-            raise ValueError(
-                "'poseformat' parameter must be a member of 'PoseFormat' enumeration.")
+        if (not isinstance(poseformat, PoseFormatEnum)):
+            raise ValueError("'poseformat' parameter must be a member of 'PoseFormat' enumeration.")
         self.poseformat = poseformat
 
     def load(self, path: str, name: str = 'Some Sequence') -> 'Sequence':
@@ -70,11 +68,10 @@ class PoseProcessor:
         positions = np.reshape(positions, (np.shape(positions)[0], int(np.shape(positions)[1] / 3), 3))
 
         # Center Positions by subtracting the mean of each coordinate
-        positions[:, :,
-                  0] -= np.mean(positions[:, :, 0])
-        positions[:, :,
-                  1] -= np.mean(positions[:, :, 1])
-        positions[:, :,
-                  2] -= np.mean(positions[:, :, 2])
+        positions[:, :, 0] -= np.mean(positions[:, :, 0])
+        positions[:, :, 1] -= np.mean(positions[:, :, 1])
+        positions[:, :, 2] -= np.mean(positions[:, :, 2])
 
+        # MoCap coordinate system is left handed -> flip x-axis to adjust data for right handed coordinate system
+        positions[:, :, 0] *= -1
         return Sequence(body_parts, positions, timestamps, body_parts, name=name)
