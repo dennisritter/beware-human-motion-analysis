@@ -138,7 +138,7 @@ def get_pelvis_coordinate_system(pelvis: np.ndarray, hip_l: np.ndarray, hip_r: n
     origin = pelvis
     vx = norm(hip_l_hip_r)
     vz = norm(v)
-    vy = get_perpendicular_vector(vx, vz)
+    vy = get_perpendicular_vector(vz, vx)
 
     return [(origin, [vx, vy, vz])]
 
