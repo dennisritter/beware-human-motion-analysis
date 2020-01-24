@@ -74,4 +74,11 @@ class PoseProcessor:
 
         # MoCap coordinate system is left handed -> flip x-axis to adjust data for right handed coordinate system
         positions[:, :, 0] *= -1
+        # Switch Y and Z axis.
+        # In Mocap Y points up and Z to the back -> We want Z to point up and Y to the front,
+        y_positions_mocap = positions[:, :, 1].copy()
+        z_positions_mocap = positions[:, :, 2].copy()
+        positions[:, :, 1] = z_positions_mocap
+        positions[:, :, 2] = y_positions_mocap
+
         return Sequence(body_parts, positions, timestamps, body_parts, name=name)
