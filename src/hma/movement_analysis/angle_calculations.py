@@ -2,7 +2,6 @@ from hma.movement_analysis import transformations
 from hma.movement_analysis.enums.angle_types import AngleTypes
 import numpy as np
 import math
-
 """ This module contains functions to calculate medical angles for human body joints.
     Functions are Developed for the tracking input of Realsense MOCAP Project (https://gitlab.beuth-hochschule.de/iisy/realsense).
     If other input is used or the joint position output of Realsense MOCAP changes, the functions might need adjustments.
@@ -57,7 +56,7 @@ def calc_angles_hip_left(positions: np.ndarray, hip_left_idx: int, hip_right_idx
         kr = math.sqrt(kx**2 + ky**2 + kz**2)
 
         # Theta is the angle of the Hip-Knee Vector to the YZ-Plane
-        theta = math.degrees(math.acos(-kx/kr))
+        theta = math.degrees(math.acos(-kx / kr))
         theta = 90 - theta
         abduction_adduction = theta
 
@@ -67,7 +66,7 @@ def calc_angles_hip_left(positions: np.ndarray, hip_left_idx: int, hip_right_idx
             phi = 0.0
         else:
             # Phi is the angle of the Knee around the X-Axis (Down = 0) and represents flexion/extension angle
-            phi = math.degrees(math.atan2(ky, -kz))
+            phi = math.degrees(math.atan2(kz, ky))
             phi += 90
             # An Extension should be represented in a negative angle
             if phi > 180:
@@ -110,7 +109,7 @@ def calc_angles_hip_right(positions: np.ndarray, hip_right_idx: int, hip_left_id
         kr = math.sqrt(kx**2 + ky**2 + kz**2)
 
         # Theta is the angle of the Hip-Knee Vector to the YZ-Plane
-        theta = math.degrees(math.acos(kx/kr))
+        theta = math.degrees(math.acos(kx / kr))
         theta = 90 - theta
         abduction_adduction = theta
 
@@ -120,7 +119,7 @@ def calc_angles_hip_right(positions: np.ndarray, hip_right_idx: int, hip_left_id
             phi = 0.0
         else:
             # Phi is the angle of the Knee around the X-Axis (Down = 0) and represents flexion/extension angle
-            phi = math.degrees(math.atan2(ky, -kz))
+            phi = math.degrees(math.atan2(kz, ky))
             phi += 90
             # An Extension should be represented in a negative angle
             if phi > 180:
@@ -187,7 +186,7 @@ def calc_angles_shoulder_left(positions: list, shoulder_left_idx: int, shoulder_
         er = math.sqrt(ex**2 + ey**2 + ez**2)
 
         # Theta is the angle of the Shoulder-Elbow Vector to the YZ-Plane and represents an abduction/adduction.
-        theta = math.degrees(math.acos(-ex/er))
+        theta = math.degrees(math.acos(-ex / er))
         theta = 90.0 - theta
         abduction_adduction = theta
 
@@ -197,7 +196,7 @@ def calc_angles_shoulder_left(positions: list, shoulder_left_idx: int, shoulder_
             phi = 0
         else:
             # Phi is the angle of the Elbow around the X-Axis (Down = 0) and represents flexion/extension angle.
-            phi = math.degrees(math.atan2(ey, -ez))
+            phi = math.degrees(math.atan2(ez, ey))
             phi += 90.0
             # An Extension should be represented in a negative angle.
             if phi > 180.0:
@@ -240,7 +239,7 @@ def calc_angles_shoulder_right(positions: list, shoulder_right_idx: int, shoulde
         er = math.sqrt(ex**2 + ey**2 + ez**2)
 
         # Theta is the angle of the Shoulder-Elbow Vector to the YZ-Plane
-        theta = math.degrees(math.acos(ex/er))
+        theta = math.degrees(math.acos(ex / er))
         theta = 90 - theta
         abduction_adduction = theta
 
@@ -251,7 +250,7 @@ def calc_angles_shoulder_right(positions: list, shoulder_right_idx: int, shoulde
         else:
             # Phi is the angle of the Elbow around the X-Axis (Down = 0) and represents flexion/extension angle
 
-            phi = math.degrees(math.atan2(ey, -ez))
+            phi = math.degrees(math.atan2(ez, ey))
             phi += 90
             # An Extension should be represented in a negative angle
             if phi > 180:

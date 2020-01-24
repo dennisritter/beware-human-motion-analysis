@@ -143,7 +143,7 @@ def get_pelvis_coordinate_system(pelvis: np.ndarray, hip_l: np.ndarray, hip_r: n
     return [(origin, [vx, vy, vz])]
 
 
-def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_direction_bp_idx: int, positions: np.ndarray):
+def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, z_direction_bp_idx: int, positions: np.ndarray):
     """
     Aligns the coordinate system to the given origin point.
     The X-Axis will be in direction of x_direction-origin.
@@ -160,20 +160,21 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     # Positions of given orientation joints in GCS
     origin = positions[origin_bp_idx]
     x_direction_bp_pos = positions[x_direction_bp_idx]
-    y_direction_bp_pos = positions[y_direction_bp_idx]
+    z_direction_bp_pos = positions[z_direction_bp_idx]
 
     # New X-Axis from origin to x_direction
     vx = x_direction_bp_pos - origin
     if vx[0] < 0:
         vx = -vx
     # New Z-Axis is perpendicular to the origin-y_direction vector and vx
-    vz = get_perpendicular_vector((y_direction_bp_pos - origin), vx)
-    if vz[2] < 0:
-        vz = -vz
-    # New Y-Axis is perpendicular to new X-Axis and Z-Axis
-    vy = get_perpendicular_vector(vx, vz)
+    vy = get_perpendicular_vector((z_direction_bp_pos - origin), vx)
     if vy[1] < 0:
         vy = -vy
+
+    # New Y-Axis is perpendicular to new X-Axis and Z-Axis
+    vz = get_perpendicular_vector(vx, vy)
+    if vz[2] < 0:
+        vz = -vz
 
     # Construct translation Matrix to move given origin to zero-position
     T = translation_matrix_4x4(np.array([0, 0, 0]) - origin)
@@ -182,13 +183,13 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, y_directio
     theta_x = get_angle(vx, np.array([1, 0, 0]))
     Rx = rotation_matrix_4x4(x_rot_axis, theta_x)
     # Use new X-Axis axis for y rotation and Rotate Y-direction vector to get rotation angle for Y-Alignment
-    y_rot_axis = vx
-    vy_rx = np.matmul(Rx, np.append(vy, 1))[:3]
-    theta_y = get_angle(vy_rx, np.array([0, 1, 0]))
-    Ry = rotation_matrix_4x4(norm(y_rot_axis), theta_y)
+    z_rot_axis = vx
+    vz_rx = np.matmul(Rx, np.append(vz, 1))[:3]
+    theta_z = get_angle(vz_rx, np.array([0, 1, 0]))
+    Rz = rotation_matrix_4x4(norm(z_rot_axis), theta_z)
     # Transform all positions
     transformed_positions = []
-    M = np.matmul(T, Rx, Ry)
+    M = np.matmul(T, Rx, Rz)
     for pos in positions:
         pos = np.matmul(M, np.append(pos, 1))[:3]
         transformed_positions.append(pos)

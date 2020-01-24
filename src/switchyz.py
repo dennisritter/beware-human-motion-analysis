@@ -16,8 +16,19 @@ from hma.movement_analysis.helpers import hierarchy_pos
 from hma.movement_analysis.helpers import draw_scenegraph
 from hma.movement_analysis.transformations import get_pelvis_coordinate_system
 
+np.set_printoptions(suppress=True)
+
 mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 
-root = 'data/sequences/switchyz'
-for filename in Path(root).rglob('*.json'):
-    print(filename)
+root = 'data/sequences/191024_tracking/single/squat/user-2'
+sequences = []
+for filename in Path(root).rglob('191024__single__squat__user-2__1.json'):
+    print(f"Loading {filename}")
+    seq = mocap_poseprocessor.load(filename)
+    sequences.append(seq)
+
+print(np.around(sequences[0][70].positions, 2))
+print(np.around(sequences[0][70].joint_angles, 2))
+
+sv = SkeletonVisualiser(sequences[0][70])
+sv.show()
