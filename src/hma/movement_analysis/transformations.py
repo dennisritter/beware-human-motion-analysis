@@ -109,17 +109,18 @@ def get_local_coordinate_system_direction_vectors(origin, x_direction_bp_pos, y_
 #           Transformation module (keep here)?
 #           Sequence class?
 #           New module?
-def get_pelvis_coordinate_system(pelvis: np.ndarray, hip_l: np.ndarray, hip_r: np.ndarray):
+def get_pelvis_coordinate_system(pelvis: np.ndarray, torso: np.ndarray, hip_l: np.ndarray, hip_r: np.ndarray):
     """Returns a pelvis coordinate system defined as a tuple containing an origin point and a list of three normalised direction vectors.
 
     Constructs direction vectors that define the axes directions of the pelvis coordinate system.
     X-Axis-Direction:   Normalised vector whose direction points from hip_l to hip_r. Afterwards, it is translated so that it starts at the pelvis.
-    Y-Axis-Direction:   Normalised vector whose direction is determined so that it is perpendicular to the hip_l-hip_r vector and points to the pelvis.
+    Y-Axis-Direction:   Normalised vector whose direction is determined so that it is perpendicular to the hip_l-hip_r vector and points to the torso.
                         Afterwards, it is translated so that it starts at the pelvis.
     Z-Axis-Direction:   The normalised cross product vector between X-Axis and Y-Axis that starts at the pelvis and results in a right handed Coordinate System.
 
     Args:
         pelvis (np.ndarray): The X, Y and Z coordinates of the pelvis body part.
+        torso (np.ndarray): The X, Y and Z coordinates of the torso body part.
         hip_r (np.ndarray): The X, Y and Z coordinates of the hip_l body part.
         hip_l (np.ndarray): The X, Y and Z coordinates of the hip_r body part.
     """
@@ -128,12 +129,12 @@ def get_pelvis_coordinate_system(pelvis: np.ndarray, hip_l: np.ndarray, hip_r: n
     hip_l_hip_r = hip_r - hip_l
 
     # Orthogonal Projection to determine Y-Axis direction
-    a = pelvis - hip_l
+    a = torso - hip_l
     b = hip_r - hip_l
 
     scalar = np.dot(a, b) / np.dot(b, b)
     a_on_b = (scalar * b) + hip_l
-    v = pelvis - a_on_b
+    v = torso - a_on_b
 
     origin = pelvis
     vx = norm(hip_l_hip_r)

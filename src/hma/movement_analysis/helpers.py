@@ -80,19 +80,17 @@ def hierarchy_pos(G, root=None, width=1., vert_gap=0.2, vert_loc=0, xcenter=0.5)
         if not isinstance(G, nx.DiGraph) and parent is not None:
             children.remove(parent)
         if len(children) != 0:
-            dx = width/len(children)
-            nextx = xcenter - width/2 - dx/2
+            dx = width / len(children)
+            nextx = xcenter - width / 2 - dx / 2
             for child in children:
                 nextx += dx
-                pos = _hierarchy_pos(G, child, width=dx, vert_gap=vert_gap,
-                                     vert_loc=vert_loc-vert_gap, xcenter=nextx,
-                                     pos=pos, parent=root)
+                pos = _hierarchy_pos(G, child, width=dx, vert_gap=vert_gap, vert_loc=vert_loc - vert_gap, xcenter=nextx, pos=pos, parent=root)
         return pos
 
     return _hierarchy_pos(G, root, width, vert_gap, vert_loc, xcenter)
 
 
-def draw_scenegraph(G, root):
+def draw_scenegraph(G, root="pelvis"):
     """Draws a graph ordered by the nodes hierarchy. Root node will be on top. 
     """
 

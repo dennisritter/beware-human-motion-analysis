@@ -30,5 +30,7 @@ for filename in Path(root).rglob('191024__single__squat__user-2__1.json'):
 print(np.around(sequences[0][70].positions, 2))
 print(np.around(sequences[0][70].joint_angles, 2))
 
-sv = SkeletonVisualiser(sequences[0][70])
+sv = SkeletonVisualiser(sequences[0])
 sv.show()
+
+draw_scenegraph(sequences[0].scene_graph)

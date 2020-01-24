@@ -201,7 +201,7 @@ class SkeletonVisualiser:
 
     def _make_pelvis_cs_trace(self, frame):
         # TODO: Refactor before develop merge
-        pcs = transformations.get_pelvis_coordinate_system(self.sequence.positions[frame][5], self.sequence.positions[frame][8], self.sequence.positions[frame][11])
+        pcs = transformations.get_pelvis_coordinate_system(self.sequence.positions[frame][5], self.sequence.positions[frame][4], self.sequence.positions[frame][8], self.sequence.positions[frame][11])
         p_origin = pcs[0][0]
         pcs[0][1][0] = pcs[0][1][0] * 100 + p_origin
         pcs[0][1][1] = pcs[0][1][1] * 100 + p_origin
