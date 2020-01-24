@@ -16,7 +16,8 @@ from hma.movement_analysis.transformations import get_pelvis_coordinate_system
 mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
 filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json"
 sequence = mocap_poseprocessor.load(filename)
-pcs = get_pelvis_coordinate_system(sequence.positions[0][5], sequence.positions[0][11], sequence.positions[0][8])
+pcs = get_pelvis_coordinate_system(sequence.positions[0][5], self.sequence.positions[frame][4], sequence.positions[0][11], sequence.positions[0][8])
+print(pcs)
 # pcs = get_pelvis_coordinate_system(np.array([[-1, 2, 2], [-1, 2, 2], [-1, 2, 2]]), np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]]),
 #                                    np.array([[3, 4, -5], [3, 4, -5], [3, 4, -5]]))
 # get_pelvis_coordinate_system(pelvis=np.array([0, 0, 0]), hip_l=np.array([-1, -1, 0]), hip_r=np.array([1, 1, 0]))
