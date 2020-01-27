@@ -1,5 +1,4 @@
 import plotly.graph_objects as go
-from hma.movement_analysis.sequence import Sequence
 from hma.movement_analysis import transformations
 
 
@@ -13,7 +12,7 @@ class SkeletonVisualiser:
 
     def __init__(
             self,
-            sequence: Sequence,
+            sequence: 'Sequence',
     ):
 
         self.sequence = sequence[:]
@@ -200,17 +199,32 @@ class SkeletonVisualiser:
         trace_z = go.Scatter3d(x=[origin[0], lcs[2, 0]], y=[origin[1], lcs[2, 1]], z=[origin[2], lcs[2, 2]], mode="lines", marker=dict(color="blue"))
         return [trace_x, trace_y, trace_z]
 
+    def _make_pelvis_cs_trace(self, frame):
+        # TODO: Refactor before develop merge
+        pcs = transformations.get_pelvis_coordinate_system(self.sequence.positions[frame][5], self.sequence.positions[frame][4], self.sequence.positions[frame][8], self.sequence.positions[frame][11])
+        p_origin = pcs[0][0]
+        pcs[0][1][0] = pcs[0][1][0] * 100 + p_origin
+        pcs[0][1][1] = pcs[0][1][1] * 100 + p_origin
+        pcs[0][1][2] = pcs[0][1][2] * 100 + p_origin
+        trace_x = go.Scatter3d(x=[p_origin[0], pcs[0][1][0][0]], y=[p_origin[1], pcs[0][1][0][1]], z=[p_origin[2], pcs[0][1][0][2]], mode="lines", marker=dict(color="red"))
+        trace_y = go.Scatter3d(x=[p_origin[0], pcs[0][1][1][0]], y=[p_origin[1], pcs[0][1][1][1]], z=[p_origin[2], pcs[0][1][1][2]], mode="lines", marker=dict(color="green"))
+        trace_z = go.Scatter3d(x=[p_origin[0], pcs[0][1][2][0]], y=[p_origin[1], pcs[0][1][2][1]], z=[p_origin[2], pcs[0][1][2][2]], mode="lines", marker=dict(color="blue"))
+        return [trace_x, trace_y, trace_z]
+
+
     def _make_jcs_traces(self, frame):
         """ Returns a list of Plotly  traces that display a Joint Coordinate System for each ball joint respectively.
         """
-        p = self.sequence.positions
-        bps = self.sequence.body_parts
-        ls_lcs_traces = self._make_lcs_trace(p[frame, bps["LeftShoulder"]], p[frame, bps["RightShoulder"]], p[frame, bps["Torso"]])
-        rs_lcs_traces = self._make_lcs_trace(p[frame, bps["RightShoulder"]], p[frame, bps["LeftShoulder"]], p[frame, bps["Torso"]])
-        lh_lcs_traces = self._make_lcs_trace(p[frame, bps["LeftHip"]], p[frame, bps["RightHip"]], p[frame, bps["Torso"]])
-        rh_lcs_traces = self._make_lcs_trace(p[frame, bps["RightHip"]], p[frame, bps["LeftHip"]], p[frame, bps["Torso"]])
+        # p = self.sequence.positions
+        # bps = self.sequence.body_parts
+        # ls_lcs_traces = self._make_lcs_trace(p[frame, bps["LeftShoulder"]], p[frame, bps["RightShoulder"]], p[frame, bps["Torso"]])
+        # rs_lcs_traces = self._make_lcs_trace(p[frame, bps["RightShoulder"]], p[frame, bps["LeftShoulder"]], p[frame, bps["Torso"]])
+        # lh_lcs_traces = self._make_lcs_trace(p[frame, bps["LeftHip"]], p[frame, bps["RightHip"]], p[frame, bps["Torso"]])
+        # rh_lcs_traces = self._make_lcs_trace(p[frame, bps["RightHip"]], p[frame, bps["LeftHip"]], p[frame, bps["Torso"]])
+        pelvis_cs_trace = self._make_pelvis_cs_trace(frame)
 
-        jcs_traces = ls_lcs_traces + rs_lcs_traces + lh_lcs_traces + rh_lcs_traces
+        # jcs_traces = ls_lcs_traces + rs_lcs_traces + lh_lcs_traces + rh_lcs_traces + pelvis_cs_trace
+        jcs_traces = pelvis_cs_trace
         return jcs_traces
 
     def _get_traces(self, frame):

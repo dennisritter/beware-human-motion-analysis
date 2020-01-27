@@ -1,8 +1,7 @@
-from .exercise import Exercise
+from .models.exercise import Exercise
 from .enums.angle_target_states import AngleTargetStates
 from .enums.angle_types import AngleTypes
 from .enums.angle_analysis_result_states import AngleAnalysisResultStates
-from .sequence import Sequence
 import warnings
 import math
 import numpy as np
@@ -32,7 +31,7 @@ class ExerciseEvaluator:
     MEDIUM_PRIO = 0.5
     LOW_PRIO = 0.0
 
-    def __init__(self, exercise: Exercise, sequence: Sequence):
+    def __init__(self, exercise: Exercise, sequence: 'Sequence'):
         """Inits ExerciseEvaluator class with the given Exercise and Sequence"""
 
         # The Exercise to evaluate
@@ -49,7 +48,7 @@ class ExerciseEvaluator:
         # Process all ball joint angles of the sequence attribute
         self._process_sequence_ball_joint_angles()
 
-    def set_sequence(self, seq: Sequence):
+    def set_sequence(self, seq: 'Sequence'):
         """Assigns the given sequence to the sequence attribute and performs necessary recalculations.
 
         Args:

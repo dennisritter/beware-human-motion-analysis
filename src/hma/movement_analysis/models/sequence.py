@@ -1,4 +1,5 @@
 import numpy as np
+import networkx as nx
 from sklearn.decomposition import PCA
 from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
 from hma.movement_analysis import angle_calculations as acm
@@ -15,6 +16,7 @@ class Sequence:
         name (str): The name of this sequence.
         joint_angles (list): The calculated angles derived from the tracked positions of this sequence
     """
+
     def __init__(self,
                  body_parts: dict,
                  positions: np.ndarray,
@@ -51,6 +53,23 @@ class Sequence:
         #       and a "abduction_adduction" key for ball joints.
         # NOTE: If no angles have been computed for a particular joint, the stored value is None.
         self.joint_angles = self._calc_joint_angles() if joint_angles is None else np.array(joint_angles)
+        # A graph that defines the hierarchy between human body parts
+        self.scene_graph = nx.DiGraph([
+            ("pelvis", "torso"),
+            ("torso", "neck"),
+            ("neck", "l_shoulder"),
+            ("l_shoulder", "l_elbow"),
+            ("l_elbow", "l_wrist"),
+            ("neck", "r_shoulder"),
+            ("r_shoulder", "r_elbow"),
+            ("r_elbow", "r_wrist"),
+            ("pelvis", "l_hip"),
+            ("l_hip", "l_knee"),
+            ("l_knee", "l_ankle"),
+            ("pelvis", "r_hip"),
+            ("r_hip", "r_knee"),
+            ("r_knee", "r_ankle"),
+        ])
 
     def __len__(self) -> int:
         return len(self.joint_angles)

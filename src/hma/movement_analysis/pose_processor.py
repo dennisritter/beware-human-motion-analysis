@@ -1,7 +1,7 @@
 from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
-from hma.movement_analysis.sequence import Sequence
 import json
 import numpy as np
+from hma.movement_analysis.models.sequence import Sequence
 
 
 class PoseProcessor:
@@ -14,7 +14,6 @@ class PoseProcessor:
     Attributes:
         poseformat (PoseFormatEnum): Specifies the pose format of sequences that will are imported. 
     """
-
     def __init__(self, poseformat: PoseFormatEnum):
         """ PoseProcessor Constructor
         Args:
@@ -23,12 +22,11 @@ class PoseProcessor:
         Returns:
             (PoseProcessor) A PoseProcessor instance.
         """
-        if(not isinstance(poseformat, PoseFormatEnum)):
-            raise ValueError(
-                "'poseformat' parameter must be a member of 'PoseFormat' enumeration.")
+        if (not isinstance(poseformat, PoseFormatEnum)):
+            raise ValueError("'poseformat' parameter must be a member of 'PoseFormat' enumeration.")
         self.poseformat = poseformat
 
-    def load(self, path: str, name: str = 'Some Sequence') -> Sequence:
+    def load(self, path: str, name: str = 'Some Sequence') -> 'Sequence':
         """ Loads a Sequence from path and maps it to the specified poseformat.
 
         Args:
@@ -42,7 +40,7 @@ class PoseProcessor:
             seq = myfile.read()
         return self.process(seq, name)
 
-    def process(self, input: str, name: str = 'Some Sequence') -> Sequence:
+    def process(self, input: str, name: str = 'Some Sequence') -> 'Sequence':
         """
         Args:
             input (str): The motion sequence input string to convert.
@@ -53,7 +51,7 @@ class PoseProcessor:
         if (self.poseformat == PoseFormatEnum.MOCAP):
             return self.process_sequence_mocap(input, name=name)
 
-    def process_sequence_mocap(self, input: str, name='Some Sequence') -> Sequence:
+    def process_sequence_mocap(self, input: str, name='Some Sequence') -> 'Sequence':
         """
         Args
             input (str): The MoCap motion sequence input string to convert.
@@ -70,11 +68,25 @@ class PoseProcessor:
         positions = np.reshape(positions, (np.shape(positions)[0], int(np.shape(positions)[1] / 3), 3))
 
         # Center Positions by subtracting the mean of each coordinate
-        positions[:, :,
-                  0] -= np.mean(positions[:, :, 0])
-        positions[:, :,
-                  1] -= np.mean(positions[:, :, 1])
-        positions[:, :,
-                  2] -= np.mean(positions[:, :, 2])
+        positions[:, :, 0] -= np.mean(positions[:, :, 0])
+        positions[:, :, 1] -= np.mean(positions[:, :, 1])
+        positions[:, :, 2] -= np.mean(positions[:, :, 2])
+
+        # Adjust MoCap data to our target Coordinate System
+        # X_mocap = Left    ->  X_hma = Right   -->     Flip X-Axis
+        # Y_mocap = Up      ->  Y_hma = Front   -->     Switch Y and Z; Flip (new) Y-Axis
+        # Z_mocap = Back    ->  Z_hma = Up      -->     Switch Y and Z
+
+        # Switch Y and Z axis.
+        # In Mocap Y points up and Z to the back -> We want Z to point up and Y to the front,
+        y_positions_mocap = positions[:, :, 1].copy()
+        z_positions_mocap = positions[:, :, 2].copy()
+        positions[:, :, 1] = z_positions_mocap
+        positions[:, :, 2] = y_positions_mocap
+        # MoCap coordinate system is left handed -> flip x-axis to adjust data for right handed coordinate system
+        positions[:, :, 0] *= -1
+        # Flip Y-Axis
+        # MoCap Z-Axis (our Y-Axis now) points "behind" the trainee, but we want it to point "forward"
+        positions[:, :, 1] *= -1
 
         return Sequence(body_parts, positions, timestamps, body_parts, name=name)
