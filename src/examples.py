@@ -1,5 +1,6 @@
 import json
 import tslearn.metrics as ts
+import numpy as np
 from hma.movement_analysis.pose_processor import PoseProcessor
 from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
 from hma.movement_analysis import exercise_loader

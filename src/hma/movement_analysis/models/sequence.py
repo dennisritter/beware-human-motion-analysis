@@ -96,6 +96,7 @@ class Sequence:
                         self.joint_angles[start:stop:step])
 
     def _calc_joint_angles(self) -> np.ndarray:
+        # TODO: Update Angle Calculation to Euler Sequences
         """Returns a 3-D list of joint angles for all frames, body parts and angle types.
         """
         n_frames = len(self.timestamps)
