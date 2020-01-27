@@ -170,8 +170,25 @@ class SkeletonVisualiser:
 
     def _make_limb_traces(self, frame):
         p = self.sequence.positions
+        bp = self.sequence.body_parts
         # Each element represents a pair of body part indices in sequence.positions that will be connected with a line
-        limb_connections = [[1, 0], [2, 1], [3, 2], [3, 14], [14, 13], [13, 12], [15, 3], [3, 4], [4, 5], [5, 8], [5, 11], [11, 10], [10, 9], [8, 7], [7, 6]]
+        limb_connections = [
+            [bp["head"], bp["neck"]],
+            [bp["neck"], bp["shoulder_l"]],
+            [bp["neck"], bp["shoulder_r"]],
+            [bp["shoulder_l"], bp["elbow_l"]],
+            [bp["shoulder_r"], bp["elbow_r"]],
+            [bp["elbow_l"], bp["wrist_l"]],
+            [bp["elbow_r"], bp["wrist_r"]],
+            [bp["neck"], bp["torso"]],
+            [bp["torso"], bp["pelvis"]],
+            [bp["pelvis"], bp["hip_l"]],
+            [bp["pelvis"], bp["hip_r"]],
+            [bp["hip_l"], bp["knee_l"]],
+            [bp["hip_r"], bp["knee_r"]],
+            [bp["knee_l"], bp["ankle_l"]],
+            [bp["knee_r"], bp["ankle_r"]]
+            ]
         limb_traces = []
         for limb in limb_connections:
             limb_trace = go.Scatter3d(x=[p[frame, limb[0], 0], p[frame, limb[1], 0]],
@@ -201,14 +218,36 @@ class SkeletonVisualiser:
 
     def _make_pelvis_cs_trace(self, frame):
         # TODO: Refactor before develop merge
-        pcs = transformations.get_pelvis_coordinate_system(self.sequence.positions[frame][5], self.sequence.positions[frame][4], self.sequence.positions[frame][8], self.sequence.positions[frame][11])
+        bp = self.sequence.body_parts
+        pcs = transformations.get_pelvis_coordinate_system(
+            self.sequence.positions[frame][bp["pelvis"]], 
+            self.sequence.positions[frame][bp["torso"]], 
+            self.sequence.positions[frame][bp["hip_l"]], 
+            self.sequence.positions[frame][bp["hip_r"]])
         p_origin = pcs[0][0]
         pcs[0][1][0] = pcs[0][1][0] * 100 + p_origin
         pcs[0][1][1] = pcs[0][1][1] * 100 + p_origin
         pcs[0][1][2] = pcs[0][1][2] * 100 + p_origin
-        trace_x = go.Scatter3d(x=[p_origin[0], pcs[0][1][0][0]], y=[p_origin[1], pcs[0][1][0][1]], z=[p_origin[2], pcs[0][1][0][2]], mode="lines", marker=dict(color="red"))
-        trace_y = go.Scatter3d(x=[p_origin[0], pcs[0][1][1][0]], y=[p_origin[1], pcs[0][1][1][1]], z=[p_origin[2], pcs[0][1][1][2]], mode="lines", marker=dict(color="green"))
-        trace_z = go.Scatter3d(x=[p_origin[0], pcs[0][1][2][0]], y=[p_origin[1], pcs[0][1][2][1]], z=[p_origin[2], pcs[0][1][2][2]], mode="lines", marker=dict(color="blue"))
+        trace_x = go.Scatter3d(
+            x=[p_origin[0], pcs[0][1][0][0]], 
+            y=[p_origin[1], pcs[0][1][0][1]], 
+            z=[p_origin[2], pcs[0][1][0][2]], 
+            mode="lines", 
+            marker=dict(color="red"))
+        trace_y = go.Scatter3d(
+            x=[p_origin[0], pcs[0][1][1][0]], 
+            y=[p_origin[1], pcs[0][1][1][1]], 
+            z=[p_origin[2], pcs[0][1][1][2]], 
+            mode="lines", 
+            marker=dict(color="green")
+        )
+        trace_z = go.Scatter3d(
+            x=[p_origin[0], pcs[0][1][2][0]], 
+            y=[p_origin[1], pcs[0][1][2][1]], 
+            z=[p_origin[2], pcs[0][1][2][2]], 
+            mode="lines", 
+            marker=dict(color="blue")
+        )
         return [trace_x, trace_y, trace_z]
 
 
