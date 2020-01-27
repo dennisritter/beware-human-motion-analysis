@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 
 def reformat_angles_dtw(seq):
-    """Returns the sequences reformatted joint angles to use them for the tslearn.metrics.dtw_path function.
-    """
+    """Returns the sequences reformatted joint angles to use them for the
+    tslearn.metrics.dtw_path function."""
     bp = seq.body_parts
     dtw_angles = []
     for frame in range(0, len(seq)):
@@ -29,21 +29,20 @@ def reformat_angles_dtw(seq):
 
 
 def hierarchy_pos(G, root=None, width=1., vert_gap=0.2, vert_loc=0, xcenter=0.5):
-    '''
-    From Joel's answer at https://stackoverflow.com/a/29597209/2966723.  
-    Licensed under Creative Commons Attribution-Share Alike 
+    """From Joel's answer at https://stackoverflow.com/a/29597209/2966723.
+    Licensed under Creative Commons Attribution-Share Alike.
 
-    If the graph is a tree this will return the positions to plot this in a 
+    If the graph is a tree this will return the positions to plot this in a
     hierarchical layout.
 
     G: the graph (must be a tree)
 
-    root: the root node of current branch 
-    - if the tree is directed and this is not given, 
+    root: the root node of current branch
+    - if the tree is directed and this is not given,
       the root will be found and used
-    - if the tree is directed and this is given, then 
+    - if the tree is directed and this is given, then
       the positions will be just for the descendants of this node.
-    - if the tree is undirected and not given, 
+    - if the tree is undirected and not given,
       then a random choice will be used.
 
     width: horizontal space allocated for this branch - avoids overlap with other branches
@@ -53,7 +52,7 @@ def hierarchy_pos(G, root=None, width=1., vert_gap=0.2, vert_loc=0, xcenter=0.5)
     vert_loc: vertical location of root
 
     xcenter: horizontal location of root
-    '''
+    """
     if not nx.is_tree(G):
         raise TypeError('cannot use hierarchy_pos on a graph that is not a tree')
 
@@ -64,13 +63,11 @@ def hierarchy_pos(G, root=None, width=1., vert_gap=0.2, vert_loc=0, xcenter=0.5)
             root = random.choice(list(G.nodes))
 
     def _hierarchy_pos(G, root, width=1., vert_gap=0.2, vert_loc=0, xcenter=0.5, pos=None, parent=None):
-        '''
-        see hierarchy_pos docstring for most arguments
+        """see hierarchy_pos docstring for most arguments.
 
         pos: a dict saying where all nodes go if they have been assigned
         parent: parent of this branch. - only affects it if non-directed
-
-        '''
+        """
 
         if pos is None:
             pos = {root: (xcenter, vert_loc)}
@@ -91,7 +88,9 @@ def hierarchy_pos(G, root=None, width=1., vert_gap=0.2, vert_loc=0, xcenter=0.5)
 
 
 def draw_scenegraph(G, root="pelvis"):
-    """Draws a graph ordered by the nodes hierarchy. Root node will be on top. 
+    """Draws a graph ordered by the nodes hierarchy.
+
+    Root node will be on top.
     """
 
     pos = hierarchy_pos(G, root)
