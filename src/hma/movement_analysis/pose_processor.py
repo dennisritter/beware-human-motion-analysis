@@ -60,25 +60,7 @@ class PoseProcessor:
             (Sequence): The Sequence Object instance representing the MoCap motion sequence of the input string.
         """
         mocap_sequence = json.loads(input)
-        # body_parts = mocap_sequence["format"]
-        body_parts = {
-            "head": 0,
-            "neck": 1,
-            "shoulder_l": 2,
-            "shoulder_r": 3,
-            "elbow_l": 4,
-            "elbow_r": 5,
-            "wrist_l": 6,
-            "wrist_r": 7,
-            "torso": 8,
-            "pelvis": 9,
-            "hip_l": 10,
-            "hip_r": 11,
-            "knee_l": 12,
-            "knee_r": 13,
-            "ankle_l": 14,
-            "ankle_r": 15,
-        }
+
         positions = np.array(mocap_sequence["frames"])
         timestamps = np.array(mocap_sequence["timestamps"])
 
@@ -106,5 +88,44 @@ class PoseProcessor:
         # Flip Y-Axis
         # MoCap Z-Axis (our Y-Axis now) points "behind" the trainee, but we want it to point "forward"
         positions[:, :, 1] *= -1
+
+        # The target Body Part format
+        body_parts = {
+            "head": 0,
+            "neck": 1,
+            "shoulder_l": 2,
+            "shoulder_r": 3,
+            "elbow_l": 4,
+            "elbow_r": 5,
+            "wrist_l": 6,
+            "wrist_r": 7,
+            "torso": 8,
+            "pelvis": 9,
+            "hip_l": 10,
+            "hip_r": 11,
+            "knee_l": 12,
+            "knee_r": 13,
+            "ankle_l": 14,
+            "ankle_r": 15,
+        }
+
+        # Change body part indices according to the target body part format
+        positions_mocap = positions.copy()
+        positions[:, 0, :] = positions_mocap[:, 15, :]  # "head": 0
+        positions[:, 1, :] = positions_mocap[:, 3, :]  # "neck": 1
+        positions[:, 2, :] = positions_mocap[:, 2, :]  # "shoulder_l": 2
+        positions[:, 3, :] = positions_mocap[:, 14, :]  # "shoulder_r": 3
+        positions[:, 4, :] = positions_mocap[:, 1, :]  # "elbow_l": 4
+        positions[:, 5, :] = positions_mocap[:, 13, :]  # "elbow_r": 5
+        positions[:, 6, :] = positions_mocap[:, 0, :]  # "wrist_l": 6
+        positions[:, 7, :] = positions_mocap[:, 12, :]  # "wrist_r": 7
+        positions[:, 8, :] = positions_mocap[:, 4, :]  # "torso": 8
+        positions[:, 9, :] = positions_mocap[:, 5, :]  # "pelvis": 9
+        positions[:, 10, :] = positions_mocap[:, 8, :]  # "hip_l": 10
+        positions[:, 11, :] = positions_mocap[:, 11, :]  # "hip_r": 11
+        positions[:, 12, :] = positions_mocap[:, 7, :]  # "knee_l": 12
+        positions[:, 13, :] = positions_mocap[:, 10, :]  # "knee_r": 13
+        positions[:, 14, :] = positions_mocap[:, 6, :]  # "ankle_l": 14
+        positions[:, 15, :] = positions_mocap[:, 9, :]  # "ankle_r": 15
 
         return Sequence(body_parts, positions, timestamps, body_parts, name=name)
