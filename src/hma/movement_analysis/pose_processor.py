@@ -60,7 +60,25 @@ class PoseProcessor:
             (Sequence): The Sequence Object instance representing the MoCap motion sequence of the input string.
         """
         mocap_sequence = json.loads(input)
-        body_parts = mocap_sequence["format"]
+        # body_parts = mocap_sequence["format"]
+        body_parts = {
+            "head": 0,
+            "neck": 1,
+            "shoulder_l": 2,
+            "shoulder_r": 3,
+            "elbow_l": 4,
+            "elbow_r": 5,
+            "wrist_l": 6,
+            "wrist_r": 7,
+            "torso": 8,
+            "pelvis": 9,
+            "hip_l": 10,
+            "hip_r": 11,
+            "knee_l": 12,
+            "knee_r": 13,
+            "ankle_l": 14,
+            "ankle_r": 15,
+        }
         positions = np.array(mocap_sequence["frames"])
         timestamps = np.array(mocap_sequence["timestamps"])
 
