@@ -12,18 +12,18 @@ def reformat_angles_dtw(seq):
     dtw_angles = []
     for frame in range(0, len(seq)):
         seq_frame_angles = []
-        seq_frame_angles.append(seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.FLEX_EX.value])
-        seq_frame_angles.append(seq.joint_angles[frame][bp["LeftShoulder"]][AngleTypes.AB_AD.value])
-        seq_frame_angles.append(seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.FLEX_EX.value])
-        seq_frame_angles.append(seq.joint_angles[frame][bp["RightShoulder"]][AngleTypes.AB_AD.value])
-        seq_frame_angles.append(seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.FLEX_EX.value])
-        seq_frame_angles.append(seq.joint_angles[frame][bp["LeftHip"]][AngleTypes.AB_AD.value])
-        seq_frame_angles.append(seq.joint_angles[frame][bp["RightHip"]][AngleTypes.FLEX_EX.value])
-        seq_frame_angles.append(seq.joint_angles[frame][bp["RightHip"]][AngleTypes.AB_AD.value])
-        seq_frame_angles.append(seq.joint_angles[frame][bp["LeftElbow"]][AngleTypes.FLEX_EX.value])
-        seq_frame_angles.append(seq.joint_angles[frame][bp["RightElbow"]][AngleTypes.FLEX_EX.value])
-        seq_frame_angles.append(seq.joint_angles[frame][bp["LeftKnee"]][AngleTypes.FLEX_EX.value])
-        seq_frame_angles.append(seq.joint_angles[frame][bp["RightKnee"]][AngleTypes.FLEX_EX.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["shoulder_l"]][AngleTypes.FLEX_EX.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["shoulder_l"]][AngleTypes.AB_AD.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["shoulder_r"]][AngleTypes.FLEX_EX.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["shoulder_r"]][AngleTypes.AB_AD.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["hip_l"]][AngleTypes.FLEX_EX.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["hip_l"]][AngleTypes.AB_AD.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["hip_r"]][AngleTypes.FLEX_EX.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["hip_r"]][AngleTypes.AB_AD.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["elbow_l"]][AngleTypes.FLEX_EX.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["elbow_r"]][AngleTypes.FLEX_EX.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["knee_l"]][AngleTypes.FLEX_EX.value])
+        seq_frame_angles.append(seq.joint_angles[frame][bp["knee_r"]][AngleTypes.FLEX_EX.value])
         dtw_angles.append(seq_frame_angles)
     return np.array(dtw_angles)
 
@@ -94,6 +94,6 @@ def draw_scenegraph(G, root="pelvis"):
     """Draws a graph ordered by the nodes hierarchy. Root node will be on top. 
     """
 
-    pos = hierarchy_pos(G, "pelvis")
+    pos = hierarchy_pos(G, root)
     nx.draw(G, pos=pos, with_labels=True)
     plt.show()
