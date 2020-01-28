@@ -161,22 +161,8 @@ class Sequence:
             positions[:, :, 1] -= np.mean(positions[:, :, 1])
             positions[:, :, 2] -= np.mean(positions[:, :, 2])
 
-            # Adjust MoCap data to our target Coordinate System
-            # X_mocap = Left    ->  X_hma = Right   -->     Flip X-Axis
-            # Y_mocap = Up      ->  Y_hma = Front   -->     Switch Y and Z; Flip (new) Y-Axis
-            # Z_mocap = Back    ->  Z_hma = Up      -->     Switch Y and Z
-
-            # Switch Y and Z axis.
-            # In Mocap Y points up and Z to the back -> We want Z to point up and Y to the front,
-            y_positions_mocap = positions[:, :, 1].copy()
-            z_positions_mocap = positions[:, :, 2].copy()
-            positions[:, :, 1] = z_positions_mocap
-            positions[:, :, 2] = y_positions_mocap
             # MoCap coordinate system is left handed -> flip x-axis to adjust data for right handed coordinate system
             positions[:, :, 0] *= -1
-            # Flip Y-Axis
-            # MoCap Z-Axis (our Y-Axis now) points "behind" the trainee, but we want it to point "forward"
-            positions[:, :, 1] *= -1
 
             return cls(body_parts, positions, timestamps, name=name)
 
