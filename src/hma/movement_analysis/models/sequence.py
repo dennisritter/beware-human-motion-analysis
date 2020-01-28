@@ -25,7 +25,7 @@ class Sequence:
                  scene_graph: nx.DiGraph = None):
         self.name = name
         # Number, order and label of tracked body parts
-        # Example: { "Head": 0, "RightShoulder": 1, ... }
+        # Example: { "head": 0, "neck": 1, ... }
         self.body_parts = body_parts
 
         # A Boolean mask list to exclude all frames, where all positions are 0.0
@@ -168,30 +168,31 @@ class Sequence:
 
     def _calc_joint_angles(self) -> np.ndarray:
         """Returns a 3-D list of joint angles for all frames, body parts and angle types."""
+        # TODO: Update Angle Calculation to Euler Sequences
         n_frames = len(self.timestamps)
         n_body_parts = len(self.body_parts)
         n_angle_types = 3
         bp = self.body_parts
 
-        ls = acm.calc_angles_shoulder_left(self.positions, bp["LeftShoulder"], bp["RightShoulder"], bp["Torso"], bp["LeftElbow"])
-        rs = acm.calc_angles_shoulder_right(self.positions, bp["RightShoulder"], bp["LeftShoulder"], bp["Torso"], bp["RightElbow"])
-        lh = acm.calc_angles_hip_left(self.positions, bp["LeftHip"], bp["RightHip"], bp["Torso"], bp["LeftKnee"])
-        rh = acm.calc_angles_hip_right(self.positions, bp["RightHip"], bp["LeftHip"], bp["Torso"], bp["RightKnee"])
-        le = acm.calc_angles_elbow(self.positions, bp["LeftElbow"], bp["LeftShoulder"], bp["LeftWrist"])
-        re = acm.calc_angles_elbow(self.positions, bp["RightElbow"], bp["RightShoulder"], bp["RightWrist"])
-        lk = acm.calc_angles_knee(self.positions, bp["LeftKnee"], bp["LeftHip"], bp["LeftAnkle"])
-        rk = acm.calc_angles_knee(self.positions, bp["RightKnee"], bp["RightHip"], bp["RightAnkle"])
+        ls = acm.calc_angles_shoulder_left(self.positions, bp["shoulder_l"], bp["shoulder_r"], bp["torso"], bp["elbow_l"])
+        rs = acm.calc_angles_shoulder_right(self.positions, bp["shoulder_r"], bp["shoulder_l"], bp["torso"], bp["elbow_r"])
+        lh = acm.calc_angles_hip_left(self.positions, bp["hip_l"], bp["hip_r"], bp["torso"], bp["knee_l"])
+        rh = acm.calc_angles_hip_right(self.positions, bp["hip_r"], bp["hip_l"], bp["torso"], bp["knee_r"])
+        le = acm.calc_angles_elbow(self.positions, bp["elbow_l"], bp["shoulder_l"], bp["wrist_l"])
+        re = acm.calc_angles_elbow(self.positions, bp["elbow_r"], bp["shoulder_r"], bp["wrist_r"])
+        lk = acm.calc_angles_knee(self.positions, bp["knee_l"], bp["hip_l"], bp["ankle_l"])
+        rk = acm.calc_angles_knee(self.positions, bp["knee_r"], bp["hip_r"], bp["ankle_r"])
 
         joint_angles = np.zeros((n_frames, n_body_parts, n_angle_types))
         for frame in range(0, n_frames):
-            joint_angles[frame][bp["LeftShoulder"]] = ls[frame]
-            joint_angles[frame][bp["RightShoulder"]] = rs[frame]
-            joint_angles[frame][bp["LeftHip"]] = lh[frame]
-            joint_angles[frame][bp["RightHip"]] = rh[frame]
-            joint_angles[frame][bp["LeftElbow"]] = le[frame]
-            joint_angles[frame][bp["RightElbow"]] = re[frame]
-            joint_angles[frame][bp["LeftKnee"]] = lk[frame]
-            joint_angles[frame][bp["RightKnee"]] = rk[frame]
+            joint_angles[frame][bp["shoulder_l"]] = ls[frame]
+            joint_angles[frame][bp["shoulder_r"]] = rs[frame]
+            joint_angles[frame][bp["hip_l"]] = lh[frame]
+            joint_angles[frame][bp["hip_r"]] = rh[frame]
+            joint_angles[frame][bp["elbow_l"]] = le[frame]
+            joint_angles[frame][bp["elbow_r"]] = re[frame]
+            joint_angles[frame][bp["knee_l"]] = lk[frame]
+            joint_angles[frame][bp["knee_r"]] = rk[frame]
 
         return joint_angles
 
