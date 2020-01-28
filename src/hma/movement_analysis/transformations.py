@@ -142,9 +142,9 @@ def get_pelvis_coordinate_system(pelvis: np.ndarray, torso: np.ndarray, hip_l: n
     return [(origin, [vx, vy, vz])]
 
 
-def get_cs_projection_tranformation(from_cs: np.ndarray, target_cs: np.ndarray):
+def get_cs_projection_transformation(from_cs: np.ndarray, target_cs: np.ndarray):
     """Returns a 4x4 transformation to project positions from the from_cs coordinate system to the to_cs coordinate system.
-
+    
     Args:
         from_cs (np.ndarray): The current coordinate system
             example: [[0,0,0], [1,0,0], [0,1,0], [0,0,1]]
@@ -162,12 +162,12 @@ def get_cs_projection_tranformation(from_cs: np.ndarray, target_cs: np.ndarray):
 
     # Use target x-axis direction vector as rotation axis as it must be perpendicular to the y-axis
     y_rot_axis = target_cs_x
-    target_cs_y_rx = np.matmul(Rx, np.append(target_cs_y, 1))[:3]
+    target_cs_y_rx = (Rx @ np.append(target_cs_y, 1))[:3]
     theta_y = get_angle(target_cs_y_rx, from_cs_y)
     Ry = rotation_matrix_4x4(norm(y_rot_axis), theta_y)
 
     # Determine complete transformation matrix
-    M = np.matmul(T, Rx, Ry)
+    M = Rx @ Ry @ T
     return M
 
 

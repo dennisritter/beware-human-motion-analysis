@@ -3,6 +3,8 @@ import networkx as nx
 from sklearn.decomposition import PCA
 from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
 from hma.movement_analysis import angle_calculations as acm
+from hma.movement_analysis.transformations import get_pelvis_coordinate_system
+from hma.movement_analysis.transformations import get_cs_projection_transformation
 
 
 class Sequence:
@@ -41,7 +43,7 @@ class Sequence:
         #           ...
         #          ]
         # shape: (num_body_parts, num_keypoints, xyz)
-        self.positions = np.array(positions)[zero_frames_filter_list]
+        self.positions = self._get_pelvis_cs_positions(np.array(positions)[zero_frames_filter_list])
 
         # Timestamps for when the positions have been tracked
         # Example: [<someTimestamp1>, <someTimestamp2>, <someTimestamp3>, ...]
@@ -94,6 +96,23 @@ class Sequence:
 
         return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.poseformat, self.name,
                         self.joint_angles[start:stop:step])
+
+    def _get_pelvis_cs_positions(self, positions):
+        """Transforms all points in positions parameter so they are relative to the pelvis. X-Axis = right, Y-Axis = front, Z-Axis = up. """
+        # TODO: Optimize to perform in batches instead of looping through all frames sequentially
+        transformed_positions = []
+        for i, frame in enumerate(positions):
+            transformed_positions.append([])
+            pelvis_cs = get_pelvis_coordinate_system(positions[i][self.body_parts["pelvis"]], positions[i][self.body_parts["torso"]],
+                                                     positions[i][self.body_parts["hip_l"]], positions[i][self.body_parts["hip_r"]])
+            M = get_cs_projection_transformation(np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]]),
+                                                 np.array([pelvis_cs[0][0], pelvis_cs[0][1][0], pelvis_cs[0][1][1], pelvis_cs[0][1][2]]))
+            for j, pos in enumerate(frame):
+                transformed_positions[i].append((M @ np.append(pos, 1))[:3])
+        for frame in positions:
+            print(frame[9])
+
+        return np.array(transformed_positions)
 
     def _calc_joint_angles(self) -> np.ndarray:
         # TODO: Update Angle Calculation to Euler Sequences
