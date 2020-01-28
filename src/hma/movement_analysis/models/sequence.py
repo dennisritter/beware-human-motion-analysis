@@ -1,7 +1,8 @@
-import numpy as np
+"""Contains the code for the sequence model including the scenegraph and angle computation."""
+import json
+
 import networkx as nx
-from sklearn.decomposition import PCA
-from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
+import numpy as np
 from hma.movement_analysis import angle_calculations as acm
 
 
@@ -12,7 +13,6 @@ class Sequence:
         body_parts (dict): A dictionary mapping body part names to position indices in the "positions" attribute array.
         positions (list): The tracked body part positions for each frame.
         timestamps (list): The timestamps for each tracked frame.
-        poseformat (PoseFormatEnum): The poseformat of this sequence.
         name (str): The name of this sequence.
         joint_angles (list): The calculated angles derived from the tracked positions of this sequence
     """
@@ -20,11 +20,10 @@ class Sequence:
                  body_parts: dict,
                  positions: np.ndarray,
                  timestamps: np.ndarray,
-                 poseformat: PoseFormatEnum,
                  name: str = 'sequence',
-                 joint_angles: list = None):
+                 joint_angles: list = None,
+                 scene_graph: nx.DiGraph = None):
         self.name = name
-        self.poseformat = poseformat
         # Number, order and label of tracked body parts
         # Example: { "head": 0, "neck": 1, ... }
         self.body_parts = body_parts
@@ -68,7 +67,7 @@ class Sequence:
             ("pelvis", "r_hip"),
             ("r_hip", "r_knee"),
             ("r_knee", "r_ankle"),
-        ])
+        ]) if scene_graph is None else scene_graph
 
     def __len__(self) -> int:
         return len(self.joint_angles)
@@ -92,13 +91,136 @@ class Sequence:
         else:
             raise TypeError(f"Invalid argument type: {type(item)}")
 
-        return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.poseformat, self.name,
+        return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.name,
                         self.joint_angles[start:stop:step])
 
-    def _calc_joint_angles(self) -> np.ndarray:
-        # TODO: Update Angle Calculation to Euler Sequences
-        """Returns a 3-D list of joint angles for all frames, body parts and angle types.
+    #? Do we need a to_mocap_json method?
+    def to_json(self) -> str:
+        """Returns the sequence instance as a json-formatted string."""
+        json_dict = {
+            'name': self.name,
+            'body_parts': self.body_parts,
+            'positions': self.positions.tolist(),
+            'timestamps': self.timestamps.tolist(),
+            'joint_angles': self.joint_angles.tolist(),
+            # TODO: return scene_graph
+            # 'scene_graph': self.scene_graph,
+        }
+        return json.dumps(json_dict)
+
+    @classmethod
+    def from_json(cls, json_str: str) -> 'Sequence':
+        """Creates a new Sequence instance from a json-formatted string.
+
+        Args:
+            json_str (str): The json-formatted string.
+
+        Returns:
+            Exercise: a new Sequence instance from the given input.
         """
+        json_dict = json.loads(json_str)
+        return cls(**json_dict)
+
+    @classmethod
+    def from_file(cls, path: str) -> 'Sequence':
+        """Loads an Sequence .json file and returns an Sequence object.
+
+        Args:
+            path (str): Path to the json file
+
+        Returns:
+            Sequence: a new Sequence instance from the given input.
+        """
+        with open(path, 'r') as sequence_file:
+            # load, parse file from json and return class
+            return cls.from_json(sequence_file.read())
+
+    @classmethod
+    def from_mocap_file(cls, path: str, name: str = 'sequence') -> 'Sequence':
+        """Loads an sequence .json file and returns an Sequence object.
+
+        Args:
+            path (str): Path to the json file
+
+        Returns:
+            Sequence: a new Sequence instance from the given input.
+        """
+        with open(path, 'r') as sequence_file:
+            # load, parse file from json and return class
+
+            mocap_sequence = json.loads(sequence_file.read())
+            positions = np.array(mocap_sequence["frames"])
+            timestamps = np.array(mocap_sequence["timestamps"])
+
+            # reshape positions to 3d array
+            positions = np.reshape(positions, (np.shape(positions)[0], int(np.shape(positions)[1] / 3), 3))
+
+            # Center Positions by subtracting the mean of each coordinate
+            positions[:, :, 0] -= np.mean(positions[:, :, 0])
+            positions[:, :, 1] -= np.mean(positions[:, :, 1])
+            positions[:, :, 2] -= np.mean(positions[:, :, 2])
+
+            # Adjust MoCap data to our target Coordinate System
+            # X_mocap = Left    ->  X_hma = Right   -->     Flip X-Axis
+            # Y_mocap = Up      ->  Y_hma = Front   -->     Switch Y and Z; Flip (new) Y-Axis
+            # Z_mocap = Back    ->  Z_hma = Up      -->     Switch Y and Z
+
+            # Switch Y and Z axis.
+            # In Mocap Y points up and Z to the back -> We want Z to point up and Y to the front,
+            y_positions_mocap = positions[:, :, 1].copy()
+            z_positions_mocap = positions[:, :, 2].copy()
+            positions[:, :, 1] = z_positions_mocap
+            positions[:, :, 2] = y_positions_mocap
+            # MoCap coordinate system is left handed -> flip x-axis to adjust data for right handed coordinate system
+            positions[:, :, 0] *= -1
+            # Flip Y-Axis
+            # MoCap Z-Axis (our Y-Axis now) points "behind" the trainee, but we want it to point "forward"
+            positions[:, :, 1] *= -1
+    
+            # The target Body Part format
+            body_parts = {
+                "head": 0,
+                "neck": 1,
+                "shoulder_l": 2,
+                "shoulder_r": 3,
+                "elbow_l": 4,
+                "elbow_r": 5,
+                "wrist_l": 6,
+                "wrist_r": 7,
+                "torso": 8,
+                "pelvis": 9,
+                "hip_l": 10,
+                "hip_r": 11,
+                "knee_l": 12,
+                "knee_r": 13,
+                "ankle_l": 14,
+                "ankle_r": 15,
+            }
+    
+            # Change body part indices according to the target body part format
+            positions_mocap = positions.copy()
+            positions[:, 0, :] = positions_mocap[:, 15, :]  # "head": 0
+            positions[:, 1, :] = positions_mocap[:, 3, :]  # "neck": 1
+            positions[:, 2, :] = positions_mocap[:, 2, :]  # "shoulder_l": 2
+            positions[:, 3, :] = positions_mocap[:, 14, :]  # "shoulder_r": 3
+            positions[:, 4, :] = positions_mocap[:, 1, :]  # "elbow_l": 4
+            positions[:, 5, :] = positions_mocap[:, 13, :]  # "elbow_r": 5
+            positions[:, 6, :] = positions_mocap[:, 0, :]  # "wrist_l": 6
+            positions[:, 7, :] = positions_mocap[:, 12, :]  # "wrist_r": 7
+            positions[:, 8, :] = positions_mocap[:, 4, :]  # "torso": 8
+            positions[:, 9, :] = positions_mocap[:, 5, :]  # "pelvis": 9
+            positions[:, 10, :] = positions_mocap[:, 8, :]  # "hip_l": 10
+            positions[:, 11, :] = positions_mocap[:, 11, :]  # "hip_r": 11
+            positions[:, 12, :] = positions_mocap[:, 7, :]  # "knee_l": 12
+            positions[:, 13, :] = positions_mocap[:, 10, :]  # "knee_r": 13
+            positions[:, 14, :] = positions_mocap[:, 6, :]  # "ankle_l": 14
+            positions[:, 15, :] = positions_mocap[:, 9, :]  # "ankle_r": 15
+
+            return cls(body_parts, positions, timestamps, name=name)
+
+    def _calc_joint_angles(self) -> np.ndarray:
+        """Returns a 3-D list of joint angles for all frames, body parts and angle types."""
+        # TODO: Update Angle Calculation to Euler Sequences
         n_frames = len(self.timestamps)
         n_body_parts = len(self.body_parts)
         n_angle_types = 3
@@ -127,9 +249,7 @@ class Sequence:
         return joint_angles
 
     def get_positions_2d(self) -> np.ndarray:
-        """Returns the positions for all keypoints in shape: (num_frames, num_bodyparts * xyz).
-        """
-
+        """Returns the positions for all keypoints in shape: (num_frames, num_bodyparts * xyz)."""
         return np.reshape(self.positions, (self.positions.shape[0], -1))
 
     def merge(self, sequence: 'Sequence') -> 'Sequence':
@@ -139,8 +259,6 @@ class Sequence:
         """
         if self.body_parts != sequence.body_parts:
             raise ValueError('body_parts of both sequences do not match!')
-        if self.poseformat != sequence.poseformat:
-            raise ValueError('poseformat of both sequences do not match!')
 
         # concatenate positions, timestamps and angles
         self.positions = np.concatenate((self.positions, sequence.positions), axis=0)
@@ -148,13 +266,6 @@ class Sequence:
         self.joint_angles = np.concatenate((self.joint_angles, sequence.joint_angles), axis=0)
 
         return self
-
-    def get_pcs(self, num_components: int = 3):
-        """Calculates n principal components for the tracked positions of this sequence
-        """
-        pca = PCA(n_components=num_components)
-        xPCA = pca.fit_transform(self.get_positions_2d())
-        return xPCA
 
     def _filter_zero_frames(self, positions: np.ndarray) -> list:
         """Returns a filter mask list to filter frames where all positions equal 0.0.
