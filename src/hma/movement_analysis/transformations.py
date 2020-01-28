@@ -63,7 +63,7 @@ def rotation_matrix_4x4(axis, theta) -> np.ndarray:
         [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab), 0],
         [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc, 0],
         [0, 0, 0, 1]
-    ]) # yapf: disable
+    ])  # yapf: disable
 
 
 def translation_matrix_4x4(v) -> np.ndarray:
@@ -80,7 +80,7 @@ def translation_matrix_4x4(v) -> np.ndarray:
         [0, 1.0, 0, 0],
         [0, 0, 1.0, 0],
         [0, 0, 0, 1.0]
-    ]) # yapf: disable
+    ])  # yapf: disable
     T[:3, 3] = v
     return T
 
@@ -140,6 +140,35 @@ def get_pelvis_coordinate_system(pelvis: np.ndarray, torso: np.ndarray, hip_l: n
     vy = get_perpendicular_vector(vz, vx)
 
     return [(origin, [vx, vy, vz])]
+
+
+def get_cs_projection_tranformation(from_cs: np.ndarray, target_cs: np.ndarray):
+    """Returns a 4x4 transformation to project positions from the from_cs coordinate system to the to_cs coordinate system.
+
+    Args:
+        from_cs (np.ndarray): The current coordinate system
+            example: [[0,0,0], [1,0,0], [0,1,0], [0,0,1]]
+        target_cs (np.ndarray): The target coordinate system
+    """
+    from_cs_origin, from_cs_x, from_cs_y, from_cs_z = from_cs
+    target_cs_origin, target_cs_x, target_cs_y, target_cs_z = target_cs
+
+    # Get Translation
+    T = translation_matrix_4x4(from_cs_origin - target_cs_origin)
+    # Construct rotation matrix for X-Alignment to rotate about x_rot_axis for the angle theta
+    x_rot_axis = get_perpendicular_vector(target_cs_x, from_cs_x)
+    theta_x = get_angle(target_cs_x, from_cs_x)
+    Rx = rotation_matrix_4x4(x_rot_axis, theta_x)
+
+    # Use target x-axis direction vector as rotation axis as it must be perpendicular to the y-axis
+    y_rot_axis = target_cs_x
+    target_cs_y_rx = np.matmul(Rx, np.append(target_cs_y, 1))[:3]
+    theta_y = get_angle(target_cs_y_rx, from_cs_y)
+    Ry = rotation_matrix_4x4(norm(y_rot_axis), theta_y)
+
+    # Determine complete transformation matrix
+    M = np.matmul(T, Rx, Ry)
+    return M
 
 
 def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, z_direction_bp_idx: int, positions: np.ndarray):
