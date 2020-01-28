@@ -136,7 +136,7 @@ class Sequence:
             return cls.from_json(sequence_file.read())
 
     @classmethod
-    def from_mocap_file(cls, path: str) -> 'Sequence':
+    def from_mocap_file(cls, path: str, name: str = 'sequence') -> 'Sequence':
         """Loads an sequence .json file and returns an Sequence object.
 
         Args:
@@ -178,7 +178,7 @@ class Sequence:
             # MoCap Z-Axis (our Y-Axis now) points "behind" the trainee, but we want it to point "forward"
             positions[:, :, 1] *= -1
 
-            return cls(body_parts, positions, timestamps)
+            return cls(body_parts, positions, timestamps, name=name)
 
     def _calc_joint_angles(self) -> np.ndarray:
         """Returns a 3-D list of joint angles for all frames, body parts and angle types."""
