@@ -6,6 +6,7 @@ import numpy as np
 from hma.movement_analysis import angle_calculations as acm
 from hma.movement_analysis.transformations import get_pelvis_coordinate_system
 from hma.movement_analysis.transformations import get_cs_projection_transformation
+from hma.movement_analysis.transformations import translation_matrix_4x4
 
 
 class Sequence:
@@ -57,18 +58,18 @@ class Sequence:
         self.scene_graph = nx.DiGraph([
             ("pelvis", "torso"),
             ("torso", "neck"),
-            ("neck", "l_shoulder"),
-            ("l_shoulder", "l_elbow"),
-            ("l_elbow", "l_wrist"),
-            ("neck", "r_shoulder"),
-            ("r_shoulder", "r_elbow"),
-            ("r_elbow", "r_wrist"),
-            ("pelvis", "l_hip"),
-            ("l_hip", "l_knee"),
-            ("l_knee", "l_ankle"),
-            ("pelvis", "r_hip"),
-            ("r_hip", "r_knee"),
-            ("r_knee", "r_ankle"),
+            ("neck", "shoulder_l"),
+            ("shoulder_l", "elbow_l"),
+            ("elbow_l", "wrist_l"),
+            ("neck", "shoulder_r"),
+            ("shoulder_r", "elbow_r"),
+            ("elbow_r", "wrist_r"),
+            ("pelvis", "hip_l"),
+            ("hip_l", "knee_l"),
+            ("knee_l", "ankle_l"),
+            ("pelvis", "hip_r"),
+            ("hip_r", "knee_r"),
+            ("knee_r", "ankle_r"),
         ]) if scene_graph is None else scene_graph
 
     def __len__(self) -> int:
@@ -97,7 +98,8 @@ class Sequence:
 
     def _get_pelvis_cs_positions(self, positions):
         """Transforms all points in positions parameter so they are relative to the pelvis. X-Axis = right, Y-Axis = front, Z-Axis = up. """
-        # TODO: Optimize to perform in batches instead of looping through all frames sequentially
+        # TODO: Optimize to perform in batches instead of looping through all frames
+        # TODO: Perform projection lazy, whenever sequence.positions is retrieved
         transformed_positions = []
         for i, frame in enumerate(positions):
             transformed_positions.append([])
@@ -105,14 +107,49 @@ class Sequence:
                                                      positions[i][self.body_parts["hip_l"]], positions[i][self.body_parts["hip_r"]])
             M = get_cs_projection_transformation(np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]]),
                                                  np.array([pelvis_cs[0][0], pelvis_cs[0][1][0], pelvis_cs[0][1][1], pelvis_cs[0][1][2]]))
-            for j, pos in enumerate(frame):
+            for _, pos in enumerate(frame):
                 transformed_positions[i].append((M @ np.append(pos, 1))[:3])
-        for frame in positions:
-            print(frame[9])
 
         return np.array(transformed_positions)
 
-    #? Do we need a to_mocap_json method?
+    def _get_angles(self, scene_graph, positions):
+        # Find Scene Graph Root Node
+        root_node = None
+        nodes = list(scene_graph.nodes)
+        for node in nodes:
+            predecessors = list(scene_graph.predecessors(node))
+            if not predecessors:
+                root_node = node
+                root_node_data = nx.get_node_attributes(scene_graph, root_node)
+                root_node_data[root_node] = {
+                    "coordinate_system": {
+                        "origin": np.array([0, 0, 0]),
+                        "x_axis": np.array([1, 0, 0]),
+                        "y_axis": np.array([0, 1, 0]),
+                        "z_axis": np.array([0, 0, 1])
+                    }
+                }
+                nx.set_node_attributes(scene_graph, root_node_data)
+                break
+        # Start recursive function with root node in our directed scene_graph
+        self._get_scene_graph_transformations(scene_graph, root_node, positions)
+
+    def _get_scene_graph_transformations(self, scene_graph, node, positions):
+        predecessors = list(scene_graph.predecessors(node))
+        successors = list(scene_graph.successors(node))
+        # End function if no successors/child nodes present in scene_graph
+        if not successors:
+            return
+        node_pos = positions[node]
+        # TODO: get translation from parent -> node
+        for child_node in successors:
+            # TODO: if ==1 children calc orientation angles/transformation calc joint angles/transformation
+            # TODO: if >1 children can't calc orientation angles/transformation as inner/outer rotation not determinable (only add translation to (child, node) edge transformation)
+            # TODO: if 0 children can't determine orientation angles/transformation (only add translation to (child, node) edge transformation)
+            child_pos = positions[child_node]
+
+            self._get_scene_graph_transformations(scene_graph, child_node, positions)
+
     def to_json(self) -> str:
         """Returns the sequence instance as a json-formatted string."""
         json_dict = {
