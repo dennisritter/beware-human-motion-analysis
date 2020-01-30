@@ -16,3 +16,5 @@ filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__s
 sequence = Sequence.from_mocap_file(filename)
 
 sequence._get_angles(sequence.scene_graph, sequence.positions)
+# print(sequence.scene_graph.nodes(data=True))
+# print(sequence.scene_graph.edges(data=True))
