@@ -17,7 +17,8 @@ sequence = Sequence.from_mocap_file(filename)
 
 sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
 
-sv = SkeletonVisualiser(sequence[0])
+sv = SkeletonVisualiser(sequence[70])
 sv.show()
+
 # print(sequence.scene_graph.nodes(data=True))
 # print(sequence.scene_graph.edges(data=True))

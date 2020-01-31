@@ -5,7 +5,7 @@ import networkx as nx
 import numpy as np
 from hma.movement_analysis import angle_calculations as acm
 import hma.movement_analysis.transformations as transformations
-from scipy.spatial.transform.Rotation import as_euler
+from scipy.spatial.transform import Rotation
 
 
 class Sequence:
@@ -127,7 +127,7 @@ class Sequence:
         self._get_scene_graph_transformations(scene_graph, root_node, root_node, positions)
 
     def _get_scene_graph_transformations(self, scene_graph, node, root_node, positions):
-        # TODO: Perform operations with batches, instead of only one frame
+        # TODO: Perform operations with batches, instead of one frame or looping...
         successors = list(scene_graph.successors(node))
 
         # Root Node handling
@@ -149,11 +149,11 @@ class Sequence:
             return
 
         node_data = nx.get_node_attributes(scene_graph, node)
-        node_pos = positions[0, self.body_parts[node]]
+        node_pos = positions[70, self.body_parts[node]]
         predecessors = list(scene_graph.predecessors(node))
 
         parent_node = predecessors[0]
-        parent_pos = positions[0, self.body_parts[parent_node]]
+        parent_pos = positions[70, self.body_parts[parent_node]]
         parent_cs = nx.get_node_attributes(scene_graph, "coordinate_system")[parent_node]
 
         T = transformations.translation_matrix_4x4(node_pos - parent_pos)
@@ -181,10 +181,8 @@ class Sequence:
             # Get parent coordinate system Z-axis as reference for nodes' joint rotation
             # Get direction vector from node to child to determine rotation of nodes' joint
             child_node = successors[0]
-            child_pos = positions[0, self.body_parts[child_node]]
+            child_pos = positions[70, self.body_parts[child_node]]
 
-            parent_cs_z = parent_cs['z_axis']
-            node_to_child_node = transformations.norm(node_pos - child_pos)
 
             # Get all transformations from root_node to parent_node
             path = nx.shortest_path(scene_graph, root_node, parent_node)
@@ -194,16 +192,32 @@ class Sequence:
                 path_transformations.append(scene_graph.edges[edge]["transformation"])
 
             # TODO: Also add rotation to transformation
-            # self._calc_joint_angle(-parent_cs_z, node_to_child_node)
+            parent_cs_z = parent_cs['z_axis']
+            node_to_child_node = transformations.norm(child_pos - node_pos)
+            # Joint angle as 3x3 rotation matrix
+            rotation = self._calc_joint_angle(-parent_cs_z, node_to_child_node)
+            r_mat_3x3 = rotation.as_dcm()
+            R = np.identity(4)
+            R[0:3,0:3] = r_mat_3x3
+            # M = T @ R
+
+            # Get Euler Sequence representing medical joint angles
+            # Y Rotation -> Abduction/Adduction
+            # Z Rotation -> Internal/External
+            # X Rotation -> Flexion/Extension
+            # TODO: Validate Euler Angles for different exercises
+            # TODO: Some Angles (e.g. knees flexion) are flipped -> handle this.
+            print(f"{node}: {rotation.as_euler('YZX', degrees=True)}")
+            print(f"{node}: {self.joint_angles[70][self.body_parts[node]]}")
 
             edge_data = {(parent_node, node): {"transformation": T}}
             nx.set_edge_attributes(scene_graph, edge_data)
             node_data[node] = {
                 "coordinate_system": {
                     "origin": (T @ np.append(parent_cs['origin'], 1))[:3],
-                    "x_axis": transformations.norm((np.append(parent_cs['x_axis'], 1))[:3]),
-                    "y_axis": transformations.norm((np.append(parent_cs['y_axis'], 1))[:3]),
-                    "z_axis": transformations.norm((np.append(parent_cs['z_axis'], 1))[:3])
+                    "x_axis": transformations.norm((R @ np.append(parent_cs['x_axis'], 1))[:3]),
+                    "y_axis": transformations.norm((R @ np.append(parent_cs['y_axis'], 1))[:3]),
+                    "z_axis": transformations.norm((R @ np.append(parent_cs['z_axis'], 1))[:3])
                 }
             }
             nx.set_node_attributes(scene_graph, node_data)
@@ -215,12 +229,16 @@ class Sequence:
 
         return
 
-    # def _calc_joint_angle(self, v1, v2):
-    #     theta = transformations.get_angle(v1, v2)
-    #     rotation_axis = transformations.get_perpendicular_vector(v1, v2)
-    #     R = transformations.rotation_matrix_4x4(rotation_axis, theta)
-    #     as_euler('XYZ')
-    #     pass
+    def _calc_joint_angle(self, v1, v2):
+        theta = transformations.get_angle(v1, v2)
+        # print(f"{v1} ::: {v2}")
+        print(np.degrees(theta))
+        rotation_axis = transformations.get_perpendicular_vector(v1, v2)
+        R = transformations.rotation_matrix_4x4(rotation_axis, theta)
+        R = R[:3, :3]
+        R = Rotation.from_dcm(R)
+        # R = R.as_euler('ZXY')
+        return R
 
     def to_json(self) -> str:
         """Returns the sequence instance as a json-formatted string."""
