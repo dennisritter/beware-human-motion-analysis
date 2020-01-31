@@ -4,10 +4,8 @@ import json
 import networkx as nx
 import numpy as np
 from hma.movement_analysis import angle_calculations as acm
-from hma.movement_analysis.transformations import get_pelvis_coordinate_system
-from hma.movement_analysis.transformations import get_cs_projection_transformation
-from hma.movement_analysis.transformations import translation_matrix_4x4
-from hma.movement_analysis.transformations import norm
+import hma.movement_analysis.transformations as transformations
+from scipy.spatial.transform.Rotation import as_euler
 
 
 class Sequence:
@@ -20,7 +18,6 @@ class Sequence:
         name (str): The name of this sequence.
         joint_angles (list): The calculated angles derived from the tracked positions of this sequence
     """
-
     def __init__(self,
                  body_parts: dict,
                  positions: np.ndarray,
@@ -60,6 +57,7 @@ class Sequence:
         self.scene_graph = nx.DiGraph([
             ("pelvis", "torso"),
             ("torso", "neck"),
+            ("neck", "head"),
             ("neck", "shoulder_l"),
             ("shoulder_l", "elbow_l"),
             ("elbow_l", "wrist_l"),
@@ -96,7 +94,8 @@ class Sequence:
         else:
             raise TypeError(f"Invalid argument type: {type(item)}")
 
-        return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.name, self.joint_angles[start:stop:step])
+        return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.name, self.joint_angles[start:stop:step],
+                        self.scene_graph)
 
     def _get_pelvis_cs_positions(self, positions):
         """Transforms all points in positions parameter so they are relative to the pelvis. X-Axis = right, Y-Axis = front, Z-Axis = up. """
@@ -105,16 +104,16 @@ class Sequence:
         transformed_positions = []
         for i, frame in enumerate(positions):
             transformed_positions.append([])
-            pelvis_cs = get_pelvis_coordinate_system(positions[i][self.body_parts["pelvis"]], positions[i][self.body_parts["torso"]],
-                                                     positions[i][self.body_parts["hip_l"]], positions[i][self.body_parts["hip_r"]])
-            M = get_cs_projection_transformation(np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]]),
-                                                 np.array([pelvis_cs[0][0], pelvis_cs[0][1][0], pelvis_cs[0][1][1], pelvis_cs[0][1][2]]))
+            pelvis_cs = transformations.get_pelvis_coordinate_system(positions[i][self.body_parts["pelvis"]], positions[i][self.body_parts["torso"]],
+                                                                     positions[i][self.body_parts["hip_l"]], positions[i][self.body_parts["hip_r"]])
+            M = transformations.get_cs_projection_transformation(np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]]),
+                                                                 np.array([pelvis_cs[0][0], pelvis_cs[0][1][0], pelvis_cs[0][1][1], pelvis_cs[0][1][2]]))
             for _, pos in enumerate(frame):
                 transformed_positions[i].append((M @ np.append(pos, 1))[:3])
 
         return np.array(transformed_positions)
 
-    def _get_angles(self, scene_graph, positions):
+    def _fill_scenegraph(self, scene_graph, positions):
         # Find Scene Graph Root Node
         root_node = None
         nodes = list(scene_graph.nodes)
@@ -128,7 +127,7 @@ class Sequence:
         self._get_scene_graph_transformations(scene_graph, root_node, root_node, positions)
 
     def _get_scene_graph_transformations(self, scene_graph, node, root_node, positions):
-        predecessors = list(scene_graph.predecessors(node))
+        # TODO: Perform operations with batches, instead of only one frame
         successors = list(scene_graph.successors(node))
 
         # Root Node handling
@@ -147,24 +146,28 @@ class Sequence:
             # Repeat function recursive for each child node of the root node
             for child_node in successors:
                 self._get_scene_graph_transformations(scene_graph, child_node, root_node, positions)
-                return
+            return
 
+        node_data = nx.get_node_attributes(scene_graph, node)
         node_pos = positions[0, self.body_parts[node]]
+        predecessors = list(scene_graph.predecessors(node))
+
         parent_node = predecessors[0]
         parent_pos = positions[0, self.body_parts[parent_node]]
-        T = translation_matrix_4x4(node_pos - parent_pos)
+        parent_cs = nx.get_node_attributes(scene_graph, "coordinate_system")[parent_node]
+
+        T = transformations.translation_matrix_4x4(node_pos - parent_pos)
         # If No successors or more than one successor present, add translation only to (parent_node, node) edge.
+        # TODO: How can we circumvent to check whether node == "torso" ?
         if len(successors) != 1 or node == "torso":
             edge_data = {(parent_node, node): {"transformation": T}}
             nx.set_edge_attributes(scene_graph, edge_data)
-            parent_cs = nx.get_node_attributes(scene_graph, "coordinate_system")[parent_node]
-            node_data = nx.get_node_attributes(scene_graph, node)
             node_data[node] = {
                 "coordinate_system": {
-                    "origin": norm((T @ np.append(parent_cs['origin'], 1))[:3]),
-                    "x_axis": norm((T @ np.append(parent_cs['x_axis'], 1))[:3]),
-                    "y_axis": norm((T @ np.append(parent_cs['y_axis'], 1))[:3]),
-                    "z_axis": norm((T @ np.append(parent_cs['z_axis'], 1))[:3])
+                    "origin": (T @ np.append(parent_cs['origin'], 1))[:3],
+                    "x_axis": transformations.norm((np.append(parent_cs['x_axis'], 1))[:3]),
+                    "y_axis": transformations.norm((np.append(parent_cs['y_axis'], 1))[:3]),
+                    "z_axis": transformations.norm((np.append(parent_cs['z_axis'], 1))[:3])
                 }
             }
             nx.set_node_attributes(scene_graph, node_data)
@@ -174,29 +177,50 @@ class Sequence:
             # negative Z-Axis because Z points up in the anatomical position
             # So the orientation change of -Z from node to child_node coordinate systems describes the joint angle
             # Get parent coordinate system for nodes Z-Axis reference
-            if predecessors:
-                # Get parent coordinate system Z-axis as reference for nodes' joint rotation
-                parent_cs = nx.get_node_attributes(scene_graph, 'coordinate_system')[parent_node]
-                parent_cs_z = parent_cs['z_axis']
-                # Get direction vector from node to child to determine rotation of nodes' joint
-                child_node = successors[0]
-                child_pos = positions[0, self.body_parts[child_node]]
 
-                node_to_child_node = norm(node_pos - child_pos)
-                # Get all transformations from root_node to parent_node
-                path = nx.shortest_path(scene_graph, root_node, parent_node)
-                path_edges = list(zip(path[0:], path[1:]))
-                path_transformations = []
-                for edge in path_edges:
-                    path_transformations.append(scene_graph.edges[edge]["transformation"])
-                print(path_transformations)
-                # Calc angle between Z-Axes
-                # retrieve Euler Angles
+            # Get parent coordinate system Z-axis as reference for nodes' joint rotation
+            # Get direction vector from node to child to determine rotation of nodes' joint
+            child_node = successors[0]
+            child_pos = positions[0, self.body_parts[child_node]]
+
+            parent_cs_z = parent_cs['z_axis']
+            node_to_child_node = transformations.norm(node_pos - child_pos)
+
+            # Get all transformations from root_node to parent_node
+            path = nx.shortest_path(scene_graph, root_node, parent_node)
+            path_edges = list(zip(path[0:], path[1:]))
+            path_transformations = []
+            for edge in path_edges:
+                path_transformations.append(scene_graph.edges[edge]["transformation"])
+
+            # TODO: Also add rotation to transformation
+            # self._calc_joint_angle(-parent_cs_z, node_to_child_node)
+
+            edge_data = {(parent_node, node): {"transformation": T}}
+            nx.set_edge_attributes(scene_graph, edge_data)
+            node_data[node] = {
+                "coordinate_system": {
+                    "origin": (T @ np.append(parent_cs['origin'], 1))[:3],
+                    "x_axis": transformations.norm((np.append(parent_cs['x_axis'], 1))[:3]),
+                    "y_axis": transformations.norm((np.append(parent_cs['y_axis'], 1))[:3]),
+                    "z_axis": transformations.norm((np.append(parent_cs['z_axis'], 1))[:3])
+                }
+            }
+            nx.set_node_attributes(scene_graph, node_data)
+            # Calc angle between Z-Axes
+            # retrieve Euler Angles
 
         for child_node in successors:
             self._get_scene_graph_transformations(scene_graph, child_node, root_node, positions)
 
         return
+
+    # def _calc_joint_angle(self, v1, v2):
+    #     theta = transformations.get_angle(v1, v2)
+    #     rotation_axis = transformations.get_perpendicular_vector(v1, v2)
+    #     R = transformations.rotation_matrix_4x4(rotation_axis, theta)
+    #     as_euler('XYZ')
+    #     pass
 
     def to_json(self) -> str:
         """Returns the sequence instance as a json-formatted string."""

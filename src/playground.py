@@ -15,6 +15,9 @@ from hma.movement_analysis.transformations import get_cs_projection_transformati
 filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json"
 sequence = Sequence.from_mocap_file(filename)
 
-sequence._get_angles(sequence.scene_graph, sequence.positions)
+sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
+
+sv = SkeletonVisualiser(sequence[0])
+sv.show()
 # print(sequence.scene_graph.nodes(data=True))
 # print(sequence.scene_graph.edges(data=True))
