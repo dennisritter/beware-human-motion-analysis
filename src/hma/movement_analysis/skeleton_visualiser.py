@@ -1,5 +1,6 @@
 import plotly.graph_objects as go
 from hma.movement_analysis import transformations
+import networkx as nx
 
 
 class SkeletonVisualiser:
@@ -37,7 +38,7 @@ class SkeletonVisualiser:
             xaxis=dict(range=[-1500, 1500], ),
             yaxis=dict(range=[-1500, 1500], ),
             zaxis=dict(range=[-1500, 1500], ),
-            camera=dict(up=dict(x=0, y=1.25, z=0), eye=dict(x=-1.2, y=1.2, z=-1.2)),
+            camera=dict(up=dict(x=0, y=0, z=1.25), eye=dict(x=-1.2, y=-1.2, z=1.2)),
         )
 
         layout = go.Layout(
@@ -198,25 +199,22 @@ class SkeletonVisualiser:
             limb_traces.append(limb_trace)
         return limb_traces
 
-    def _make_lcs_trace(self, origin, x_direction_pos, y_direction_pos):
+    def _make_lcs_trace(self, origin, x_direction, y_direction, z_direction):
         """Returns a list that contains a plotly trace object the X, Y and Z
         axes of the local joint coordinate system calculated from an origin, a
         X-axis-direction and a Y-axis-direction."""
 
-        # Get Local Coordinate System vectors
-        lcs = transformations.get_local_coordinate_system_direction_vectors(origin, x_direction_pos, y_direction_pos)
-
         # Set Local Coordinate System vectors' length to 100 and move relative to local origin.
-        lcs[0] = lcs[0] * 100 + origin
-        lcs[1] = lcs[1] * 100 + origin
-        lcs[2] = lcs[2] * 100 + origin
-        trace_x = go.Scatter3d(x=[origin[0], lcs[0, 0]], y=[origin[1], lcs[0, 1]], z=[origin[2], lcs[0, 2]], mode="lines", marker=dict(color="red"))
-        trace_y = go.Scatter3d(x=[origin[0], lcs[1, 0]], y=[origin[1], lcs[1, 1]], z=[origin[2], lcs[1, 2]], mode="lines", marker=dict(color="green"))
-        trace_z = go.Scatter3d(x=[origin[0], lcs[2, 0]], y=[origin[1], lcs[2, 1]], z=[origin[2], lcs[2, 2]], mode="lines", marker=dict(color="blue"))
+        x_direction= x_direction * 100 + origin
+        y_direction= y_direction * 100 + origin
+        z_direction= z_direction * 100 + origin
+        trace_x = go.Scatter3d(x=[origin[0], x_direction[0]], y=[origin[1], x_direction[1]], z=[origin[2], x_direction[2]], mode="lines", marker=dict(color="red"))
+        trace_y = go.Scatter3d(x=[origin[0], y_direction[0]], y=[origin[1], y_direction[1]], z=[origin[2], y_direction[2]], mode="lines", marker=dict(color="green"))
+        trace_z = go.Scatter3d(x=[origin[0], z_direction[0]], y=[origin[1], z_direction[1]], z=[origin[2], z_direction[2]], mode="lines", marker=dict(color="blue"))
         return [trace_x, trace_y, trace_z]
 
     def _make_pelvis_cs_trace(self, frame):
-        # TODO: Refactor before develop merge
+        # TODO: REMOVE, it is already included in _make_jcs_traces
         bp = self.sequence.body_parts
         pcs = transformations.get_pelvis_coordinate_system(self.sequence.positions[frame][bp["pelvis"]], self.sequence.positions[frame][bp["torso"]],
                                                            self.sequence.positions[frame][bp["hip_l"]], self.sequence.positions[frame][bp["hip_r"]])
@@ -250,10 +248,21 @@ class SkeletonVisualiser:
         # rs_lcs_traces = self._make_lcs_trace(p[frame, bps["RightShoulder"]], p[frame, bps["LeftShoulder"]], p[frame, bps["Torso"]])
         # lh_lcs_traces = self._make_lcs_trace(p[frame, bps["LeftHip"]], p[frame, bps["RightHip"]], p[frame, bps["Torso"]])
         # rh_lcs_traces = self._make_lcs_trace(p[frame, bps["RightHip"]], p[frame, bps["LeftHip"]], p[frame, bps["Torso"]])
-        pelvis_cs_trace = self._make_pelvis_cs_trace(frame)
 
-        # jcs_traces = ls_lcs_traces + rs_lcs_traces + lh_lcs_traces + rh_lcs_traces + pelvis_cs_trace
-        jcs_traces = pelvis_cs_trace
+        # Get Local Coordinate System vectors
+        jcs_traces = []
+        scene_graph = self.sequence.scene_graph
+        nodes = list(scene_graph.nodes)
+        node_coordinate_systems = nx.get_node_attributes(scene_graph, 'coordinate_system')
+        for node in nodes:
+            node_data = node_coordinate_systems[node]
+            origin = node_data['origin']
+            x_axis = node_data['x_axis']
+            y_axis = node_data['y_axis']
+            z_axis = node_data['z_axis']
+            jcs_traces += self._make_lcs_trace(origin, x_axis, y_axis, z_axis)
+
+
         return jcs_traces
 
     def _get_traces(self, frame):
