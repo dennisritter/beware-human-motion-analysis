@@ -253,9 +253,8 @@ class SkeletonVisualiser:
         jcs_traces = []
         scene_graph = self.sequence.scene_graph
         nodes = list(scene_graph.nodes)
-        node_coordinate_systems = nx.get_node_attributes(scene_graph, 'coordinate_system')
         for node in nodes:
-            node_data = node_coordinate_systems[node]
+            node_data = scene_graph.nodes[node]['coordinate_system'][frame]
             origin = node_data['origin']
             x_axis = node_data['x_axis']
             y_axis = node_data['y_axis']

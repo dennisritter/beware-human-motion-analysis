@@ -13,11 +13,11 @@ from hma.movement_analysis.transformations import get_pelvis_coordinate_system
 from hma.movement_analysis.transformations import get_cs_projection_transformation
 
 filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json"
-sequence = Sequence.from_mocap_file(filename)
+sequence = Sequence.from_mocap_file(filename)[60:70]
 
 sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
 
-sv = SkeletonVisualiser(sequence[70])
+sv = SkeletonVisualiser(sequence)
 sv.show()
 
 # print(sequence.scene_graph.nodes(data=True))
