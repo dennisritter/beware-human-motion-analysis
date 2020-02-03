@@ -128,6 +128,7 @@ class Sequence:
         # Predefine node data lists to store data for each frame of the sequence
         for node in scene_graph.nodes:
             scene_graph.nodes[node]['coordinate_system'] = []
+            scene_graph.nodes[node]['angles'] = {}
 
         # Predefine edge data lists to store data for each frame of the sequence
         for n1, n2 in scene_graph.edges:
@@ -195,9 +196,13 @@ class Sequence:
             node_to_child_node = transformations.norm(child_pos - node_pos)
             # Joint angles as 3x3 rotation matrix
             rotation = self._calc_joint_angle(-parent_cs_z, node_to_child_node)
+            # NOTE: Scipy as_dcm() function has been renamed to 'as_matrix()' in scipy=1.4.*
+            #       lates version for win64 is still 1.3.* ; Consider updating scipy dependency when 1.4.* is available for win64.
             r_mat_3x3 = rotation.as_dcm()
             R = np.identity(4)
             R[0:3, 0:3] = r_mat_3x3
+            # Store 4x4 Rotation Matrix in scene_graph node 
+            scene_graph.nodes[node]['angles']['rotation_matrix'] = np.array(r_mat_3x3)
 
             # Get Euler Sequence representing medical joint angles
             # Y Rotation -> Abduction/Adduction
@@ -212,13 +217,14 @@ class Sequence:
             print(f"EULER: F:{euler_angles[2]} A:{euler_angles[0]} I:{euler_angles[1]}")
             print(f"SPHER: F:{spherical_angles[0]} A:{spherical_angles[1]} I: None")
 
+            scene_graph.nodes[node]['angles']['euler_yzx'] = euler_angles
             scene_graph[parent_node][node]['transformation'].append(T)
             scene_graph.nodes[node]['coordinate_system'].append({
-                    "origin": (T @ np.append(parent_cs['origin'], 1))[:3],
-                    "x_axis": transformations.norm((R @ np.append(parent_cs['x_axis'], 1))[:3]),
-                    "y_axis": transformations.norm((R @ np.append(parent_cs['y_axis'], 1))[:3]),
-                    "z_axis": transformations.norm((R @ np.append(parent_cs['z_axis'], 1))[:3])
-                })
+                "origin": (T @ np.append(parent_cs['origin'], 1))[:3],
+                "x_axis": transformations.norm((R @ np.append(parent_cs['x_axis'], 1))[:3]),
+                "y_axis": transformations.norm((R @ np.append(parent_cs['y_axis'], 1))[:3]),
+                "z_axis": transformations.norm((R @ np.append(parent_cs['z_axis'], 1))[:3])
+            })
 
         for child_node in successors:
             self._get_scene_graph_transformations(scene_graph, child_node, root_node, positions, frame)
