@@ -1,9 +1,22 @@
 import math
 import numpy as np
+from scipy.spatial.transform import Rotation
 
 
 def get_angle(v1, v2):
     return np.arccos(np.dot(norm(v1), norm(v2)))
+
+
+def get_rotation(v1, v2):
+    """Returns a Numpy Rotation Object that describes the rotational transformation from v1 to v2"""
+    v1 = norm(v1)
+    v2 = norm(v2)
+    theta = get_angle(v1, v2)
+    rotation_axis = get_perpendicular_vector(v1, v2)
+    R = rotation_matrix_4x4(rotation_axis, theta)
+    R = R[:3, :3]
+    R = Rotation.from_dcm(R)
+    return R
 
 
 def get_perpendicular_vector(v1, v2):
