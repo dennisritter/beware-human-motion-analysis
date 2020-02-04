@@ -4,6 +4,7 @@ import json
 import networkx as nx
 import numpy as np
 from scipy.spatial.transform import Rotation
+from numpy.linalg import inv
 from hma.movement_analysis import angle_calculations as acm
 import hma.movement_analysis.transformations as transformations
 
@@ -113,18 +114,64 @@ class Sequence:
 
         return np.array(transformed_positions)
 
-    def _calc_angles_medical_from_euler(self, euler_sequence: str):
-        """Determines medical joint angles from the specified euler sequence and stores them in the scene_graph. 
+    def _calc_angles_medical_from_euler(self, scene_graph, euler_sequence: str, frame: int):
+        """Determines medical joint angles from the specified euler sequence and stores them in the scene_graph.
         
-        Adds the 'medical' key to the node dictionary stored in scene_graph.nodes[node]['angles'][frame], 
+        Adds the 'medical' key to the node dictionary stored in scene_graph.nodes[node]['angles'][frame],
         which holds all joint angle representations of this node for a specific frame of the sequence
         
-        Args: 
+        Args:
             euler_sequence (str): The euler sequence to map the medical angles from as a string.
-                example: 'yzx' 
+                example: 'xyz' 
         """
-        pass
 
+        euler_x_idx = euler_sequence.index('x')
+        euler_y_idx = euler_sequence.index('y')
+        euler_z_idx = euler_sequence.index('z')
+
+        for node in scene_graph.nodes:
+            # if node == 'head':
+            # if node == 'neck':
+            # if node == 'shoulder_l':
+            if node == 'shoulder_r':
+                euler_angles = scene_graph.nodes[node]['angles'][frame]['euler_' + euler_sequence]
+                flex = euler_angles[euler_x_idx]
+                abd = euler_angles[euler_y_idx] * -1
+                inter = euler_angles[euler_z_idx]
+                scene_graph.nodes[node]['angles'][frame]['medical'] = [flex, abd, inter]
+            # if node == 'elbow_l':
+            # if node == 'elbow_r':
+            # if node == 'wrist_l':
+            # if node == 'wrist_r':
+            # if node == 'torso':
+            # if node == 'pelvis':
+            # if node == 'hip_l':
+            elif node == 'hip_r':
+                euler_angles = scene_graph.nodes[node]['angles'][frame]['euler_' + euler_sequence]
+                flex = euler_angles[euler_x_idx]
+                abd = euler_angles[euler_y_idx] * -1
+                inter = euler_angles[euler_z_idx]
+                scene_graph.nodes[node]['angles'][frame]['medical'] = [flex, abd, inter]
+            elif node == 'knee_l':
+                euler_angles = scene_graph.nodes[node]['angles'][frame]['euler_' + euler_sequence]
+                flex = euler_angles[euler_x_idx] * -1
+                abd = euler_angles[euler_y_idx]
+                inter = euler_angles[euler_z_idx]
+                scene_graph.nodes[node]['angles'][frame]['medical'] = [flex, abd, inter]
+            elif node == 'knee_r':
+                euler_angles = scene_graph.nodes[node]['angles'][frame]['euler_' + euler_sequence]
+                flex = euler_angles[euler_x_idx] * -1
+                abd = euler_angles[euler_y_idx]
+                inter = euler_angles[euler_z_idx]
+                scene_graph.nodes[node]['angles'][frame]['medical'] = [flex, abd, inter]
+            # if node == 'ankle_l':
+            # if node == 'ankle_r':
+            elif scene_graph.nodes[node]['angles']:
+                euler_angles = scene_graph.nodes[node]['angles'][frame]['euler_' + euler_sequence]
+                flex = euler_angles[euler_x_idx]
+                abd = euler_angles[euler_y_idx]
+                inter = euler_angles[euler_z_idx]
+                scene_graph.nodes[node]['angles'][frame]['medical'] = [flex, abd, inter]
 
     def _fill_scenegraph(self, scene_graph, positions):
         # TODO: Perform lazy, whenever sequence.joint_angles or scenegraph is retrieved (?)
@@ -151,7 +198,19 @@ class Sequence:
             # TODO: Perform operations with batches, instead of one frame or looping...
             # Start recursive function with root node in our directed scene_graph
             self._calc_scene_graph_transformations(scene_graph, root_node, root_node, positions, frame)
-            self._calc_angles_medical_from_euler('yzx')
+            self._calc_angles_medical_from_euler(scene_graph, 'xyz', frame)
+
+            for node in scene_graph.nodes:
+                if scene_graph.nodes[node]['angles']:
+                    spherical_angles = np.round(self.joint_angles[frame][self.body_parts[node]], 2)
+                    euler_angles = np.round(scene_graph.nodes[node]['angles'][frame]['euler_xyz'], 2)
+                    medical_angles = np.round(scene_graph.nodes[node]['angles'][frame]['medical'], 2)
+
+                    print(node)
+                    print(f"SPHER: F:{spherical_angles[0]} A:{spherical_angles[1]} I: None")
+                    print(f"EULER: F:{euler_angles[0]} A:{euler_angles[1]} I:{euler_angles[2]}")
+                    print(f"MEDIC: F:{medical_angles[0]} A:{medical_angles[1]} I:{medical_angles[2]}")
+                    print('-----')
 
     def _calc_scene_graph_transformations(self, scene_graph, node, root_node, positions, frame):
         successors = list(scene_graph.successors(node))
@@ -196,12 +255,10 @@ class Sequence:
             child_node = successors[0]
             child_pos = positions[frame, self.body_parts[child_node]]
 
-            # Get all transformations from root_node to parent_node
-            path = nx.shortest_path(scene_graph, root_node, parent_node)
-            path_edges = list(zip(path[0:], path[1:]))
-            path_transformations = []
-            for edge in path_edges:
-                path_transformations.append(scene_graph.edges[edge]["transformation"][frame])
+            # path = nx.shortest_path(scene_graph, root_node, parent_node)
+            # path_edges = list(zip(path[0:], path[1:]))
+            # for edge in path_edges:
+            #     print(edge)
 
             # Determine Joint Rotation
             scene_graph.nodes[node]['angles'].append({})
@@ -222,15 +279,11 @@ class Sequence:
             # TODO: Validate Euler Angles for different exercises
             # TODO: Some Angles (e.g. knees flexion) are flipped -> handle this.
             # TODO: Remove print statements
-            euler_angles = rotation.as_euler('YZX', degrees=True)
-            spherical_angles = self.joint_angles[frame][self.body_parts[node]]
-            print(f"[{frame}][{node}]")
-            print(f"EULER: F:{euler_angles[2]} A:{euler_angles[0]} I:{euler_angles[1]}")
-            print(f"SPHER: F:{spherical_angles[0]} A:{spherical_angles[1]} I: None")
+            euler_angles = rotation.as_euler('XYZ', degrees=True)
 
             scene_graph.nodes[node]['angles'][frame]['rotation_matrix'] = np.array(r_mat_3x3)
-            scene_graph.nodes[node]['angles'][frame]['euler_yzx'] = euler_angles
-            scene_graph[parent_node][node]['transformation'].append(T)
+            scene_graph.nodes[node]['angles'][frame]['euler_xyz'] = euler_angles
+            scene_graph[parent_node][node]['transformation'].append(T @ R)
             scene_graph.nodes[node]['coordinate_system'].append({
                 "origin": (T @ np.append(parent_cs['origin'], 1))[:3],
                 "x_axis": transformations.norm((R @ np.append(parent_cs['x_axis'], 1))[:3]),
