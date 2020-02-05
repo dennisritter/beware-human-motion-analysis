@@ -8,14 +8,12 @@ def get_angle(v1, v2):
 
 
 def get_rotation(v1, v2):
-    """Returns a Numpy Rotation Object that describes the rotational transformation from v1 to v2"""
+    """Returns a homogenious 4x4 transformation matrix without translation vector that describes the rotational transformation from v1 to v2"""
     v1 = norm(v1)
     v2 = norm(v2)
     theta = get_angle(v1, v2)
     rotation_axis = get_perpendicular_vector(v1, v2)
     R = rotation_matrix_4x4(rotation_axis, theta)
-    R = R[:3, :3]
-    R = Rotation.from_dcm(R)
     return R
 
 
@@ -157,7 +155,7 @@ def get_pelvis_coordinate_system(pelvis: np.ndarray, torso: np.ndarray, hip_l: n
 
 def get_cs_projection_transformation(from_cs: np.ndarray, target_cs: np.ndarray):
     """Returns a 4x4 transformation to project positions from the from_cs coordinate system to the to_cs coordinate system.
-    
+
     Args:
         from_cs (np.ndarray): The current coordinate system
             example: [[0,0,0], [1,0,0], [0,1,0], [0,0,1]]
