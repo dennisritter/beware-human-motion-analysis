@@ -54,7 +54,6 @@ class Sequence:
         # NOTE: If angles have been computed, the stored value is a dictionary with at least one key "flexion_extension"
         #       and a "abduction_adduction" key for ball joints.
         # NOTE: If no angles have been computed for a particular joint, the stored value is None.
-        # TODO: REMOVE when scene_graph is tested properly
         self.joint_angles = self._calc_joint_angles() if joint_angles is None else np.array(joint_angles)
         # A directed graph that defines the hierarchy between human body parts
         self.scene_graph = nx.DiGraph([
@@ -73,10 +72,10 @@ class Sequence:
             ("pelvis", "hip_r"),
             ("hip_r", "knee_r"),
             ("knee_r", "ankle_r"),
-        ]) if scene_graph is None else scene_graph
+        ]) if scene_graph is None else scene_graph.copy()
 
     def __len__(self) -> int:
-        return len(self.joint_angles)
+        return len(self.positions)
 
     def __getitem__(self, item) -> 'Sequence':
         """Returns the sub-sequence item. You can either specifiy one element by index or use numpy-like slicing.
@@ -98,15 +97,16 @@ class Sequence:
             raise TypeError(f"Invalid argument type: {type(item)}")
 
         # Slice All data lists stored in the scene_graphs nodes and edges
-        for node in self.scene_graph.nodes:
-            for data_list in self.scene_graph.nodes[node].keys():
+        scene_graph = self.scene_graph.copy()
+        for node in scene_graph.nodes:
+            for data_list in scene_graph.nodes[node].keys():
                 if data_list:
-                    self.scene_graph.nodes[node][data_list] = self.scene_graph.nodes[node][data_list][start:stop:step]
-        for e1, e2 in self.scene_graph.edges:
-            for data_list in self.scene_graph[e1][e2].keys():
+                    scene_graph.nodes[node][data_list] = scene_graph.nodes[node][data_list][start:stop:step]
+        for e1, e2 in scene_graph.edges:
+            for data_list in scene_graph[e1][e2].keys():
                 if data_list:
-                    self.scene_graph[e1][e2][data_list] = self.scene_graph[e1][e2][data_list][start:stop:step]
-
+                    scene_graph[e1][e2][data_list] = scene_graph[e1][e2][data_list][start:stop:step]
+        self.scene_graph = scene_graph
         # TODO: Remove unwanted items from scene_graph data
         return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.name, self.joint_angles[start:stop:step],
                         self.scene_graph)
@@ -397,11 +397,32 @@ class Sequence:
         if self.body_parts != sequence.body_parts:
             raise ValueError('body_parts of both sequences do not match!')
 
+        # Copy the given sequence to not change it implicitly
+        sequence = sequence[:]
+
         # concatenate positions, timestamps and angles
         self.positions = np.concatenate((self.positions, sequence.positions), axis=0)
         self.timestamps = np.concatenate((self.timestamps, sequence.timestamps), axis=0)
         self.joint_angles = np.concatenate((self.joint_angles, sequence.joint_angles), axis=0)
 
+        # Concatenate scene_graph data lists
+        for node in self.scene_graph.nodes:
+            for data_list in self.scene_graph.nodes[node].keys():
+                if data_list and data_list in sequence.scene_graph.nodes[node]:
+                    self.scene_graph.nodes[node][data_list] += sequence.scene_graph.nodes[node][data_list]
+                # If appending sequence has no data in scene_graph, add it beforehand
+                elif data_list and data_list not in sequence.scene_graph.nodes[node]:
+                    sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
+                    self.scene_graph.nodes[node][data_list] += sequence.scene_graph.nodes[node][data_list]
+
+        for e1, e2 in self.scene_graph.edges:
+            for data_list in self.scene_graph[e1][e2].keys():
+                if data_list and data_list in sequence.scene_graph[e1][e2]:
+                    self.scene_graph[e1][e2][data_list] += sequence.scene_graph[e1][e2][data_list]
+                # If appending sequence has no data in scene_graph, add it beforehand
+                elif data_list and data_list not in sequence.scene_graph[e1][e2]:
+                    sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
+                    self.scene_graph[e1][e2][data_list] += sequence.scene_graph[e1][e2][data_list]
         return self
 
     def _filter_zero_frames(self, positions: np.ndarray) -> list:
