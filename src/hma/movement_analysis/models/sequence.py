@@ -56,7 +56,7 @@ class Sequence:
         # NOTE: If no angles have been computed for a particular joint, the stored value is None.
         # TODO: REMOVE when scene_graph is tested properly
         self.joint_angles = self._calc_joint_angles() if joint_angles is None else np.array(joint_angles)
-        # A graph that defines the hierarchy between human body parts
+        # A directed graph that defines the hierarchy between human body parts
         self.scene_graph = nx.DiGraph([
             ("pelvis", "torso"),
             ("torso", "neck"),
@@ -96,6 +96,16 @@ class Sequence:
             raise NotImplementedError("Tuple as index")
         else:
             raise TypeError(f"Invalid argument type: {type(item)}")
+
+        # Slice All data lists stored in the scene_graphs nodes and edges
+        for node in self.scene_graph.nodes:
+            for data_list in self.scene_graph.nodes[node].keys():
+                if data_list:
+                    self.scene_graph.nodes[node][data_list] = self.scene_graph.nodes[node][data_list][start:stop:step]
+        for e1, e2 in self.scene_graph.edges:
+            for data_list in self.scene_graph[e1][e2].keys():
+                if data_list:
+                    self.scene_graph[e1][e2][data_list] = self.scene_graph[e1][e2][data_list][start:stop:step]
 
         # TODO: Remove unwanted items from scene_graph data
         return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.name, self.joint_angles[start:stop:step],
