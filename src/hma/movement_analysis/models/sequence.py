@@ -7,6 +7,7 @@ from numpy.linalg import inv
 from hma.movement_analysis import angle_calculations as acm
 import hma.movement_analysis.transformations as transformations
 import hma.movement_analysis.angle_representations as ar
+import time
 
 # TODO: Handle expensive calculations with batches instead of loops to increase performance
 # TODO: Implement Lazy Loading for props that are expensive to calculate (e.g. joint angles, Scene_graph data)
@@ -72,7 +73,10 @@ class Sequence:
             ("hip_r", "knee_r"),
             ("knee_r", "ankle_r"),
         ]) if scene_graph is None else scene_graph.copy()
+        start_time = time.time()
         self._fill_scenegraph(self.scene_graph, self.positions)
+        elapsed_time = time.time() - start_time
+        print(elapsed_time)        
 
         # Stores joint angles for each frame
         # NOTE: Body part indices are the indices stored in self.body_parts.
@@ -236,6 +240,7 @@ class Sequence:
         return
 
     def to_json(self) -> str:
+        # TODO: serialize scene_graph. Als ndarrays must be transferred to lists before.
         """Returns the sequence instance as a json-formatted string."""
         json_dict = {
             'name': self.name,
@@ -243,7 +248,7 @@ class Sequence:
             'positions': self.positions.tolist(),
             'timestamps': self.timestamps.tolist(),
             'joint_angles': self.joint_angles.tolist(),
-            'scene_graph': nx.readwrite.json_graph.adjacency_data(self.scene_graph)
+            # 'scene_graph': nx.readwrite.json_graph.adjacency_data(self.scene_graph)
         }
         return json.dumps(json_dict)
 

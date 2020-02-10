@@ -12,6 +12,7 @@ from hma.movement_analysis.helpers import draw_scenegraph
 from hma.movement_analysis.transformations import get_pelvis_coordinate_system
 from hma.movement_analysis.transformations import get_cs_projection_transformation
 import hma.movement_analysis.angle_representations as ar
+from hma.movement_analysis.models.exercise import Exercise
 import time
 
 filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json"
@@ -21,12 +22,19 @@ filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__s
 # filename = "data/sequences/191024_tracking/single/triceps_extension_right/user-2/191024__single__triceps_extension_right__user-2__1.json"
 # filename = "data/sequences/191024_tracking/single/overhead_press/user-2/191024__single__overhead_press__user-2__1.json"
 # filename = "data/sequences/191024_tracking/single/lunge_left/user-2/191024__single__lunge_left__user-2__1.json"
-# frame = 50
-sequence = Sequence.from_mocap_file(filename)
-s = sequence[50:55]
-print(s.joint_angles)
-print(s.scene_graph.nodes['shoulder_l']['angles'][0]['euler_xyz'])
 
+# filename = "data/sequences/test/1_frame.json"
+sequence = Sequence.from_mocap_file(filename)
+print(len(sequence))
+
+# sstr = s.to_json()
+with open('data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json', 'r') as json_file:
+    mocap_sequence = json.loads(json_file.read())
+    mocap_sequence["frames"] = mocap_sequence["frames"][0:100]
+    mocap_sequence["timestamps"] = mocap_sequence["timestamps"][0:100]
+
+with open('data/sequences/test/100_frames.json', 'w') as out:
+    json.dump(mocap_sequence, out)
 # # --- Medical Angles Check ---
 # non_ball_joints = ['elbow_l', 'elbow_r', 'knee_l', 'knee_r']
 # ball_joints = ['shoulder_l', 'shoulder_r', 'hip_l', 'hip_r']
