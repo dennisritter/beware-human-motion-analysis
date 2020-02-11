@@ -39,6 +39,29 @@ def get_perpendicular_vector(v1, v2):
         return norm(np.cross(v1, v2))
 
 
+def get_perpendicular_vector_batch(v_arr1, v_arr2):
+    """Returns an array of vectors that are perpendicular to the vectors at corresponding indices. 
+
+    Args:
+        v1 (np.ndarray): The first array of vectors that are perpendicular to the respective vector of the returned array.
+        v2 (np.ndarray): The second array of vectors that are perpendicular to the respective vector of the returned array.
+    """
+    v_arr1 = norm_batch(v_arr1)
+    v_arr2 = norm_batch(v_arr2)
+
+    # If theta 180° (dot product = -1)
+    # v1_dot_v2 = v_arr2 @ v_arr1
+    v1_dot_v2 = np.tensordot(v_arr1, v_arr2, (0, 0))
+    print(v1_dot_v2)
+    # if v1_dot_v2 == -1 or v1_dot_v2 == 1:
+    #     # Whenever v1 and v2 are parallel to each other, we can use an arbitrary vector that is NOT parallel to v1 and v2
+    #     # So call this function recursively until a non-parallel vector has been found
+    #     return get_perpendicular_vector(np.random.rand(3), v2)
+    # else:
+    #     return norm(np.cross(v1, v2))
+    pass
+
+
 def norm(v) -> np.ndarray:
     """Normalises the given vector v and returns it afterwards.
 
