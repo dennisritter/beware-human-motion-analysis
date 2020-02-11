@@ -139,14 +139,15 @@ class Sequence:
         nodes = list(scene_graph.nodes)
         # Find root_node
         for node in nodes:
-            # Predefine node data attributes to store data for each frame of the sequence
-            scene_graph.nodes[node]['coordinate_system'] = []
-            scene_graph.nodes[node]['angles'] = []
-
             predecessors = list(scene_graph.predecessors(node))
             if not predecessors:
                 root_node = node
                 break
+
+        # Predefine node data attributes to store data for each frame of the sequence
+        for node in scene_graph.nodes:
+            scene_graph.nodes[node]['coordinate_system'] = []
+            scene_graph.nodes[node]['angles'] = []
 
         # Predefine edge data lists to store data for each frame of the sequence
         for n1, n2 in scene_graph.edges:
@@ -236,7 +237,7 @@ class Sequence:
         return
 
     def to_json(self) -> str:
-        # TODO: serialize scene_graph.
+        # TODO: serialize scene_graph. Als ndarrays must be transferred to lists before.
         """Returns the sequence instance as a json-formatted string."""
         json_dict = {
             'name': self.name,
