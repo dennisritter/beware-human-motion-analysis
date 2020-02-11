@@ -9,11 +9,12 @@ import hma.movement_analysis.transformations as transformations
 import hma.movement_analysis.angle_representations as ar
 import time
 
+
 # TODO: Handle expensive calculations with batches instead of loops to increase performance
 # TODO: Implement Lazy Loading for props that are expensive to calculate (e.g. joint angles, Scene_graph data)
 # TODO: Test from_json and to_json methods for whether they (de)serialize the scene_graph properly
 # TODO: Consider outsourcing medical joint_angle calculations and attribute to another module/script/class
-#       Maybe a place to handle medical related stuff would be nice to get a clean seperation.  
+#       Maybe a place to handle medical related stuff would be nice to get a clean seperation.
 class Sequence:
     """Represents a motion sequence.
 
@@ -24,7 +25,6 @@ class Sequence:
         name (str): The name of this sequence.
         joint_angles (list): The calculated angles derived from the tracked positions of this sequence
     """
-
     def __init__(self,
                  body_parts: dict,
                  positions: np.ndarray,
@@ -54,7 +54,7 @@ class Sequence:
         # Timestamps for when the positions have been tracked
         # Example: [<someTimestamp1>, <someTimestamp2>, <someTimestamp3>, ...]
         self.timestamps = np.array(timestamps)[zero_frames_filter_list]
-        
+
         # A directed graph that defines the hierarchy between human body parts
         self.scene_graph = nx.DiGraph([
             ("pelvis", "torso"),
@@ -73,10 +73,7 @@ class Sequence:
             ("hip_r", "knee_r"),
             ("knee_r", "ankle_r"),
         ]) if scene_graph is None else scene_graph.copy()
-        start_time = time.time()
         self._fill_scenegraph(self.scene_graph, self.positions)
-        elapsed_time = time.time() - start_time
-        print(elapsed_time)        
 
         # Stores joint angles for each frame
         # NOTE: Body part indices are the indices stored in self.body_parts.
@@ -118,7 +115,7 @@ class Sequence:
                 if data_list:
                     scene_graph[e1][e2][data_list] = scene_graph[e1][e2][data_list][start:stop:step]
         self.scene_graph = scene_graph
-        
+
         return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.name, self.joint_angles[start:stop:step],
                         self.scene_graph)
 
@@ -142,15 +139,14 @@ class Sequence:
         nodes = list(scene_graph.nodes)
         # Find root_node
         for node in nodes:
+            # Predefine node data attributes to store data for each frame of the sequence
+            scene_graph.nodes[node]['coordinate_system'] = []
+            scene_graph.nodes[node]['angles'] = []
+
             predecessors = list(scene_graph.predecessors(node))
             if not predecessors:
                 root_node = node
                 break
-
-        # Predefine node data attributes to store data for each frame of the sequence
-        for node in scene_graph.nodes:
-            scene_graph.nodes[node]['coordinate_system'] = []
-            scene_graph.nodes[node]['angles'] = []
 
         # Predefine edge data lists to store data for each frame of the sequence
         for n1, n2 in scene_graph.edges:
@@ -240,7 +236,7 @@ class Sequence:
         return
 
     def to_json(self) -> str:
-        # TODO: serialize scene_graph. Als ndarrays must be transferred to lists before.
+        # TODO: serialize scene_graph.
         """Returns the sequence instance as a json-formatted string."""
         json_dict = {
             'name': self.name,
@@ -376,7 +372,6 @@ class Sequence:
         ball_joints = ['shoulder_l', 'shoulder_r', 'hip_l', 'hip_r']
         non_ball_joints = ['elbow_l', 'elbow_r', 'knee_l', 'knee_r']
 
-
         for node in self.scene_graph.nodes:
             if 'angles' in self.scene_graph.nodes[node].keys():
                 for frame, angle_types in enumerate(self.scene_graph.nodes[node]['angles']):
@@ -386,7 +381,7 @@ class Sequence:
                         joint_angles[frame][bp[node]] = ar.medical_from_euler('zxz', angle_types['euler_zxz'], node)
                     else:
                         joint_angles[frame][bp[node]] = np.array([None, None, None])
-                        
+
         return joint_angles
 
     def get_positions_2d(self) -> np.ndarray:
@@ -407,7 +402,7 @@ class Sequence:
         # concatenate positions, timestamps and angles
         self.positions = np.concatenate((self.positions, sequence.positions), axis=0)
         self.timestamps = np.concatenate((self.timestamps, sequence.timestamps), axis=0)
-        
+
         # Concatenate scene_graph data lists
         for node in self.scene_graph.nodes:
             for data_list in self.scene_graph.nodes[node].keys():

@@ -34,3 +34,6 @@ for i in range(100):
 # print(f"Max Time: {max(times)}")
 # print(f"Min Time: {min(times)}")
 # print(f"Avg Time: {sum(times)/len(times)}")
+start_time = time.time()
+elapsed_time = time.time() - start_time
+print(elapsed_time)
