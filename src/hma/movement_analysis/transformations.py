@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from scipy.spatial.transform import Rotation
+import sklearn.preprocessing as preprocessing
 
 
 def get_angle(v1, v2):
@@ -48,6 +49,16 @@ def norm(v) -> np.ndarray:
     if v_norm == 0:
         return np.zeros(3)
     return v / v_norm
+
+
+def norm_batch(v_arr):
+    """Normalises the given vectors of v_arr and returns them in an array afterwards.
+
+    Args:
+        v_arr (np.ndarray): A numpy array of vectors to normalise.
+    """
+
+    return preprocessing.normalize(v_arr, norm='l2')
 
 
 def rotation_matrix_4x4(axis, theta) -> np.ndarray:
