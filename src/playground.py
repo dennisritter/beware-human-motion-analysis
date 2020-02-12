@@ -25,16 +25,19 @@ filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__s
 # filename = "data/sequences/191024_tracking/single/overhead_press/user-2/191024__single__overhead_press__user-2__1.json"
 # filename = "data/sequences/191024_tracking/single/lunge_left/user-2/191024__single__lunge_left__user-2__1.json"
 v1 = [1, 2, 3]
-v2 = [3, 2, 1]
-v3 = [1, 3, 3]
-v4 = [0, 0, 0]
-v_arr1 = np.array([v1, v2, v3, v4])
-v_arr2 = np.array([v3, v4, v2, v1])
+v2 = [1, 23, -123]
+v3 = [-1, -1, -1]
+v4 = [5, 5, 5]
+v_arr1 = np.array([v1, v1])
+v_arr2 = np.array([v2, v3])
 
-print(np.dot(v1, v3))
-print(np.dot(v2, v4))
-print(np.dot(v3, v2))
-print(np.dot(v4, v1))
+print(np.array(v1).shape)
+
+p1 = transformations.get_perpendicular_vector(v1, v2)
+p2 = transformations.get_perpendicular_vector(v1, v3)
+print(p1)
+print(p2)
 print("--------------------------------")
-print(np.tensordot(v_arr1, v_arr2, axes=2))
-# transformations.get_perpendicular_vector_batch(v_arr1, v_arr2)
+pb = transformations.get_perpendicular_vector_batch(v_arr1, v_arr2)
+print(pb)
+print("--------------------------------")

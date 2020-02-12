@@ -49,17 +49,30 @@ def get_perpendicular_vector_batch(v_arr1, v_arr2):
     v_arr1 = norm_batch(v_arr1)
     v_arr2 = norm_batch(v_arr2)
 
-    # If theta 180° (dot product = -1)
-    # v1_dot_v2 = v_arr2 @ v_arr1
-    v1_dot_v2 = np.tensordot(v_arr1, v_arr2, (0, 0))
-    print(v1_dot_v2)
-    # if v1_dot_v2 == -1 or v1_dot_v2 == 1:
-    #     # Whenever v1 and v2 are parallel to each other, we can use an arbitrary vector that is NOT parallel to v1 and v2
-    #     # So call this function recursively until a non-parallel vector has been found
-    #     return get_perpendicular_vector(np.random.rand(3), v2)
-    # else:
-    #     return norm(np.cross(v1, v2))
-    pass
+    # Matrix multiplication to get dot products of all rows of A and columns of B
+    # The diagonal values of the resulting product matrix represent the dot product of A[n] and B[n] in the original arrays
+    dot_products = dot_batch(v_arr1, v_arr2)
+    # Get indices of vector pairs that are parallel theta 0°/180° (dot product = 1 or -1)
+    parallel_vector_indices = np.where((dot_products == -1) | (dot_products == 1))[0]
+    for idx in parallel_vector_indices:
+        # Replace all vectors of v_arr1 that are parallel to the respective vector in v_arr2 by random unparallel vectors
+        v_arr1[idx] = random_unparallel_vector(v_arr2[idx])
+
+    return norm_batch(np.cross(v_arr1, v_arr2))
+
+
+def random_unparallel_vector(v1):
+    """Returns an unparallel vector to v1 with same dimension. """
+    v2 = np.random.rand(v1.shape[0])
+    v1_dot_v2 = np.dot(v1, v2)
+    if v1_dot_v2 == -1 or v1_dot_v2 == 1:
+        return random_unparallel_vector(v1)
+    else:
+        return v2
+
+
+def dot_batch(va1, va2) -> np.ndarray:
+    return (va1 @ va2.transpose()).diagonal()
 
 
 def norm(v) -> np.ndarray:
