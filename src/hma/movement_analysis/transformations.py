@@ -143,6 +143,25 @@ def translation_matrix_4x4(v) -> np.ndarray:
     return T
 
 
+def translation_matrix_4x4_batch(v_arr) -> np.ndarray:
+    """Returns an array of 4x4 Matrices, each representing a translation.
+
+    Args:
+        v_arr (np.ndarray): An array of vectors defining translations.
+
+    Returns:
+        (np.ndarray) Array of 4x4 transformation matrices, each representing a translation as defined by respective vectors in v_arr.
+    """
+    M = np.empty([len(v_arr), 4, 4])
+    I = [[1.0, 0, 0, 0],
+        [0, 1.0, 0, 0],
+        [0, 0, 1.0, 0],
+        [0, 0, 0, 1.0]] # yapf: disable
+    M[:] = I
+    M[:, :3, 3] = v_arr[:, :]
+    return M
+
+
 def get_local_coordinate_system_direction_vectors(origin, x_direction_bp_pos, y_direction_bp_pos):
     # New X-Axis from origin to x_direction
     vx = x_direction_bp_pos - origin

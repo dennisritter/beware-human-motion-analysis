@@ -146,7 +146,7 @@ class Sequence:
 
         # Predefine node data attributes to store data for each frame of the sequence
         for node in scene_graph.nodes:
-            scene_graph.nodes[node]['coordinate_system'] = []
+            scene_graph.nodes[node]['coordinate_system'] = {"origin": None, "x_axis": None, "y_axis": None, "z_axis": None}
             scene_graph.nodes[node]['angles'] = []
 
         # Predefine edge data lists to store data for each frame of the sequence
@@ -163,13 +163,18 @@ class Sequence:
 
         # Root Node handling
         if node == root_node:
-            # The node with no predecessors is the root node, so add the initial coordinate system to its node data for all frames
-            scene_graph.nodes[node]['coordinate_system'] = [{
-                "origin": np.array([0, 0, 0]),
-                "x_axis": np.array([1, 0, 0]),
-                "y_axis": np.array([0, 1, 0]),
-                "z_axis": np.array([0, 0, 1])
-            }] * n_frames
+            # The node with no predecessors is the root node, so add the initial coordinate system vectors
+            scene_graph.nodes[node]['coordinate_system']['origin'] = np.zeros((n_frames, 3))
+            x_axes = np.empty([n_frames, 3])
+            x_axes[:] = np.array([1, 0, 0])
+            scene_graph.nodes[node]['coordinate_system']['x_axis'] = x_axes
+            y_axes = np.empty([n_frames, 3])
+            y_axes[:] = np.array([0, 1, 0])
+            scene_graph.nodes[node]['coordinate_system']['y_axis'] = y_axes
+            z_axes = np.empty([n_frames, 3])
+            z_axes[:] = np.array([0, 0, 1])
+            scene_graph.nodes[node]['coordinate_system']['z_axis'] = z_axes
+
             # Repeat function recursive for each child node of the root node
             for child_node in successors:
                 self._calc_scene_graph_transformations_batch(scene_graph, child_node, root_node, positions)
@@ -182,17 +187,20 @@ class Sequence:
         parent_pos = positions[:, self.body_parts[parent_node]]
         parent_cs = scene_graph.nodes[parent_node]['coordinate_system']
 
-        T = transformations.translation_matrix_4x4(node_pos - parent_pos)
+        T = transformations.translation_matrix_4x4_batch(node_pos - parent_pos)
         # If No successors or more than one successor present, add translation only to (parent_node, node) edge.
         # TODO: How can we circumvent to check whether node == "torso" ?
         if len(successors) != 1 or node == "torso":
-            scene_graph[parent_node][node]['transformation'].append(T)
-            scene_graph.nodes[node]['coordinate_system'].append({
+            scene_graph[parent_node][node]['transformation'] = T
+            #TODO: Do.
+            # Batch wise matmulnp.einsum('ijk, ik -> ij', m, v)
+            cs = {
                 "origin": (T @ np.append(parent_cs['origin'], 1))[:3],
                 "x_axis": transformations.norm((np.append(parent_cs['x_axis'], 1))[:3]),
                 "y_axis": transformations.norm((np.append(parent_cs['y_axis'], 1))[:3]),
                 "z_axis": transformations.norm((np.append(parent_cs['z_axis'], 1))[:3])
-            })
+            }
+            scene_graph.nodes[node]['coordinate_system'] = cs
         elif len(successors) == 1:
             child_node = successors[0]
             child_pos = positions[frame, self.body_parts[child_node]]
