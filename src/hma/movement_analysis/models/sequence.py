@@ -155,7 +155,85 @@ class Sequence:
 
         for frame, _ in enumerate(positions):
             # Start recursive function with root node in our directed scene_graph
-            self._calc_scene_graph_transformations(scene_graph, root_node, root_node, positions, frame)
+            self._calc_scene_graph_transformations_batch(scene_graph, root_node, root_node, positions)
+
+    def _calc_scene_graph_transformations_batch(self, scene_graph, node, root_node, positions):
+        n_frames = len(positions)
+        successors = list(scene_graph.successors(node))
+
+        # Root Node handling
+        if node == root_node:
+            # The node with no predecessors is the root node, so add the initial coordinate system to its node data for all frames
+            scene_graph.nodes[node]['coordinate_system'] = [{
+                "origin": np.array([0, 0, 0]),
+                "x_axis": np.array([1, 0, 0]),
+                "y_axis": np.array([0, 1, 0]),
+                "z_axis": np.array([0, 0, 1])
+            }] * n_frames
+            # Repeat function recursive for each child node of the root node
+            for child_node in successors:
+                self._calc_scene_graph_transformations_batch(scene_graph, child_node, root_node, positions)
+            return
+
+        node_pos = positions[:, self.body_parts[node]]
+        predecessors = list(scene_graph.predecessors(node))
+
+        parent_node = predecessors[0]
+        parent_pos = positions[:, self.body_parts[parent_node]]
+        parent_cs = scene_graph.nodes[parent_node]['coordinate_system']
+
+        T = transformations.translation_matrix_4x4(node_pos - parent_pos)
+        # If No successors or more than one successor present, add translation only to (parent_node, node) edge.
+        # TODO: How can we circumvent to check whether node == "torso" ?
+        if len(successors) != 1 or node == "torso":
+            scene_graph[parent_node][node]['transformation'].append(T)
+            scene_graph.nodes[node]['coordinate_system'].append({
+                "origin": (T @ np.append(parent_cs['origin'], 1))[:3],
+                "x_axis": transformations.norm((np.append(parent_cs['x_axis'], 1))[:3]),
+                "y_axis": transformations.norm((np.append(parent_cs['y_axis'], 1))[:3]),
+                "z_axis": transformations.norm((np.append(parent_cs['z_axis'], 1))[:3])
+            })
+        elif len(successors) == 1:
+            child_node = successors[0]
+            child_pos = positions[frame, self.body_parts[child_node]]
+
+            # --Determine Joint Rotation--
+            scene_graph.nodes[node]['angles'].append({})
+            # Get parent coordinate system Z-axis as reference for nodes' joint rotation
+            parent_cs_z = parent_cs['z_axis']
+            # Get direction vector from node to child to determine rotation of nodes' joint
+            node_to_child_node = transformations.norm(child_pos - node_pos)
+            # Joint angles as 4x4 homogenious rotation matrix
+            R_parent_to_node = transformations.get_rotation(-parent_cs_z, node_to_child_node)
+
+            # Get Euler Sequences to be able to determine medical joint angles
+            # NOTE: Scipy from_dcm() function has been renamed to 'as_matrix()' in scipy=1.4.*
+            #       lates version for win64 is still 1.3.* ; Consider updating scipy dependency when 1.4.* is available for win64.
+            euler_angles_xyz = Rotation.from_dcm(R_parent_to_node[:3, :3]).as_euler('XYZ', degrees=True)
+            euler_angles_yxz = Rotation.from_dcm(R_parent_to_node[:3, :3]).as_euler('YXZ', degrees=True)
+            euler_angles_zxz = Rotation.from_dcm(R_parent_to_node[:3, :3]).as_euler('ZXZ', degrees=True)
+
+            # Store transformation from parent to current node in corresponding edge
+            scene_graph[parent_node][node]['transformation'].append(T @ R_parent_to_node)
+            # Store Rotation Matrix
+            scene_graph.nodes[node]['angles'][frame]['rotation_matrix'] = np.array(R_parent_to_node)
+            # Store Euler Sequences
+            scene_graph.nodes[node]['angles'][frame]['euler_xyz'] = euler_angles_xyz
+            scene_graph.nodes[node]['angles'][frame]['euler_yxz'] = euler_angles_yxz
+            scene_graph.nodes[node]['angles'][frame]['euler_zxz'] = euler_angles_zxz
+            # Store the nodes coordinate system
+            scene_graph.nodes[node]['coordinate_system'].append({
+                "origin": (T @ np.append(parent_cs['origin'], 1))[:3],
+                "x_axis": transformations.norm((R_parent_to_node @ np.append(parent_cs['x_axis'], 1))[:3]),
+                "y_axis": transformations.norm((R_parent_to_node @ np.append(parent_cs['y_axis'], 1))[:3]),
+                "z_axis": transformations.norm((R_parent_to_node @ np.append(parent_cs['z_axis'], 1))[:3])
+            })
+
+        # Repeat procedure if successors present
+        for child_node in successors:
+            self._calc_scene_graph_transformations(scene_graph, child_node, root_node, positions, frame)
+
+        return
 
     def _calc_scene_graph_transformations(self, scene_graph, node, root_node, positions, frame):
         successors = list(scene_graph.successors(node))
