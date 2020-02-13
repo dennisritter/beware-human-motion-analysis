@@ -121,6 +121,14 @@ def mat_mul_batch(a, b):
             raise ValueError('The parameters dimensions are not supported.\nSuppported dimensions: (2,3), (3,2), (3,3)')
 
 
+def v3_to_v4(v):
+    return np.append(v, 1)
+
+
+def v3_to_v4_batch(v):
+    return np.hstack((v, np.ones(len(v)).reshape((2, 1))))
+
+
 def rotation_matrix_4x4(axis, theta) -> np.ndarray:
     # Source: https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
     """
