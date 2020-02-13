@@ -24,10 +24,14 @@ filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__s
 # filename = "data/sequences/191024_tracking/single/triceps_extension_right/user-2/191024__single__triceps_extension_right__user-2__1.json"
 # filename = "data/sequences/191024_tracking/single/overhead_press/user-2/191024__single__overhead_press__user-2__1.json"
 # filename = "data/sequences/191024_tracking/single/lunge_left/user-2/191024__single__lunge_left__user-2__1.json"
-# sequence = Sequence.from_mocap_file(filename)
 
-m = np.array([[[2, 2], [2, 2]], [[3, 3], [3, 3]], [[5, 8], [7, -1]]])
-v = np.array([[2, 2]])
-es = 
-print(np.array([[[5, 8], [7, -1]]]) @ np.array([2, 2]))
-print(es)
+start_time = time.time()
+sequence = Sequence.from_mocap_file(filename)
+end_time = time.time()
+elapsed = end_time - start_time
+print(elapsed)
+
+print(sequence.joint_angles[:50, 2])
+s = sequence[0:50]
+sv = SkeletonVisualiser(s)
+sv.show()
