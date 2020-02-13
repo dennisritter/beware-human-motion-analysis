@@ -98,14 +98,27 @@ def norm_batch(v_arr):
 
 
 def mat_mul_batch(a, b):
-    if a.ndim == 3 and b.ndim == 2:
-        return np.einsum('ijk, ik -> ij', a, b)
-    elif a.ndim == 2 and b.ndim == 3:
-        return np.einsum('ik, ijk -> ik', a, b)
-    elif a.ndim == 3 and b.ndim == 3:
-        return np.einsum('ijk, ikl -> ijl', a, b)
+    """Performs an element-wise Matrix multiplication for each element in the given arrays.
+
+    The batch-wise matrix multiplication is equivalent to a @ b for each element in a and b respectively.
+    The returned np.array contains the resulting 1-D or 2-D np.arrays depending on the dimensions of parameters a and b.
+
+    Args:
+        a (np.ndarray): An array of vectors or matrices (1-D or 2-D np.arrays)
+        b (np.ndarray): An array of vectors or matrices (1-D or 2-D np.arrays)
+
+    """
+    if len(a) != len(b):
+        raise ValueError('The number of elements in the first dimension of parameters a and b should be equal.')
     else:
-        raise ValueError('The parameters dimensions are not supported.\nSuppported dimensions: (2,3), (3,2), (3,3)')
+        if a.ndim == 3 and b.ndim == 2:
+            return np.einsum('ijk, ik -> ij', a, b)
+        elif a.ndim == 2 and b.ndim == 3:
+            return np.einsum('ik, ijk -> ik', a, b)
+        elif a.ndim == 3 and b.ndim == 3:
+            return np.einsum('ijk, ikl -> ijl', a, b)
+        else:
+            raise ValueError('The parameters dimensions are not supported.\nSuppported dimensions: (2,3), (3,2), (3,3)')
 
 
 def rotation_matrix_4x4(axis, theta) -> np.ndarray:
