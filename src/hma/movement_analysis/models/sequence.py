@@ -108,9 +108,12 @@ class Sequence:
         # Slice All data lists stored in the scene_graphs nodes and edges
         scene_graph = self.scene_graph.copy()
         for node in scene_graph.nodes:
-            for data_list in scene_graph.nodes[node].keys():
-                if data_list:
-                    scene_graph.nodes[node][data_list] = scene_graph.nodes[node][data_list][start:stop:step]
+            for vector_list in scene_graph.nodes[node]['coordinate_system'].keys():
+                if vector_list:
+                    scene_graph.nodes[node]['coordinate_system'][vector_list][start:stop:step]
+            for angle_list in scene_graph.nodes[node]['angles'].keys():
+                if angle_list:
+                    scene_graph.nodes[node]['angles'][angle_list][start:stop:step]
         for e1, e2 in scene_graph.edges:
             for data_list in scene_graph[e1][e2].keys():
                 if data_list:

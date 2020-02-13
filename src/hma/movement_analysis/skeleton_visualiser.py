@@ -9,6 +9,7 @@ class SkeletonVisualiser:
     Attributes:
         sequence (Sequence): The motion sequence to visualise the skeleton from.
     """
+
     def __init__(
             self,
             sequence: 'Sequence',
@@ -188,7 +189,7 @@ class SkeletonVisualiser:
             [bp["hip_r"], bp["knee_r"]],
             [bp["knee_l"], bp["ankle_l"]],
             [bp["knee_r"], bp["ankle_r"]]
-        ] # yapf: disable
+        ]  # yapf: disable
         limb_traces = []
         for limb in limb_connections:
             limb_trace = go.Scatter3d(x=[p[frame, limb[0], 0], p[frame, limb[1], 0]],
@@ -205,9 +206,9 @@ class SkeletonVisualiser:
         X-axis-direction and a Y-axis-direction."""
 
         # Set Local Coordinate System vectors' length to 100 and move relative to local origin.
-        x_direction= x_direction * 100 + origin
-        y_direction= y_direction * 100 + origin
-        z_direction= z_direction * 100 + origin
+        x_direction = x_direction * 100 + origin
+        y_direction = y_direction * 100 + origin
+        z_direction = z_direction * 100 + origin
         trace_x = go.Scatter3d(x=[origin[0], x_direction[0]], y=[origin[1], x_direction[1]], z=[origin[2], x_direction[2]], mode="lines", marker=dict(color="red"))
         trace_y = go.Scatter3d(x=[origin[0], y_direction[0]], y=[origin[1], y_direction[1]], z=[origin[2], y_direction[2]], mode="lines", marker=dict(color="green"))
         trace_z = go.Scatter3d(x=[origin[0], z_direction[0]], y=[origin[1], z_direction[1]], z=[origin[2], z_direction[2]], mode="lines", marker=dict(color="blue"))
@@ -254,13 +255,12 @@ class SkeletonVisualiser:
         scene_graph = self.sequence.scene_graph
         nodes = list(scene_graph.nodes)
         for node in nodes:
-            node_data = scene_graph.nodes[node]['coordinate_system'][frame]
-            origin = node_data['origin']
-            x_axis = node_data['x_axis']
-            y_axis = node_data['y_axis']
-            z_axis = node_data['z_axis']
+            node_data = scene_graph.nodes[node]['coordinate_system']
+            origin = node_data['origin'][frame]
+            x_axis = node_data['x_axis'][frame]
+            y_axis = node_data['y_axis'][frame]
+            z_axis = node_data['z_axis'][frame]
             jcs_traces += self._make_lcs_trace(origin, x_axis, y_axis, z_axis)
-
 
         return jcs_traces
 
