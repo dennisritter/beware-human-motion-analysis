@@ -97,6 +97,24 @@ def norm_batch(v_arr):
     return preprocessing.normalize(v_arr, norm='l2')
 
 
+def mat_vec_mul_batch(a, b):
+    if a.ndim == 3 and b.ndim == 2:
+        return np.einsum('ijk, ik -> ij', a, b)
+    elif a.ndim != 3:
+        raise ValueError('The first parameter a should be a matrix of matrices (a.ndim == 3)')
+    elif b.ndim != 2:
+        raise ValueError('The second parameter b should be a matrix of vectors (b.ndim == 2)')
+
+
+def mat_mat_mul_batch(a, b):
+    if a.ndim == 3 and b.ndim == 3:
+        return np.einsum('ijk, ikl -> ijl', a, b)
+    elif a.ndim != 3:
+        raise ValueError('The first parameter a should be a matrix of matrices (a.ndim == 3)')
+    elif b.ndim != 3:
+        raise ValueError('The second parameter b should be a matrix of matrices (b.ndim == 3)')
+
+
 def rotation_matrix_4x4(axis, theta) -> np.ndarray:
     # Source: https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
     """
@@ -154,9 +172,9 @@ def translation_matrix_4x4_batch(v_arr) -> np.ndarray:
     """
     M = np.empty([len(v_arr), 4, 4])
     I = [[1.0, 0, 0, 0],
-        [0, 1.0, 0, 0],
-        [0, 0, 1.0, 0],
-        [0, 0, 0, 1.0]] # yapf: disable
+         [0, 1.0, 0, 0],
+         [0, 0, 1.0, 0],
+         [0, 0, 0, 1.0]]  # yapf: disable
     M[:] = I
     M[:, :3, 3] = v_arr[:, :]
     return M
