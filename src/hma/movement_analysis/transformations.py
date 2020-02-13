@@ -30,9 +30,9 @@ def get_rotation_batch(v1, v2):
     """Returns a homogenious 4x4 transformation matrix without translation vector that describes the rotational transformation from v1 to v2"""
     v1 = norm_batch(v1)
     v2 = norm_batch(v2)
-    theta = get_angle(v1, v2)
+    theta = get_angle_batch(v1, v2)
     rotation_axis = get_perpendicular_vector_batch(v1, v2)
-    R = rotation_matrix_4x4(rotation_axis, theta)
+    R = rotation_matrix_4x4_batch(rotation_axis, theta)
     return R
 
 
@@ -47,7 +47,6 @@ def get_perpendicular_vector(v1, v2):
     v2 = norm(v2)
 
     # If theta 180° (dot product = -1)
-    # print(np.dot(v1, v2))
     v1_dot_v2 = np.dot(v1, v2)
     if v1_dot_v2 == -1 or v1_dot_v2 == 1:
         # Whenever v1 and v2 are parallel to each other, we can use an arbitrary vector that is NOT parallel to v1 and v2
@@ -111,7 +110,8 @@ def norm_batch(v_arr):
     Args:
         v_arr (np.ndarray): A numpy array of vectors to normalise.
     """
-
+    # print(preprocessing.normalize(v_arr, norm='l2'))
+    # print('------------------------')
     return preprocessing.normalize(v_arr, norm='l2')
 
 
@@ -172,6 +172,35 @@ def rotation_matrix_4x4(axis, theta) -> np.ndarray:
         [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc, 0],
         [0, 0, 0, 1]
     ])  # yapf: disable
+
+
+def rotation_matrix_4x4_batch(axis, theta) -> np.ndarray:
+    # Source: https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
+    """
+    Returns an array of rotation matrices each associated with counterclockwise rotation about
+    the respective axis by theta in degrees as 4x4 Transformation Matrix
+
+    Args:
+        axis(np.array): The vectors to rotate about.
+        theta(float): The degrees to rotate about the respective axis.
+
+    Returns:
+        (np.ndarray) An array containing 4x4 rotation matrices representing rotations about the given axes
+    """
+    matrices = np.empty([len(theta), 4, 4])
+    axis = norm_batch(np.asarray(axis))
+    for i, _ in enumerate(theta):
+        a = math.cos(theta[i] / 2.0)
+        b, c, d = -axis[i] * math.sin(theta[i] / 2.0)
+        aa, bb, cc, dd = a * a, b * b, c * c, d * d
+        bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
+        matrices[i] = np.array([
+            [aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac), 0],
+            [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab), 0],
+            [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc, 0],
+            [0, 0, 0, 1]
+        ])  # yapf: disable
+    return matrices
 
 
 def translation_matrix_4x4(v) -> np.ndarray:
