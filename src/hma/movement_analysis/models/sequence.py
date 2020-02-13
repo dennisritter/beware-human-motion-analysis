@@ -10,7 +10,6 @@ import hma.movement_analysis.angle_representations as ar
 import time
 
 
-# TODO: Handle expensive calculations with batches instead of loops to increase performance
 # TODO: Implement Lazy Loading for props that are expensive to calculate (e.g. joint angles, Scene_graph data)
 # TODO: Test from_json and to_json methods for whether they (de)serialize the scene_graph properly
 # TODO: Consider outsourcing medical joint_angle calculations and attribute to another module/script/class
@@ -106,6 +105,7 @@ class Sequence:
             raise TypeError(f"Invalid argument type: {type(item)}")
 
         # Slice All data lists stored in the scene_graphs nodes and edges
+        # TODO: Refactor to perform slicing generic (?)
         scene_graph = self.scene_graph.copy()
         for node in scene_graph.nodes:
             for vector_list in scene_graph.nodes[node]['coordinate_system'].keys():
@@ -410,13 +410,20 @@ class Sequence:
 
         # Concatenate scene_graph data lists
         for node in self.scene_graph.nodes:
-            for data_list in self.scene_graph.nodes[node].keys():
-                if data_list and data_list in sequence.scene_graph.nodes[node]:
-                    self.scene_graph.nodes[node][data_list] += sequence.scene_graph.nodes[node][data_list]
+            for vector_list in self.scene_graph.nodes[node]['coordinate_system'].keys():
+                if vector_list and vector_list in sequence.scene_graph.nodes[node]:
+                    self.scene_graph.nodes[node]['coordinate_system'][vector_list] += sequence.scene_graph.nodes[node]['coordinate_system'][vector_list]
                 # If appending sequence has no data in scene_graph, add it beforehand
-                elif data_list and data_list not in sequence.scene_graph.nodes[node]:
+                elif vector_list and vector_list not in sequence.scene_graph.nodes[node]:
                     sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
-                    self.scene_graph.nodes[node][data_list] += sequence.scene_graph.nodes[node][data_list]
+                    self.scene_graph.nodes[node]['coordinate_system'][vector_list] += sequence.scene_graph.nodes[node]['coordinate_system'][vector_list]
+            for angle_list in self.scene_graph.nodes[node]['angles'].keys():
+                if angle_list and angle_list in sequence.scene_graph.nodes[node]:
+                    self.scene_graph.nodes[node]['angles'][angle_list] += sequence.scene_graph.nodes[node]['angles'][angle_list]
+                # If appending sequence has no data in scene_graph, add it beforehand
+                elif angle_list and angle_list not in sequence.scene_graph.nodes[node]:
+                    sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
+                    self.scene_graph.nodes[node]['angles'][angle_list] += sequence.scene_graph.nodes[node]['angles'][angle_list]
 
         for e1, e2 in self.scene_graph.edges:
             for data_list in self.scene_graph[e1][e2].keys():
