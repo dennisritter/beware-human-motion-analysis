@@ -377,14 +377,13 @@ class Sequence:
 
         for node in self.scene_graph.nodes:
             if 'angles' in self.scene_graph.nodes[node].keys():
-                for frame, angle_types in enumerate(self.scene_graph.nodes[node]['angles']):
-                    if node in ball_joints:
-                        joint_angles[frame][bp[node]] = ar.medical_from_euler('xyz', angle_types['euler_xyz'], node)
-                    elif node in non_ball_joints:
-                        joint_angles[frame][bp[node]] = ar.medical_from_euler('zxz', angle_types['euler_zxz'], node)
-                    else:
-                        joint_angles[frame][bp[node]] = np.array([None, None, None])
-
+                angles_dict = self.scene_graph.nodes[node]['angles']
+                if node in ball_joints:
+                    joint_angles[:, bp[node]] = ar.medical_from_euler_batch('xyz', angles_dict['euler_xyz'], node)
+                elif node in non_ball_joints:
+                    joint_angles[:, bp[node]] = ar.medical_from_euler_batch('zxz', angles_dict['euler_zxz'], node)
+                else:
+                    joint_angles[:, bp[node]] = np.array([None, None, None])
         return joint_angles
 
     def get_positions_2d(self) -> np.ndarray:
