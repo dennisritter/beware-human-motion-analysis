@@ -97,22 +97,15 @@ def norm_batch(v_arr):
     return preprocessing.normalize(v_arr, norm='l2')
 
 
-def mat_vec_mul_batch(a, b):
+def mat_mul_batch(a, b):
     if a.ndim == 3 and b.ndim == 2:
         return np.einsum('ijk, ik -> ij', a, b)
-    elif a.ndim != 3:
-        raise ValueError('The first parameter a should be a matrix of matrices (a.ndim == 3)')
-    elif b.ndim != 2:
-        raise ValueError('The second parameter b should be a matrix of vectors (b.ndim == 2)')
-
-
-def mat_mat_mul_batch(a, b):
-    if a.ndim == 3 and b.ndim == 3:
+    elif a.ndim == 2 and b.ndim == 3:
+        return np.einsum('ik, ijk -> ik', a, b)
+    elif a.ndim == 3 and b.ndim == 3:
         return np.einsum('ijk, ikl -> ijl', a, b)
-    elif a.ndim != 3:
-        raise ValueError('The first parameter a should be a matrix of matrices (a.ndim == 3)')
-    elif b.ndim != 3:
-        raise ValueError('The second parameter b should be a matrix of matrices (b.ndim == 3)')
+    else:
+        raise ValueError('The parameters dimensions are not supported.\nSuppported dimensions: (2,3), (3,2), (3,3)')
 
 
 def rotation_matrix_4x4(axis, theta) -> np.ndarray:
