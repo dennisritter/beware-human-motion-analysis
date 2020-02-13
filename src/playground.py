@@ -27,7 +27,7 @@ filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__s
 # filename = "data/sequences/test/100_frames.json"
 
 times = []
-n = 100
+n = 1
 for i in range(0, n):
     start_time = time.time()
     sequence = Sequence.from_mocap_file(filename)
@@ -35,4 +35,14 @@ for i in range(0, n):
     elapsed = end_time - start_time
     times.append(elapsed)
 
-print(sum(times)/len(times))
+print(sum(times) / len(times))
+
+s = sequence[0]
+s2 = sequence[1]
+
+print(s.joint_angles)
+print(s2.joint_angles)
+s.merge(s2)
+
+print('-----------')
+print(s.joint_angles)

@@ -14,6 +14,7 @@ import time
 # TODO: Test from_json and to_json methods for whether they (de)serialize the scene_graph properly
 # TODO: Consider outsourcing medical joint_angle calculations and attribute to another module/script/class
 #       Maybe a place to handle medical related stuff would be nice to get a clean seperation.
+# TODO: Refactor __getitem__ and merge functions to be more generic (optional)
 class Sequence:
     """Represents a motion sequence.
 
@@ -23,6 +24,7 @@ class Sequence:
         timestamps (list): The timestamps for each tracked frame.
         name (str): The name of this sequence.
         joint_angles (list): The calculated angles derived from the tracked positions of this sequence
+        scene_graph (networkx.DiGraph): A Directed Graph defining the hierarchy between body parts that will be filled with related data 
     """
 
     def __init__(self,
