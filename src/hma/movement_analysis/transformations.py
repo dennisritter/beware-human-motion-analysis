@@ -5,7 +5,15 @@ import sklearn.preprocessing as preprocessing
 
 
 def get_angle(v1, v2):
+    """Returns the angle between vectors v1 and v2 (normalized) in degrees"""
     return np.arccos(np.dot(norm(v1), norm(v2)))
+
+
+def get_angle_batch(v1, v2):
+    """Returns the angle between each vectors of v1 and v2 (normalized) in degrees respectively"""
+    v1 = norm_batch(v1)
+    v2 = norm_batch(v2)
+    return np.arccos(dot_batch(v1, v2))
 
 
 def get_rotation(v1, v2):
@@ -14,6 +22,16 @@ def get_rotation(v1, v2):
     v2 = norm(v2)
     theta = get_angle(v1, v2)
     rotation_axis = get_perpendicular_vector(v1, v2)
+    R = rotation_matrix_4x4(rotation_axis, theta)
+    return R
+
+
+def get_rotation_batch(v1, v2):
+    """Returns a homogenious 4x4 transformation matrix without translation vector that describes the rotational transformation from v1 to v2"""
+    v1 = norm_batch(v1)
+    v2 = norm_batch(v2)
+    theta = get_angle(v1, v2)
+    rotation_axis = get_perpendicular_vector_batch(v1, v2)
     R = rotation_matrix_4x4(rotation_axis, theta)
     return R
 
@@ -126,7 +144,7 @@ def v3_to_v4(v):
 
 
 def v3_to_v4_batch(v):
-    return np.hstack((v, np.ones(len(v)).reshape((2, 1))))
+    return np.hstack((v, np.ones(len(v)).reshape((len(v), 1))))
 
 
 def rotation_matrix_4x4(axis, theta) -> np.ndarray:
