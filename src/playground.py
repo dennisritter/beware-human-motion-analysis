@@ -24,14 +24,15 @@ filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__s
 # filename = "data/sequences/191024_tracking/single/triceps_extension_right/user-2/191024__single__triceps_extension_right__user-2__1.json"
 # filename = "data/sequences/191024_tracking/single/overhead_press/user-2/191024__single__overhead_press__user-2__1.json"
 # filename = "data/sequences/191024_tracking/single/lunge_left/user-2/191024__single__lunge_left__user-2__1.json"
+# filename = "data/sequences/test/100_frames.json"
 
-start_time = time.time()
-sequence = Sequence.from_mocap_file(filename)
-end_time = time.time()
-elapsed = end_time - start_time
-print(elapsed)
+times = []
+n = 100
+for i in range(0, n):
+    start_time = time.time()
+    sequence = Sequence.from_mocap_file(filename)
+    end_time = time.time()
+    elapsed = end_time - start_time
+    times.append(elapsed)
 
-print(sequence.joint_angles[:50, 2])
-s = sequence[0:50]
-sv = SkeletonVisualiser(s)
-sv.show()
+print(sum(times)/len(times))
