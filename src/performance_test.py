@@ -20,20 +20,15 @@ import time
 # filename = "data/sequences/191024_tracking/single/overhead_press/user-2/191024__single__overhead_press__user-2__1.json"
 # filename = "data/sequences/191024_tracking/single/lunge_left/user-2/191024__single__lunge_left__user-2__1.json"
 
-filename = "data/sequences/test/1_frame.json"
-# filename = "data/sequences/test/100_frames.json"
+# filename = "data/sequences/test/1_frame.json"
+filename = "data/sequences/test/100_frames.json"
 times = []
 n = 100
-
-for i in range(100):
-    # start_time = time.time()
+for i in range(0, n):
+    start_time = time.time()
     sequence = Sequence.from_mocap_file(filename)
-    # elapsed_time = time.time() - start_time
-    # times.append(elapsed_time)
+    end_time = time.time()
+    elapsed = end_time - start_time
+    times.append(elapsed)
 
-# print(f"Max Time: {max(times)}")
-# print(f"Min Time: {min(times)}")
-# print(f"Avg Time: {sum(times)/len(times)}")
-start_time = time.time()
-elapsed_time = time.time() - start_time
-print(elapsed_time)
+print(sum(times) / len(times))

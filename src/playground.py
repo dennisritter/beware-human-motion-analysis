@@ -26,23 +26,21 @@ filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__s
 # filename = "data/sequences/191024_tracking/single/lunge_left/user-2/191024__single__lunge_left__user-2__1.json"
 # filename = "data/sequences/test/100_frames.json"
 
-times = []
-n = 1
-for i in range(0, n):
-    start_time = time.time()
-    sequence = Sequence.from_mocap_file(filename)
-    end_time = time.time()
-    elapsed = end_time - start_time
-    times.append(elapsed)
+sequence = Sequence.from_mocap_file(filename)
+s = sequence[0:10]
+s2 = s[:2]
+s3 = s2.merge(s)
+a = 1
 
-print(sum(times) / len(times))
+# print(len(sequence.joint_angles))
+# print(len(sequence.scene_graph.nodes["shoulder_l"]['coordinate_system']['origin']))
+# print(len(sequence.scene_graph.nodes["shoulder_l"]['coordinate_system']['x_axis']))
+# print(len(sequence.scene_graph.nodes["shoulder_l"]['coordinate_system']['y_axis']))
+# print(len(sequence.scene_graph.nodes["shoulder_l"]['coordinate_system']['z_axis']))
 
-s = sequence[0]
-s2 = sequence[1]
+# print(s.joint_angles)
+# print(s2.joint_angles)
+# s.merge(s2)
 
-print(s.joint_angles)
-print(s2.joint_angles)
-s.merge(s2)
-
-print('-----------')
-print(s.joint_angles)
+# print('-----------')
+# print(s.joint_angles)

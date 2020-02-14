@@ -8,13 +8,13 @@ from hma.movement_analysis import angle_calculations as acm
 import hma.movement_analysis.transformations as transformations
 import hma.movement_analysis.angle_representations as ar
 import time
+import copy
 
 
 # TODO: Implement Lazy Loading for props that are expensive to calculate (e.g. joint angles, Scene_graph data)
 # TODO: Test from_json and to_json methods for whether they (de)serialize the scene_graph properly
 # TODO: Consider outsourcing medical joint_angle calculations and attribute to another module/script/class
 #       Maybe a place to handle medical related stuff would be nice to get a clean seperation.
-# TODO: Refactor __getitem__ and merge functions to be more generic (optional)
 class Sequence:
     """Represents a motion sequence.
 
@@ -26,7 +26,6 @@ class Sequence:
         joint_angles (list): The calculated angles derived from the tracked positions of this sequence
         scene_graph (networkx.DiGraph): A Directed Graph defining the hierarchy between body parts that will be filled with related data 
     """
-
     def __init__(self,
                  body_parts: dict,
                  positions: np.ndarray,
@@ -107,23 +106,21 @@ class Sequence:
             raise TypeError(f"Invalid argument type: {type(item)}")
 
         # Slice All data lists stored in the scene_graphs nodes and edges
-        # TODO: Refactor to perform slicing generic (?)
-        scene_graph = self.scene_graph.copy()
+        scene_graph = copy.deepcopy(self.scene_graph)
         for node in scene_graph.nodes:
             for vector_list in scene_graph.nodes[node]['coordinate_system'].keys():
                 if vector_list:
-                    scene_graph.nodes[node]['coordinate_system'][vector_list][start:stop:step]
+                    scene_graph.nodes[node]['coordinate_system'][vector_list] = scene_graph.nodes[node]['coordinate_system'][vector_list][start:stop:step]
             for angle_list in scene_graph.nodes[node]['angles'].keys():
                 if angle_list:
-                    scene_graph.nodes[node]['angles'][angle_list][start:stop:step]
+                    scene_graph.nodes[node]['angles'][angle_list] = scene_graph.nodes[node]['angles'][angle_list][start:stop:step]
         for e1, e2 in scene_graph.edges:
             for data_list in scene_graph[e1][e2].keys():
                 if data_list:
                     scene_graph[e1][e2][data_list] = scene_graph[e1][e2][data_list][start:stop:step]
-        self.scene_graph = scene_graph
 
         return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.name, self.joint_angles[start:stop:step],
-                        self.scene_graph)
+                        scene_graph)
 
     def _get_pelvis_cs_positions(self, positions):
         """Transforms all points in positions parameter so they are relative to the pelvis. X-Axis = right, Y-Axis = front, Z-Axis = up. """
@@ -197,7 +194,8 @@ class Sequence:
         # TODO: How can we circumvent to check whether node == "torso" ?
         if len(successors) != 1 or node == "torso":
             scene_graph[parent_node][node]['transformation'] = T
-            scene_graph.nodes[node]['coordinate_system']["origin"] = transformations.mat_mul_batch(T, transformations.v3_to_v4_batch(parent_cs['origin']))[:, :3]
+            scene_graph.nodes[node]['coordinate_system']["origin"] = transformations.mat_mul_batch(T,
+                                                                                                   transformations.v3_to_v4_batch(parent_cs['origin']))[:, :3]
             scene_graph.nodes[node]['coordinate_system']["x_axis"] = parent_cs['x_axis']
             scene_graph.nodes[node]['coordinate_system']["y_axis"] = parent_cs['y_axis']
             scene_graph.nodes[node]['coordinate_system']["z_axis"] = parent_cs['z_axis']
@@ -229,7 +227,8 @@ class Sequence:
             scene_graph.nodes[node]['angles']['euler_yxz'] = euler_angles_yxz
             scene_graph.nodes[node]['angles']['euler_zxz'] = euler_angles_zxz
             # Store the nodes coordinate system
-            scene_graph.nodes[node]['coordinate_system']['origin'] = transformations.mat_mul_batch(T, transformations.v3_to_v4_batch(parent_cs['origin']))[:, :3]
+            scene_graph.nodes[node]['coordinate_system']['origin'] = transformations.mat_mul_batch(T,
+                                                                                                   transformations.v3_to_v4_batch(parent_cs['origin']))[:, :3]
             x_axes = transformations.norm_batch(transformations.mat_mul_batch(R_parent_to_node[:, :3, :3], parent_cs['x_axis']))
             scene_graph.nodes[node]['coordinate_system']['x_axis'] = x_axes
             y_axes = transformations.norm_batch(transformations.mat_mul_batch(R_parent_to_node[:, :3, :3], parent_cs['y_axis']))
@@ -414,27 +413,30 @@ class Sequence:
         for node in self.scene_graph.nodes:
             for vector_list in self.scene_graph.nodes[node]['coordinate_system'].keys():
                 if vector_list and vector_list in sequence.scene_graph.nodes[node]:
-                    self.scene_graph.nodes[node]['coordinate_system'][vector_list] += sequence.scene_graph.nodes[node]['coordinate_system'][vector_list]
+                    self.scene_graph.nodes[node]['coordinate_system'][vector_list] = np.concatenate(
+                        (self.scene_graph.nodes[node]['coordinate_system'][vector_list], sequence.scene_graph.nodes[node]['coordinate_system'][vector_list]))
                 # If appending sequence has no data in scene_graph, add it beforehand
                 elif vector_list and vector_list not in sequence.scene_graph.nodes[node]:
                     sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
-                    self.scene_graph.nodes[node]['coordinate_system'][vector_list] += sequence.scene_graph.nodes[node]['coordinate_system'][vector_list]
+                    self.scene_graph.nodes[node]['coordinate_system'][vector_list] = np.concatenate(
+                        (self.scene_graph.nodes[node]['coordinate_system'][vector_list], sequence.scene_graph.nodes[node]['coordinate_system'][vector_list]))
             for angle_list in self.scene_graph.nodes[node]['angles'].keys():
                 if angle_list and angle_list in sequence.scene_graph.nodes[node]:
-                    self.scene_graph.nodes[node]['angles'][angle_list] += sequence.scene_graph.nodes[node]['angles'][angle_list]
-                # If appending sequence has no data in scene_graph, add it beforehand
+                    self.scene_graph.nodes[node]['angles'][angle_list] = np.concatenate(
+                        (self.scene_graph.nodes[node]['angles'][angle_list], sequence.scene_graph.nodes[node]['angles'][angle_list]))
                 elif angle_list and angle_list not in sequence.scene_graph.nodes[node]:
                     sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
-                    self.scene_graph.nodes[node]['angles'][angle_list] += sequence.scene_graph.nodes[node]['angles'][angle_list]
+                    self.scene_graph.nodes[node]['angles'][angle_list] = np.concatenate(
+                        (self.scene_graph.nodes[node]['angles'][angle_list], sequence.scene_graph.nodes[node]['angles'][angle_list]))
 
         for e1, e2 in self.scene_graph.edges:
             for data_list in self.scene_graph[e1][e2].keys():
                 if data_list and data_list in sequence.scene_graph[e1][e2]:
-                    self.scene_graph[e1][e2][data_list] += sequence.scene_graph[e1][e2][data_list]
+                    self.scene_graph[e1][e2][data_list] = np.concatenate((self.scene_graph[e1][e2][data_list], sequence.scene_graph[e1][e2][data_list]))
                 # If appending sequence has no data in scene_graph, add it beforehand
                 elif data_list and data_list not in sequence.scene_graph[e1][e2]:
                     sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
-                    self.scene_graph[e1][e2][data_list] += sequence.scene_graph[e1][e2][data_list]
+                    self.scene_graph[e1][e2][data_list] = np.concatenate((self.scene_graph[e1][e2][data_list], sequence.scene_graph[e1][e2][data_list]))
 
         self.joint_angles = np.concatenate((self.joint_angles, sequence.joint_angles), axis=0)
 
