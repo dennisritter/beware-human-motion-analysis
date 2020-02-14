@@ -3,11 +3,8 @@ import json
 import networkx as nx
 import numpy as np
 from scipy.spatial.transform import Rotation
-from numpy.linalg import inv
-from hma.movement_analysis import angle_calculations as acm
 import hma.movement_analysis.transformations as transformations
 import hma.movement_analysis.angle_representations as ar
-import time
 import copy
 
 
@@ -24,7 +21,7 @@ class Sequence:
         timestamps (list): The timestamps for each tracked frame.
         name (str): The name of this sequence.
         joint_angles (list): The calculated angles derived from the tracked positions of this sequence
-        scene_graph (networkx.DiGraph): A Directed Graph defining the hierarchy between body parts that will be filled with related data 
+        scene_graph (networkx.DiGraph): A Directed Graph defining the hierarchy between body parts that will be filled with related data.
     """
     def __init__(self,
                  body_parts: dict,
