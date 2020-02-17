@@ -1,6 +1,6 @@
+"""Visualises a skeleton from a Sequence in a webbrowser 3-D canvas."""
 import plotly.graph_objects as go
 from hma.movement_analysis import transformations
-import networkx as nx
 
 
 class SkeletonVisualiser:
@@ -9,17 +9,15 @@ class SkeletonVisualiser:
     Attributes:
         sequence (Sequence): The motion sequence to visualise the skeleton from.
     """
-
     def __init__(
             self,
-            sequence: 'Sequence',
+            sequence,
     ):
 
         self.sequence = sequence[:]
 
     def show(self):
-        """Visualises the human pose skeleton as an animated 3D Scatter
-        Plot."""
+        """Visualises the human pose skeleton as an animated 3D Scatter Plot."""
         traces = self._get_traces(0)
         layout = self._get_layout()
         frames = self._get_frames()
@@ -54,7 +52,7 @@ class SkeletonVisualiser:
     def _make_sliders(self):
         """Returns a list including one Plotly slider that allows users to
         controll the displayed frame."""
-        p = self.sequence.positions
+        pos = self.sequence.positions
         # Frame Slider
         slider = {
             "active": 0,
@@ -81,7 +79,7 @@ class SkeletonVisualiser:
             "y": 0,
             "steps": []
         }
-        for i in range(0, len(p)):
+        for i in range(0, len(pos)):
             # Create slider step for each frame
             slider_step = {
                 "args": [[i], {
@@ -157,44 +155,44 @@ class SkeletonVisualiser:
         if len(self.sequence) <= 1:
             return []
 
-        p = self.sequence.positions
+        pos = self.sequence.positions
         frames = []
-        for i in range(0, len(p)):
+        for i in range(0, len(pos)):
             frame = {"data": self._get_traces(i), "name": i}
             frames.append(frame)
         return frames
 
     def _make_joint_traces(self, frame):
-        p = self.sequence.positions
-        trace_joints = go.Scatter3d(x=p[frame, :, 0], y=p[frame, :, 1], z=p[frame, :, 2], mode="markers", marker=dict(color="royalblue", size=5))
+        pos = self.sequence.positions
+        trace_joints = go.Scatter3d(x=pos[frame, :, 0], y=pos[frame, :, 1], z=pos[frame, :, 2], mode="markers", marker=dict(color="royalblue", size=5))
         return [trace_joints]
 
     def _make_limb_traces(self, frame):
-        p = self.sequence.positions
-        bp = self.sequence.body_parts
+        pos = self.sequence.positions
+        bps = self.sequence.body_parts
         # Each element represents a pair of body part indices in sequence.positions that will be connected with a line
         limb_connections = [
-            [bp["head"], bp["neck"]],
-            [bp["neck"], bp["shoulder_l"]],
-            [bp["neck"], bp["shoulder_r"]],
-            [bp["shoulder_l"], bp["elbow_l"]],
-            [bp["shoulder_r"], bp["elbow_r"]],
-            [bp["elbow_l"], bp["wrist_l"]],
-            [bp["elbow_r"], bp["wrist_r"]],
-            [bp["neck"], bp["torso"]],
-            [bp["torso"], bp["pelvis"]],
-            [bp["pelvis"], bp["hip_l"]],
-            [bp["pelvis"], bp["hip_r"]],
-            [bp["hip_l"], bp["knee_l"]],
-            [bp["hip_r"], bp["knee_r"]],
-            [bp["knee_l"], bp["ankle_l"]],
-            [bp["knee_r"], bp["ankle_r"]]
+            [bps["head"], bps["neck"]],
+            [bps["neck"], bps["shoulder_l"]],
+            [bps["neck"], bps["shoulder_r"]],
+            [bps["shoulder_l"], bps["elbow_l"]],
+            [bps["shoulder_r"], bps["elbow_r"]],
+            [bps["elbow_l"], bps["wrist_l"]],
+            [bps["elbow_r"], bps["wrist_r"]],
+            [bps["neck"], bps["torso"]],
+            [bps["torso"], bps["pelvis"]],
+            [bps["pelvis"], bps["hip_l"]],
+            [bps["pelvis"], bps["hip_r"]],
+            [bps["hip_l"], bps["knee_l"]],
+            [bps["hip_r"], bps["knee_r"]],
+            [bps["knee_l"], bps["ankle_l"]],
+            [bps["knee_r"], bps["ankle_r"]]
         ]  # yapf: disable
         limb_traces = []
         for limb in limb_connections:
-            limb_trace = go.Scatter3d(x=[p[frame, limb[0], 0], p[frame, limb[1], 0]],
-                                      y=[p[frame, limb[0], 1], p[frame, limb[1], 1]],
-                                      z=[p[frame, limb[0], 2], p[frame, limb[1], 2]],
+            limb_trace = go.Scatter3d(x=[pos[frame, limb[0], 0], pos[frame, limb[1], 0]],
+                                      y=[pos[frame, limb[0], 1], pos[frame, limb[1], 1]],
+                                      z=[pos[frame, limb[0], 2], pos[frame, limb[1], 2]],
                                       mode="lines",
                                       line=dict(color="firebrick", width=5))
             limb_traces.append(limb_trace)
@@ -209,16 +207,28 @@ class SkeletonVisualiser:
         x_direction = x_direction * 100 + origin
         y_direction = y_direction * 100 + origin
         z_direction = z_direction * 100 + origin
-        trace_x = go.Scatter3d(x=[origin[0], x_direction[0]], y=[origin[1], x_direction[1]], z=[origin[2], x_direction[2]], mode="lines", marker=dict(color="red"))
-        trace_y = go.Scatter3d(x=[origin[0], y_direction[0]], y=[origin[1], y_direction[1]], z=[origin[2], y_direction[2]], mode="lines", marker=dict(color="green"))
-        trace_z = go.Scatter3d(x=[origin[0], z_direction[0]], y=[origin[1], z_direction[1]], z=[origin[2], z_direction[2]], mode="lines", marker=dict(color="blue"))
+        trace_x = go.Scatter3d(x=[origin[0], x_direction[0]],
+                               y=[origin[1], x_direction[1]],
+                               z=[origin[2], x_direction[2]],
+                               mode="lines",
+                               marker=dict(color="red"))
+        trace_y = go.Scatter3d(x=[origin[0], y_direction[0]],
+                               y=[origin[1], y_direction[1]],
+                               z=[origin[2], y_direction[2]],
+                               mode="lines",
+                               marker=dict(color="green"))
+        trace_z = go.Scatter3d(x=[origin[0], z_direction[0]],
+                               y=[origin[1], z_direction[1]],
+                               z=[origin[2], z_direction[2]],
+                               mode="lines",
+                               marker=dict(color="blue"))
         return [trace_x, trace_y, trace_z]
 
     def _make_pelvis_cs_trace(self, frame):
         # TODO: REMOVE, it is already included in _make_jcs_traces
-        bp = self.sequence.body_parts
-        pcs = transformations.get_pelvis_coordinate_system(self.sequence.positions[frame][bp["pelvis"]], self.sequence.positions[frame][bp["torso"]],
-                                                           self.sequence.positions[frame][bp["hip_l"]], self.sequence.positions[frame][bp["hip_r"]])
+        bps = self.sequence.body_parts
+        pcs = transformations.get_pelvis_coordinate_system(self.sequence.positions[frame][bps["pelvis"]], self.sequence.positions[frame][bps["torso"]],
+                                                           self.sequence.positions[frame][bps["hip_l"]], self.sequence.positions[frame][bps["hip_r"]])
         p_origin = pcs[0][0]
         pcs[0][1][0] = pcs[0][1][0] * 100 + p_origin
         pcs[0][1][1] = pcs[0][1][1] * 100 + p_origin
