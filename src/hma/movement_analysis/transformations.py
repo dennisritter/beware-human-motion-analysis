@@ -1,87 +1,87 @@
+"""This module contains 3-D transformation function as well as geometric calculations."""
 import math
 import numpy as np
-from scipy.spatial.transform import Rotation
 import sklearn.preprocessing as preprocessing
 
 
-def get_angle(v1, v2):
-    """Returns the angle between vectors v1 and v2 (normalized) in degrees
-
-    Args: 
-        v1 (np.ndarray): A 3-D vector whose direction defines an angle of zero.
-        v2 (np.ndarray): A 3-D vector whose direction defines the spanned angle to v1.
-    """
-    return np.arccos(np.dot(norm(v1), norm(v2)))
-
-
-def get_angle_batch(v1, v2):
-    """Returns the angle between each vectors of v1 and v2 (normalized) in degrees respectively
+def get_angle(vec1, vec2):
+    """Returns the angle between vectors vec1 and vec2 (normalized) in degrees
 
     Args:
-        v1 (np.ndarray): A list of 3-D vectors whose direction define an angle of zero.
-        v2 (np.ndarray): A list of 3-D vectors whose direction define the spanned angle to v1.
+        vec1 (np.ndarray): A 3-D vector whose direction defines an angle of zero.
+        vec2 (np.ndarray): A 3-D vector whose direction defines the spanned angle to vec1.
     """
-    v1 = norm_batch(v1)
-    v2 = norm_batch(v2)
-    return np.arccos(dot_batch(v1, v2))
+    return np.arccos(np.dot(norm(vec1), norm(vec2)))
 
 
-def get_rotation(v1, v2):
-    """Returns a homogenious 4x4 transformation matrix without translation vector that describes the rotational transformation from v1 to v2
+def get_angle_batch(vec1, vec2):
+    """Returns the angle between each vectors of vec1 and vec2 (normalized) in degrees respectively
 
     Args:
-        v1 (np.ndarray): A 3-D vector whose direction defines the starting point of rotation.
-        v2 (np.ndarray): A 3-D vectors whose direction defines the end point of rotation.
+        vec1 (np.ndarray): A list of 3-D vectors whose direction define an angle of zero.
+        vec2 (np.ndarray): A list of 3-D vectors whose direction define the spanned angle to vec1.
     """
-    v1 = norm(v1)
-    v2 = norm(v2)
-    theta = get_angle(v1, v2)
-    rotation_axis = get_perpendicular_vector(v1, v2)
-    R = rotation_matrix_4x4(rotation_axis, theta)
-    return R
+    vec1 = norm_batch(vec1)
+    vec2 = norm_batch(vec2)
+    return np.arccos(dot_batch(vec1, vec2))
 
 
-def get_rotation_batch(v1, v2):
-    """Returns a homogenious 4x4 transformation matrix without translation vector that describes the rotational transformation from v1 to v2
+def get_rotation(vec1, vec2):
+    """Returns a homogenious 4x4 transformation matrix without translation vector that describes the rotational transformation from vec1 to vec2
 
     Args:
-        v1 (np.ndarray): A list of 3-D vectors whose direction define the starting point of rotation.
-        v2 (np.ndarray): A list of 3-D vectors whose direction define the end point of rotation.
+        vec1 (np.ndarray): A 3-D vector whose direction defines the starting point of rotation.
+        vec2 (np.ndarray): A 3-D vectors whose direction defines the end point of rotation.
     """
-    v1 = norm_batch(v1)
-    v2 = norm_batch(v2)
-    theta = get_angle_batch(v1, v2)
-    rotation_axis = get_perpendicular_vector_batch(v1, v2)
-    R = rotation_matrix_4x4_batch(rotation_axis, theta)
-    return R
+    vec1 = norm(vec1)
+    vec2 = norm(vec2)
+    theta = get_angle(vec1, vec2)
+    rotation_axis = get_perpendicular_vector(vec1, vec2)
+    rot_mat = rotation_matrix_4x4(rotation_axis, theta)
+    return rot_mat
 
 
-def get_perpendicular_vector(v1, v2):
-    """Returns a vector that is perpendicular to v1 and v2
+def get_rotation_batch(vec1, vec2):
+    """Returns a homogenious 4x4 transformation matrix without translation vector that describes the rotational transformation from vec1 to vec2
 
     Args:
-        v1 (np.ndarray): Vector one, which is perpendicular to the returned vector.
-        v2 (np.ndarray): Vector two, which is perpendicular to the returned vector.
+        vec1 (np.ndarray): A list of 3-D vectors whose direction define the starting point of rotation.
+        vec2 (np.ndarray): A list of 3-D vectors whose direction define the end point of rotation.
     """
-    v1 = norm(v1)
-    v2 = norm(v2)
+    vec1 = norm_batch(vec1)
+    vec2 = norm_batch(vec2)
+    theta = get_angle_batch(vec1, vec2)
+    rotation_axis = get_perpendicular_vector_batch(vec1, vec2)
+    rot_mat = rotation_matrix_4x4_batch(rotation_axis, theta)
+    return rot_mat
+
+
+def get_perpendicular_vector(vec1, vec2):
+    """Returns a vector that is perpendicular to vec1 and vec2
+
+    Args:
+        vec1 (np.ndarray): Vector one, which is perpendicular to the returned vector.
+        vec2 (np.ndarray): Vector two, which is perpendicular to the returned vector.
+    """
+    vec1 = norm(vec1)
+    vec2 = norm(vec2)
 
     # If theta 180° (dot product = -1)
-    v1_dot_v2 = np.dot(v1, v2)
-    if v1_dot_v2 == -1 or v1_dot_v2 == 1:
-        # Whenever v1 and v2 are parallel to each other, we can use an arbitrary vector that is NOT parallel to v1 and v2
+    vec1_dot_vec2 = np.dot(vec1, vec2)
+    if vec1_dot_vec2 == -1 or vec1_dot_vec2 == 1:
+        # Whenever vec1 and vec2 are parallel to each other, we can use an arbitrary vector that is NOT parallel to vec1 and vec2
         # So call this function recursively until a non-parallel vector has been found
-        return get_perpendicular_vector(np.random.rand(3), v2)
+        return get_perpendicular_vector(np.random.rand(3), vec2)
     else:
-        return norm(np.cross(v1, v2))
+        return norm(np.cross(vec1, vec2))
 
 
 def get_perpendicular_vector_batch(v_arr1, v_arr2):
-    """Returns an array of vectors that are perpendicular to the vectors at corresponding indices. 
+    """Returns an array of vectors that are perpendicular to the vectors at corresponding indices.
 
     Args:
-        v1 (np.ndarray): The first array of vectors that are perpendicular to the respective vector of the returned array.
-        v2 (np.ndarray): The second array of vectors that are perpendicular to the respective vector of the returned array.
+        vec1 (np.ndarray): The first array of vectors that are perpendicular to the respective vector of the returned array.
+        vec2 (np.ndarray): The second array of vectors that are perpendicular to the respective vector of the returned array.
     """
     v_arr1 = norm_batch(v_arr1)
     v_arr2 = norm_batch(v_arr2)
@@ -98,30 +98,36 @@ def get_perpendicular_vector_batch(v_arr1, v_arr2):
     return norm_batch(np.cross(v_arr1, v_arr2))
 
 
-def random_unparallel_vector(v1):
-    """Returns an unparallel vector to v1 with same dimension. """
-    v2 = np.random.rand(v1.shape[0])
-    v1_dot_v2 = np.dot(v1, v2)
-    if v1_dot_v2 == -1 or v1_dot_v2 == 1:
-        return random_unparallel_vector(v1)
+def random_unparallel_vector(vec1):
+    """Returns an unparallel vector to vec1 with same dimension. """
+    vec2 = np.random.rand(vec1.shape[0])
+    vec1_dot_vec2 = np.dot(vec1, vec2)
+    if vec1_dot_vec2 == -1 or vec1_dot_vec2 == 1:
+        return random_unparallel_vector(vec1)
     else:
-        return v2
+        return vec2
 
 
 def dot_batch(va1, va2) -> np.ndarray:
+    """Returns the dot product for respective vectors in va1 and va2.
+
+    Args:
+        va1 (np.ndarray): A list of 3-D vectors.
+        va2 (np.ndarray): Another list of 3-D vectors.
+    """
     return (va1 @ va2.transpose()).diagonal()
 
 
-def norm(v) -> np.ndarray:
-    """Normalises the given vector v and returns it afterwards.
+def norm(vec) -> np.ndarray:
+    """Normalises the given vector vec and returns it afterwards.
 
     Args:
-        v (np.ndarray): The vector to normalise.
+        vec (np.ndarray): The vector to normalise.
     """
-    v_norm = np.linalg.norm(v)
-    if v_norm == 0:
+    vec_norm = np.linalg.norm(vec)
+    if vec_norm == 0:
         return np.zeros(3)
-    return v / v_norm
+    return vec / vec_norm
 
 
 def norm_batch(v_arr):
@@ -133,46 +139,46 @@ def norm_batch(v_arr):
     return preprocessing.normalize(v_arr, norm='l2')
 
 
-def mat_mul_batch(a, b):
+def mat_mul_batch(arr1, arr2):
     """Performs an element-wise Matrix multiplication for each element in the given arrays.
 
-    The batch-wise matrix multiplication is equivalent to a @ b for each element in a and b respectively.
-    The returned np.array contains the resulting 1-D or 2-D np.arrays depending on the dimensions of parameters a and b.
+    The batch-wise matrix multiplication is equivalent to arr1 @ arr2 for each element in arr1 and arr2 respectively.
+    The returned np.array contains the resulting 1-D or 2-D np.arrays depending on the dimensions of parameters arr1 and arr2.
 
     Args:
-        a (np.ndarray): An array of vectors or matrices (1-D or 2-D np.arrays)
-        b (np.ndarray): An array of vectors or matrices (1-D or 2-D np.arrays)
+        arr1 (np.ndarray): An array of vectors or matrices (1-D or 2-D np.arrays)
+        arr2 (np.ndarray): An array of vectors or matrices (1-D or 2-D np.arrays)
 
     """
-    if len(a) != len(b):
+    if len(arr1) != len(arr2):
         raise ValueError('The number of elements in the first dimension of parameters a and b should be equal.')
     else:
-        if a.ndim == 3 and b.ndim == 2:
-            return np.einsum('ijk, ik -> ij', a, b)
-        elif a.ndim == 2 and b.ndim == 3:
-            return np.einsum('ik, ijk -> ik', a, b)
-        elif a.ndim == 3 and b.ndim == 3:
-            return np.einsum('ijk, ikl -> ijl', a, b)
+        if arr1.ndim == 3 and arr2.ndim == 2:
+            return np.einsum('ijk, ik -> ij', arr1, arr2)
+        elif arr1.ndim == 2 and arr2.ndim == 3:
+            return np.einsum('ik, ijk -> ik', arr1, arr2)
+        elif arr1.ndim == 3 and arr2.ndim == 3:
+            return np.einsum('ijk, ikl -> ijl', arr1, arr2)
         else:
             raise ValueError('The parameters dimensions are not supported.\nSuppported dimensions: (2,3), (3,2), (3,3)')
 
 
-def v3_to_v4(v):
+def v3_to_v4(vec):
     """Returns a 3-D position vector with appended homogenious coordinate from the given 3-D vector.
 
     Args:
-        v (np.ndarray): A 3-D vector.
+        vec (np.ndarray): A 3-D vector.
     """
-    return np.append(v, 1)
+    return np.append(vec, 1)
 
 
-def v3_to_v4_batch(v):
-    """Returns a 3-D position vector with appended homogenious coordinate from each given 3-D vector in parameter v.
+def v3_to_v4_batch(vec):
+    """Returns a 3-D position vector with appended homogenious coordinate from each given 3-D vector in parameter vec.
 
     Args:
-        v (np.ndarray): A numpy array of 3-D vectors.
+        vec (np.ndarray): A numpy array of 3-D vectors.
     """
-    return np.hstack((v, np.ones(len(v)).reshape((len(v), 1))))
+    return np.hstack((vec, np.ones(len(vec)).reshape((len(vec), 1))))
 
 
 def rotation_matrix_4x4(axis, theta) -> np.ndarray:
@@ -188,6 +194,7 @@ def rotation_matrix_4x4(axis, theta) -> np.ndarray:
     Returns:
         (np.ndarray) 4x4 rotation matrix representing a rotation about the given axis
     """
+    # pylint: disable=invalid-name
     axis = np.asarray(axis)
     axis = norm(axis)
     a = math.cos(theta / 2.0)
@@ -200,6 +207,7 @@ def rotation_matrix_4x4(axis, theta) -> np.ndarray:
         [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc, 0],
         [0, 0, 0, 1]
     ])  # yapf: disable
+    # pylint: enable=invalid-name
 
 
 def rotation_matrix_4x4_batch(axis, theta) -> np.ndarray:
@@ -215,6 +223,7 @@ def rotation_matrix_4x4_batch(axis, theta) -> np.ndarray:
     Returns:
         (np.ndarray) An array containing 4x4 rotation matrices representing rotations about the given axes
     """
+    # pylint: disable=invalid-name
     matrices = np.empty([len(theta), 4, 4])
     axis = norm_batch(np.asarray(axis))
     for i, _ in enumerate(theta):
@@ -229,25 +238,26 @@ def rotation_matrix_4x4_batch(axis, theta) -> np.ndarray:
             [0, 0, 0, 1]
         ])  # yapf: disable
     return matrices
+    # pylint: enable=invalid-name
 
 
-def translation_matrix_4x4(v) -> np.ndarray:
+def translation_matrix_4x4(vec) -> np.ndarray:
     """Returns a 4x4 Matrix representing a translation.
 
     Args:
-        v (np.ndarray): A vector defining the translation.
+        vec (np.ndarray): A vector defining the translation.
 
     Returns:
         (np.ndarray) 4x4 transformation matrix representing a translation as defined by argument v.
     """
-    T = np.array([
+    translation_mat = np.array([
         [1.0, 0, 0, 0],
         [0, 1.0, 0, 0],
         [0, 0, 1.0, 0],
         [0, 0, 0, 1.0]
     ])  # yapf: disable
-    T[:3, 3] = v
-    return T
+    translation_mat[:3, 3] = vec
+    return translation_mat
 
 
 def translation_matrix_4x4_batch(v_arr) -> np.ndarray:
@@ -259,31 +269,32 @@ def translation_matrix_4x4_batch(v_arr) -> np.ndarray:
     Returns:
         (np.ndarray) Array of 4x4 transformation matrices, each representing a translation as defined by respective vectors in v_arr.
     """
-    M = np.empty([len(v_arr), 4, 4])
-    I = [[1.0, 0, 0, 0],
-         [0, 1.0, 0, 0],
-         [0, 0, 1.0, 0],
-         [0, 0, 0, 1.0]]  # yapf: disable
-    M[:] = I
-    M[:, :3, 3] = v_arr[:, :]
-    return M
+    transformation_mat = np.empty([len(v_arr), 4, 4])
+    ident_mat = [[1.0, 0, 0, 0],
+                 [0, 1.0, 0, 0],
+                 [0, 0, 1.0, 0],
+                 [0, 0, 0, 1.0]]  # yapf: disable
+    transformation_mat[:] = ident_mat
+    transformation_mat[:, :3, 3] = v_arr[:, :]
+    return transformation_mat
 
 
 def get_local_coordinate_system_direction_vectors(origin, x_direction_bp_pos, y_direction_bp_pos):
+    """Returns normalised direction vectors representing the axes directions of the constreucted coordinate system."""
     # New X-Axis from origin to x_direction
-    vx = x_direction_bp_pos - origin
-    if vx[0] < 0:
-        vx = -vx
-    # New Z-Axis is perpendicular to the origin-y_direction vector and vx
-    vz = get_perpendicular_vector((y_direction_bp_pos - origin), vx)
-    if vz[2] < 0:
-        vz = -vz
+    vec_x = x_direction_bp_pos - origin
+    if vec_x[0] < 0:
+        vec_x = -vec_x
+    # New Z-Axis is perpendicular to the origin-y_direction vector and vec_x
+    vec_z = get_perpendicular_vector((y_direction_bp_pos - origin), vec_x)
+    if vec_z[2] < 0:
+        vec_z = -vec_z
     # New Y-Axis is perpendicular to new X-Axis and Z-Axis
-    vy = get_perpendicular_vector(vx, vz)
-    if vy[1] < 0:
-        vy = -vy
+    vec_y = get_perpendicular_vector(vec_x, vec_z)
+    if vec_y[1] < 0:
+        vec_y = -vec_y
 
-    return np.array([norm(vx), norm(vy), norm(vz)])
+    return np.array([norm(vec_x), norm(vec_y), norm(vec_z)])
 
 
 # TODO: Decide where is the best place for this function. Maybe a new module makes sense so transformations.py holds general functions only
@@ -311,19 +322,19 @@ def get_pelvis_coordinate_system(pelvis: np.ndarray, torso: np.ndarray, hip_l: n
     hip_l_hip_r = hip_r - hip_l
 
     # Orthogonal Projection to determine Y-Axis direction
-    a = torso - hip_l
-    b = hip_r - hip_l
+    vec_a = torso - hip_l
+    vec_b = hip_r - hip_l
 
-    scalar = np.dot(a, b) / np.dot(b, b)
-    a_on_b = (scalar * b) + hip_l
-    v = torso - a_on_b
+    scalar = np.dot(vec_a, vec_b) / np.dot(vec_b, vec_b)
+    a_on_b = (scalar * vec_b) + hip_l
+    vec = torso - a_on_b
 
     origin = pelvis
-    vx = norm(hip_l_hip_r)
-    vz = norm(v)
-    vy = get_perpendicular_vector(vz, vx)
+    vec_x = norm(hip_l_hip_r)
+    vec_z = norm(vec)
+    vec_y = get_perpendicular_vector(vec_z, vec_x)
 
-    return [(origin, [vx, vy, vz])]
+    return [(origin, [vec_x, vec_y, vec_z])]
 
 
 def get_cs_projection_transformation(from_cs: np.ndarray, target_cs: np.ndarray):
@@ -334,25 +345,25 @@ def get_cs_projection_transformation(from_cs: np.ndarray, target_cs: np.ndarray)
             example: [[0,0,0], [1,0,0], [0,1,0], [0,0,1]]
         target_cs (np.ndarray): The target coordinate system
     """
-    from_cs_origin, from_cs_x, from_cs_y, from_cs_z = from_cs
-    target_cs_origin, target_cs_x, target_cs_y, target_cs_z = target_cs
+    from_cs_origin, from_cs_x, from_cs_y, _ = from_cs
+    target_cs_origin, target_cs_x, target_cs_y, _ = target_cs
 
     # Get Translation
-    T = translation_matrix_4x4(from_cs_origin - target_cs_origin)
+    transformation_mat = translation_matrix_4x4(from_cs_origin - target_cs_origin)
     # Construct rotation matrix for X-Alignment to rotate about x_rot_axis for the angle theta
     x_rot_axis = get_perpendicular_vector(target_cs_x, from_cs_x)
     theta_x = get_angle(target_cs_x, from_cs_x)
-    Rx = rotation_matrix_4x4(x_rot_axis, theta_x)
+    rot_mat_x = rotation_matrix_4x4(x_rot_axis, theta_x)
 
     # Use target x-axis direction vector as rotation axis as it must be perpendicular to the y-axis
     y_rot_axis = target_cs_x
-    target_cs_y_rx = (Rx @ np.append(target_cs_y, 1))[:3]
+    target_cs_y_rx = (rot_mat_x @ np.append(target_cs_y, 1))[:3]
     theta_y = get_angle(target_cs_y_rx, from_cs_y)
-    Ry = rotation_matrix_4x4(norm(y_rot_axis), theta_y)
+    rot_mat_y = rotation_matrix_4x4(norm(y_rot_axis), theta_y)
 
     # Determine complete transformation matrix
-    M = Rx @ Ry @ T
-    return M
+    transformation_mat = rot_mat_x @ rot_mat_y @ transformation_mat
+    return transformation_mat
 
 
 def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, z_direction_bp_idx: int, positions: np.ndarray):
@@ -375,35 +386,35 @@ def align_coordinates_to(origin_bp_idx: int, x_direction_bp_idx: int, z_directio
     z_direction_bp_pos = positions[z_direction_bp_idx]
 
     # New X-Axis from origin to x_direction
-    vx = x_direction_bp_pos - origin
-    if vx[0] < 0:
-        vx = -vx
-    # New Z-Axis is perpendicular to the origin-y_direction vector and vx
-    vy = get_perpendicular_vector((z_direction_bp_pos - origin), vx)
-    if vy[1] < 0:
-        vy = -vy
+    vec_x = x_direction_bp_pos - origin
+    if vec_x[0] < 0:
+        vec_x = -vec_x
+    # New Z-Axis is perpendicular to the origin-y_direction vector and vec_x
+    vec_y = get_perpendicular_vector((z_direction_bp_pos - origin), vec_x)
+    if vec_y[1] < 0:
+        vec_y = -vec_y
 
     # New Y-Axis is perpendicular to new X-Axis and Z-Axis
-    vz = get_perpendicular_vector(vx, vy)
-    if vz[2] < 0:
-        vz = -vz
+    vec_z = get_perpendicular_vector(vec_x, vec_y)
+    if vec_z[2] < 0:
+        vec_z = -vec_z
 
     # Construct translation Matrix to move given origin to zero-position
-    T = translation_matrix_4x4(np.array([0, 0, 0]) - origin)
+    translation_mat = translation_matrix_4x4(np.array([0, 0, 0]) - origin)
     # Construct rotation matrix for X-Alignment to rotate about x_rot_axis for the angle theta
-    x_rot_axis = get_perpendicular_vector(vx, np.array([1, 0, 0]))
-    theta_x = get_angle(vx, np.array([1, 0, 0]))
-    Rx = rotation_matrix_4x4(x_rot_axis, theta_x)
-    # Use new X-Axis axis for y rotation and Rotate Y-direction vector to get rotation angle for Y-Alignment
-    z_rot_axis = vx
-    vz_rx = np.matmul(Rx, np.append(vz, 1))[:3]
-    theta_z = get_angle(vz_rx, np.array([0, 1, 0]))
-    Rz = rotation_matrix_4x4(norm(z_rot_axis), theta_z)
+    x_rot_axis = get_perpendicular_vector(vec_x, np.array([1, 0, 0]))
+    theta_x = get_angle(vec_x, np.array([1, 0, 0]))
+    rot_mat_x = rotation_matrix_4x4(x_rot_axis, theta_x)
+    # Use new X-Axis axis for y rotation and rot_matotate Y-direction vector to get rotation angle for Y-Alignment
+    z_rot_axis = vec_x
+    vec_z_rx = np.matmul(rot_mat_x, np.append(vec_z, 1))[:3]
+    theta_z = get_angle(vec_z_rx, np.array([0, 1, 0]))
+    rot_mat_z = rotation_matrix_4x4(norm(z_rot_axis), theta_z)
     # Transform all positions
     transformed_positions = []
-    M = np.matmul(T, Rx, Rz)
+    transformation_mat = np.matmul(translation_mat, rot_mat_x, rot_mat_z)
     for pos in positions:
-        pos = np.matmul(M, np.append(pos, 1))[:3]
+        pos = np.matmul(transformation_mat, np.append(pos, 1))[:3]
         transformed_positions.append(pos)
 
     return transformed_positions
