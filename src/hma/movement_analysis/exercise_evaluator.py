@@ -223,12 +223,12 @@ class ExerciseEvaluator:
             target_distance_tolerance = abs(int(mean(ex_targets[AngleTargetStates.END.value]) - mean(ex_targets[AngleTargetStates.START.value])))
             angles_savgol = np.array(angles_savgol)
             target_start_range = self.target_angles[body_part_idx][angle_type.value][AngleTargetStates.START.value]
-            if min(target_start_range) - target_distance_tolerance < angles_savgol[0] < max(target_start_range) + target_distance_tolerance:
+            if (min(target_start_range) - target_distance_tolerance < angles_savgol[0] < max(target_start_range) + target_distance_tolerance):
                 if target_end_greater_start:
                     minima = np.insert(minima, 0, 0)
                 else:
                     maxima = np.insert(maxima, 0, 0)
-            if min(target_start_range) - target_distance_tolerance < angles_savgol[-1] < max(target_start_range) + target_distance_tolerance:
+            if (min(target_start_range) - target_distance_tolerance < angles_savgol[-1] < max(target_start_range) + target_distance_tolerance):
                 if target_end_greater_start:
                     minima = np.append(minima, len(angles_savgol) - 1)
                 else:
@@ -324,7 +324,7 @@ class ExerciseEvaluator:
                         s=20,
                         zorder=3,
                         label="Removed Start/End Frame")
-            if iterations:
+            if len(iterations) != 0:
                 plt.scatter(iterations[:, 1],
                             np.full((len(iterations), ),
                                     angles_savgol_all_bps.max() + 10),
@@ -394,13 +394,13 @@ class ExerciseEvaluator:
             confirmed_turning_frames = confirmed_turning_frames[start_frame < confirmed_turning_frames]
             # If there is no element in confirmed_turning_frames that is greater the current start_frame,
             # we can exit the loop since following start_frames will be even higher
-            if not confirmed_turning_frames:
+            if len(confirmed_turning_frames) == 0:
                 break
             # If there are still elements left in confirmed_turning_frames, take the smallest one as our turning point
             else:
                 turning_frame = confirmed_turning_frames[0]
                 confirmed_end_frames = confirmed_start_frames[turning_frame < confirmed_start_frames]
-                if not confirmed_end_frames:
+                if len(confirmed_end_frames) == 0:
                     break
                 # If there are still elements left in confirmed_end_frames, take the smallest one as our end point
                 else:

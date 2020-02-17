@@ -413,21 +413,21 @@ class Sequence:
         # Concatenate scene_graph data lists
         for node in self.scene_graph.nodes:
             for vector_list in self.scene_graph.nodes[node]['coordinate_system'].keys():
-                if vector_list and vector_list in sequence.scene_graph.nodes[node]:
+                if vector_list and vector_list in sequence.scene_graph.nodes[node]['coordinate_system']:
                     self.scene_graph.nodes[node]['coordinate_system'][vector_list] = np.concatenate(
                         (self.scene_graph.nodes[node]['coordinate_system'][vector_list], sequence.scene_graph.nodes[node]['coordinate_system'][vector_list]))
                 # If appending sequence has no data in scene_graph, add it beforehand
-                elif vector_list and vector_list not in sequence.scene_graph.nodes[node]:
+                elif vector_list and vector_list not in sequence.scene_graph.nodes[node]['coordinate_system']:
                     # pylint -> Ignore private function call warning as it is called from the class itself
                     # pylint: disable=W0212
                     sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
                     self.scene_graph.nodes[node]['coordinate_system'][vector_list] = np.concatenate(
                         (self.scene_graph.nodes[node]['coordinate_system'][vector_list], sequence.scene_graph.nodes[node]['coordinate_system'][vector_list]))
             for angle_list in self.scene_graph.nodes[node]['angles'].keys():
-                if angle_list and angle_list in sequence.scene_graph.nodes[node]:
+                if angle_list and angle_list in sequence.scene_graph.nodes[node]['angles']:
                     self.scene_graph.nodes[node]['angles'][angle_list] = np.concatenate(
                         (self.scene_graph.nodes[node]['angles'][angle_list], sequence.scene_graph.nodes[node]['angles'][angle_list]))
-                elif angle_list and angle_list not in sequence.scene_graph.nodes[node]:
+                elif angle_list and angle_list not in sequence.scene_graph.nodes[node]['angles']:
                     # pylint -> Ignore private function call warning as it is called from the class itself
                     # pylint: disable=W0212
                     sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
@@ -454,7 +454,7 @@ class Sequence:
     def _filter_zero_frames(self, positions: np.ndarray) -> list:
         """Returns a filter mask list to filter frames where all positions equal 0.0.
 
-        Checks whether the sum of all coordinates for a frame is 0.0
+        Checks whether all coordinates for a frame are 0
             True -> keep this frame
             False -> remove this frame
 
@@ -464,8 +464,4 @@ class Sequence:
         Returns:
             (list<boolean>): The filter list.
         """
-        bool_list = []
-        for pos in positions:
-            bool_list.append(np.sum(pos) != 0)
-
-        return bool_list
+        return [len(pos) != len(pos[np.all(pos == 0)]) for pos in positions]

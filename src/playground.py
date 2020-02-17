@@ -17,7 +17,8 @@ import time
 import hma.movement_analysis.transformations as transformations
 import sklearn.preprocessing as preprocessing
 
-filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json"
+squat_file = "data/exercises/squat.json"
+# filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json"
 # filename = "data/sequences/191024_tracking/single/biceps_curl_left/user-2/191024__single__biceps_curl_left__user-2__1.json"
 # filename = "data/sequences/191024_tracking/single/biceps_curl_right/user-2/191024__single__biceps_curl_right__user-2__1.json"
 # filename = "data/sequences/191024_tracking/single/triceps_extension_left/user-2/191024__single__triceps_extension_left__user-2__1.json"
@@ -25,22 +26,12 @@ filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__s
 # filename = "data/sequences/191024_tracking/single/overhead_press/user-2/191024__single__overhead_press__user-2__1.json"
 # filename = "data/sequences/191024_tracking/single/lunge_left/user-2/191024__single__lunge_left__user-2__1.json"
 # filename = "data/sequences/test/100_frames.json"
+# f1 = "data/sequences/test/a.json"
+# f2 = "data/sequences/test/b.json"
+filename = "data/sequences/test/christopher_test.json"
 
-sequence = Sequence.from_mocap_file(filename)
-s = sequence[0:10]
-s2 = s[:2]
-s3 = s2.merge(s)
-a = 1
-
-# print(len(sequence.joint_angles))
-# print(len(sequence.scene_graph.nodes["shoulder_l"]['coordinate_system']['origin']))
-# print(len(sequence.scene_graph.nodes["shoulder_l"]['coordinate_system']['x_axis']))
-# print(len(sequence.scene_graph.nodes["shoulder_l"]['coordinate_system']['y_axis']))
-# print(len(sequence.scene_graph.nodes["shoulder_l"]['coordinate_system']['z_axis']))
-
-# print(s.joint_angles)
-# print(s2.joint_angles)
-# s.merge(s2)
-
-# print('-----------')
-# print(s.joint_angles)
+s = Sequence.from_mocap_file(filename)
+squat = Exercise.from_file(squat_file)
+EE = ExerciseEvaluator(squat, s)
+iterations = EE.find_iteration_keypoints(plot=True)
+print(iterations)
