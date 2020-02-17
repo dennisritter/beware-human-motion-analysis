@@ -5,19 +5,34 @@ import sklearn.preprocessing as preprocessing
 
 
 def get_angle(v1, v2):
-    """Returns the angle between vectors v1 and v2 (normalized) in degrees"""
+    """Returns the angle between vectors v1 and v2 (normalized) in degrees
+
+    Args: 
+        v1 (np.ndarray): A 3-D vector whose direction defines an angle of zero.
+        v2 (np.ndarray): A 3-D vector whose direction defines the spanned angle to v1.
+    """
     return np.arccos(np.dot(norm(v1), norm(v2)))
 
 
 def get_angle_batch(v1, v2):
-    """Returns the angle between each vectors of v1 and v2 (normalized) in degrees respectively"""
+    """Returns the angle between each vectors of v1 and v2 (normalized) in degrees respectively
+
+    Args:
+        v1 (np.ndarray): A list of 3-D vectors whose direction define an angle of zero.
+        v2 (np.ndarray): A list of 3-D vectors whose direction define the spanned angle to v1.
+    """
     v1 = norm_batch(v1)
     v2 = norm_batch(v2)
     return np.arccos(dot_batch(v1, v2))
 
 
 def get_rotation(v1, v2):
-    """Returns a homogenious 4x4 transformation matrix without translation vector that describes the rotational transformation from v1 to v2"""
+    """Returns a homogenious 4x4 transformation matrix without translation vector that describes the rotational transformation from v1 to v2
+
+    Args:
+        v1 (np.ndarray): A 3-D vector whose direction defines the starting point of rotation.
+        v2 (np.ndarray): A 3-D vectors whose direction defines the end point of rotation.
+    """
     v1 = norm(v1)
     v2 = norm(v2)
     theta = get_angle(v1, v2)
@@ -27,7 +42,12 @@ def get_rotation(v1, v2):
 
 
 def get_rotation_batch(v1, v2):
-    """Returns a homogenious 4x4 transformation matrix without translation vector that describes the rotational transformation from v1 to v2"""
+    """Returns a homogenious 4x4 transformation matrix without translation vector that describes the rotational transformation from v1 to v2
+
+    Args:
+        v1 (np.ndarray): A list of 3-D vectors whose direction define the starting point of rotation.
+        v2 (np.ndarray): A list of 3-D vectors whose direction define the end point of rotation.
+    """
     v1 = norm_batch(v1)
     v2 = norm_batch(v2)
     theta = get_angle_batch(v1, v2)
@@ -110,8 +130,6 @@ def norm_batch(v_arr):
     Args:
         v_arr (np.ndarray): A numpy array of vectors to normalise.
     """
-    # print(preprocessing.normalize(v_arr, norm='l2'))
-    # print('------------------------')
     return preprocessing.normalize(v_arr, norm='l2')
 
 
@@ -140,10 +158,20 @@ def mat_mul_batch(a, b):
 
 
 def v3_to_v4(v):
+    """Returns a 3-D position vector with appended homogenious coordinate from the given 3-D vector.
+
+    Args:
+        v (np.ndarray): A 3-D vector.
+    """
     return np.append(v, 1)
 
 
 def v3_to_v4_batch(v):
+    """Returns a 3-D position vector with appended homogenious coordinate from each given 3-D vector in parameter v.
+
+    Args:
+        v (np.ndarray): A numpy array of 3-D vectors.
+    """
     return np.hstack((v, np.ones(len(v)).reshape((len(v), 1))))
 
 
