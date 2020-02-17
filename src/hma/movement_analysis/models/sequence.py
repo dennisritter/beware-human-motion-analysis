@@ -1,17 +1,20 @@
 """Contains the code for the sequence model including the scenegraph and angle computation."""
 import json
+import copy
 import networkx as nx
 import numpy as np
 from scipy.spatial.transform import Rotation
 import hma.movement_analysis.transformations as transformations
 import hma.movement_analysis.angle_representations as ar
-import copy
+from hma.movement_analysis.models.sequence import Sequence
 
 
 # TODO: Implement Lazy Loading for props that are expensive to calculate (e.g. joint angles, Scene_graph data)
 # TODO: Test from_json and to_json methods for whether they (de)serialize the scene_graph properly
 # TODO: Consider outsourcing medical joint_angle calculations and attribute to another module/script/class
 #       Maybe a place to handle medical related stuff would be nice to get a clean seperation.
+# Ignore pylint 'Function redefined warning' as Sequence is imported for pyright
+# pylint: disable=E0102
 class Sequence:
     """Represents a motion sequence.
 
