@@ -6,7 +6,8 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 import hma.movement_analysis.transformations as transformations
 import hma.movement_analysis.angle_representations as ar
-from hma.movement_analysis.models.sequence import Sequence
+
+# from hma.movement_analysis.models.sequence import Sequence
 
 
 # TODO: Implement Lazy Loading for props that are expensive to calculate (e.g. joint angles, Scene_graph data)
@@ -114,10 +115,10 @@ class Sequence:
             for angle_list in scene_graph.nodes[node]['angles'].keys():
                 if angle_list:
                     scene_graph.nodes[node]['angles'][angle_list] = scene_graph.nodes[node]['angles'][angle_list][start:stop:step]
-        for e1, e2 in scene_graph.edges:
-            for data_list in scene_graph[e1][e2].keys():
+        for edge1, edge2 in scene_graph.edges:
+            for data_list in scene_graph[edge1][edge2].keys():
                 if data_list:
-                    scene_graph[e1][e2][data_list] = scene_graph[e1][e2][data_list][start:stop:step]
+                    scene_graph[edge1][edge2][data_list] = scene_graph[edge1][edge2][data_list][start:stop:step]
 
         return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.name, self.joint_angles[start:stop:step],
                         scene_graph)
@@ -129,10 +130,10 @@ class Sequence:
             transformed_positions.append([])
             pelvis_cs = transformations.get_pelvis_coordinate_system(positions[i][self.body_parts["pelvis"]], positions[i][self.body_parts["torso"]],
                                                                      positions[i][self.body_parts["hip_l"]], positions[i][self.body_parts["hip_r"]])
-            M = transformations.get_cs_projection_transformation(np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]]),
-                                                                 np.array([pelvis_cs[0][0], pelvis_cs[0][1][0], pelvis_cs[0][1][1], pelvis_cs[0][1][2]]))
+            transformation = transformations.get_cs_projection_transformation(
+                np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]]), np.array([pelvis_cs[0][0], pelvis_cs[0][1][0], pelvis_cs[0][1][1], pelvis_cs[0][1][2]]))
             for _, pos in enumerate(frame):
-                transformed_positions[i].append((M @ np.append(pos, 1))[:3])
+                transformed_positions[i].append((transformation @ np.append(pos, 1))[:3])
 
         return np.array(transformed_positions)
 
@@ -153,8 +154,8 @@ class Sequence:
             scene_graph.nodes[node]['angles'] = {}
 
         # Predefine edge data lists to store data for each frame of the sequence
-        for n1, n2 in scene_graph.edges:
-            scene_graph[n1][n2]['transformation'] = []
+        for node1, node2 in scene_graph.edges:
+            scene_graph[node1][node2]['transformation'] = []
 
         # Start recursive function with root node in our directed scene_graph
         self._calc_scene_graph_transformations_batch(scene_graph, root_node, root_node, positions)
@@ -189,12 +190,12 @@ class Sequence:
         parent_pos = positions[:, self.body_parts[parent_node]]
         parent_cs = scene_graph.nodes[parent_node]['coordinate_system']
 
-        T = transformations.translation_matrix_4x4_batch(node_pos - parent_pos)
+        translation_mat4x4 = transformations.translation_matrix_4x4_batch(node_pos - parent_pos)
         # If No successors or more than one successor present, add translation only to (parent_node, node) edge.
         # TODO: How can we circumvent to check whether node == "torso" ?
         if len(successors) != 1 or node == "torso":
-            scene_graph[parent_node][node]['transformation'] = T
-            scene_graph.nodes[node]['coordinate_system']["origin"] = transformations.mat_mul_batch(T,
+            scene_graph[parent_node][node]['transformation'] = translation_mat4x4
+            scene_graph.nodes[node]['coordinate_system']["origin"] = transformations.mat_mul_batch(translation_mat4x4,
                                                                                                    transformations.v3_to_v4_batch(parent_cs['origin']))[:, :3]
             scene_graph.nodes[node]['coordinate_system']["x_axis"] = parent_cs['x_axis']
             scene_graph.nodes[node]['coordinate_system']["y_axis"] = parent_cs['y_axis']
@@ -209,31 +210,31 @@ class Sequence:
             node_to_child_node = transformations.norm_batch(child_pos - node_pos)
             # Get parent coordinate system Z-axis as reference for nodes' joint rotation..
             # ..Determine 4x4 homogenious rotation matrix to derive joint angles later
-            R_parent_to_node = transformations.get_rotation_batch(parent_cs['z_axis'] * -1, node_to_child_node)
+            rot_parent_to_node = transformations.get_rotation_batch(parent_cs['z_axis'] * -1, node_to_child_node)
 
             # Get Euler Sequences to be able to determine medical joint angles
             # NOTE: Scipy from_dcm() function has been renamed to 'as_matrix()' in scipy=1.4.*
             #       lates version for win64 is still 1.3.* ; Consider updating scipy dependency when 1.4.* is available for win64.
-            euler_angles_xyz = Rotation.from_dcm(R_parent_to_node[:, :3, :3]).as_euler('XYZ', degrees=True)
-            euler_angles_yxz = Rotation.from_dcm(R_parent_to_node[:, :3, :3]).as_euler('YXZ', degrees=True)
-            euler_angles_zxz = Rotation.from_dcm(R_parent_to_node[:, :3, :3]).as_euler('ZXZ', degrees=True)
+            euler_angles_xyz = Rotation.from_dcm(rot_parent_to_node[:, :3, :3]).as_euler('XYZ', degrees=True)
+            euler_angles_yxz = Rotation.from_dcm(rot_parent_to_node[:, :3, :3]).as_euler('YXZ', degrees=True)
+            euler_angles_zxz = Rotation.from_dcm(rot_parent_to_node[:, :3, :3]).as_euler('ZXZ', degrees=True)
 
             # Store transformation from parent to current node in corresponding edge
-            scene_graph[parent_node][node]['transformation'] = transformations.mat_mul_batch(T, R_parent_to_node)
+            scene_graph[parent_node][node]['transformation'] = transformations.mat_mul_batch(translation_mat4x4, rot_parent_to_node)
             # Store Rotation Matrix
-            scene_graph.nodes[node]['angles']['rotation_matrix'] = np.array(R_parent_to_node)
+            scene_graph.nodes[node]['angles']['rotation_matrix'] = np.array(rot_parent_to_node)
             # Store Euler Sequences
             scene_graph.nodes[node]['angles']['euler_xyz'] = euler_angles_xyz
             scene_graph.nodes[node]['angles']['euler_yxz'] = euler_angles_yxz
             scene_graph.nodes[node]['angles']['euler_zxz'] = euler_angles_zxz
             # Store the nodes coordinate system
-            scene_graph.nodes[node]['coordinate_system']['origin'] = transformations.mat_mul_batch(T,
+            scene_graph.nodes[node]['coordinate_system']['origin'] = transformations.mat_mul_batch(translation_mat4x4,
                                                                                                    transformations.v3_to_v4_batch(parent_cs['origin']))[:, :3]
-            x_axes = transformations.norm_batch(transformations.mat_mul_batch(R_parent_to_node[:, :3, :3], parent_cs['x_axis']))
+            x_axes = transformations.norm_batch(transformations.mat_mul_batch(rot_parent_to_node[:, :3, :3], parent_cs['x_axis']))
             scene_graph.nodes[node]['coordinate_system']['x_axis'] = x_axes
-            y_axes = transformations.norm_batch(transformations.mat_mul_batch(R_parent_to_node[:, :3, :3], parent_cs['y_axis']))
+            y_axes = transformations.norm_batch(transformations.mat_mul_batch(rot_parent_to_node[:, :3, :3], parent_cs['y_axis']))
             scene_graph.nodes[node]['coordinate_system']['y_axis'] = y_axes
-            z_axes = transformations.norm_batch(transformations.mat_mul_batch(R_parent_to_node[:, :3, :3], parent_cs['z_axis']))
+            z_axes = transformations.norm_batch(transformations.mat_mul_batch(rot_parent_to_node[:, :3, :3], parent_cs['z_axis']))
             scene_graph.nodes[node]['coordinate_system']['z_axis'] = z_axes
 
         # Repeat procedure if successors present
@@ -373,7 +374,7 @@ class Sequence:
         n_frames = len(self.positions)
         n_body_parts = len(self.scene_graph.nodes)
         n_angle_types = 3
-        bp = self.body_parts
+        body_part = self.body_parts
 
         joint_angles = np.full((n_frames, n_body_parts, n_angle_types), None)
         ball_joints = ['shoulder_l', 'shoulder_r', 'hip_l', 'hip_r']
@@ -383,18 +384,18 @@ class Sequence:
             if 'angles' in self.scene_graph.nodes[node].keys():
                 angles_dict = self.scene_graph.nodes[node]['angles']
                 if node in ball_joints:
-                    joint_angles[:, bp[node]] = ar.medical_from_euler_batch('xyz', angles_dict['euler_xyz'], node)
+                    joint_angles[:, body_part[node]] = ar.medical_from_euler_batch('xyz', angles_dict['euler_xyz'], node)
                 elif node in non_ball_joints:
-                    joint_angles[:, bp[node]] = ar.medical_from_euler_batch('zxz', angles_dict['euler_zxz'], node)
+                    joint_angles[:, body_part[node]] = ar.medical_from_euler_batch('zxz', angles_dict['euler_zxz'], node)
                 else:
-                    joint_angles[:, bp[node]] = np.array([None, None, None])
+                    joint_angles[:, body_part[node]] = np.array([None, None, None])
         return joint_angles
 
     def get_positions_2d(self) -> np.ndarray:
         """Returns the positions for all keypoints in shape: (num_frames, num_bodyparts * xyz)."""
         return np.reshape(self.positions, (self.positions.shape[0], -1))
 
-    def merge(self, sequence: 'Sequence') -> 'Sequence':
+    def merge(self, sequence) -> 'Sequence':
         """Returns the merged two sequences.
 
         Raises ValueError if either the body_parts, the poseformat or the body_parts and keys within the joint_angles do not match!
@@ -417,6 +418,8 @@ class Sequence:
                         (self.scene_graph.nodes[node]['coordinate_system'][vector_list], sequence.scene_graph.nodes[node]['coordinate_system'][vector_list]))
                 # If appending sequence has no data in scene_graph, add it beforehand
                 elif vector_list and vector_list not in sequence.scene_graph.nodes[node]:
+                    # pylint -> Ignore private function call warning as it is called from the class itself
+                    # pylint: disable=W0212
                     sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
                     self.scene_graph.nodes[node]['coordinate_system'][vector_list] = np.concatenate(
                         (self.scene_graph.nodes[node]['coordinate_system'][vector_list], sequence.scene_graph.nodes[node]['coordinate_system'][vector_list]))
@@ -425,18 +428,24 @@ class Sequence:
                     self.scene_graph.nodes[node]['angles'][angle_list] = np.concatenate(
                         (self.scene_graph.nodes[node]['angles'][angle_list], sequence.scene_graph.nodes[node]['angles'][angle_list]))
                 elif angle_list and angle_list not in sequence.scene_graph.nodes[node]:
+                    # pylint -> Ignore private function call warning as it is called from the class itself
+                    # pylint: disable=W0212
                     sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
                     self.scene_graph.nodes[node]['angles'][angle_list] = np.concatenate(
                         (self.scene_graph.nodes[node]['angles'][angle_list], sequence.scene_graph.nodes[node]['angles'][angle_list]))
 
-        for e1, e2 in self.scene_graph.edges:
-            for data_list in self.scene_graph[e1][e2].keys():
-                if data_list and data_list in sequence.scene_graph[e1][e2]:
-                    self.scene_graph[e1][e2][data_list] = np.concatenate((self.scene_graph[e1][e2][data_list], sequence.scene_graph[e1][e2][data_list]))
+        for edge1, edge2 in self.scene_graph.edges:
+            for data_list in self.scene_graph[edge1][edge2].keys():
+                if data_list and data_list in sequence.scene_graph[edge1][edge2]:
+                    self.scene_graph[edge1][edge2][data_list] = np.concatenate(
+                        (self.scene_graph[edge1][edge2][data_list], sequence.scene_graph[edge1][edge2][data_list]))
                 # If appending sequence has no data in scene_graph, add it beforehand
-                elif data_list and data_list not in sequence.scene_graph[e1][e2]:
+                elif data_list and data_list not in sequence.scene_graph[edge1][edge2]:
+                    # pylint -> Ignore private function call warning as it is called from the class itself
+                    # pylint: disable=W0212
                     sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
-                    self.scene_graph[e1][e2][data_list] = np.concatenate((self.scene_graph[e1][e2][data_list], sequence.scene_graph[e1][e2][data_list]))
+                    self.scene_graph[edge1][edge2][data_list] = np.concatenate(
+                        (self.scene_graph[edge1][edge2][data_list], sequence.scene_graph[edge1][edge2][data_list]))
 
         self.joint_angles = np.concatenate((self.joint_angles, sequence.joint_angles), axis=0)
 
