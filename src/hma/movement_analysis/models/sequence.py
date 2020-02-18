@@ -7,8 +7,6 @@ from scipy.spatial.transform import Rotation
 import hma.movement_analysis.transformations as transformations
 import hma.movement_analysis.angle_representations as ar
 
-# from hma.movement_analysis.models.sequence import Sequence
-
 
 # TODO: Implement Lazy Loading for props that are expensive to calculate (e.g. joint angles, Scene_graph data)
 # TODO: Test from_json and to_json methods for whether they (de)serialize the scene_graph properly
@@ -85,7 +83,7 @@ class Sequence:
         self.joint_angles = self._calc_joint_angles() if joint_angles is None else np.array(joint_angles)
 
     def __len__(self) -> int:
-        return len(self.positions)
+        return len(self.joint_angles)
 
     def __getitem__(self, item) -> 'Sequence':
         """Returns the sub-sequence item. You can either specifiy one element by index or use numpy-like slicing.
@@ -297,77 +295,88 @@ class Sequence:
             Sequence: a new Sequence instance from the given input.
         """
         with open(path, 'r') as sequence_file:
-            # load, parse file from json and return class
+            return from_mocap_json(sequence_file.read(), name)
 
-            mocap_sequence = json.loads(sequence_file.read())
-            positions = np.array(mocap_sequence["frames"])
-            timestamps = np.array(mocap_sequence["timestamps"])
+    @classmethod
+    def from_mocap_json(cls, json_str: str, name: str = 'sequence') -> 'Sequence':
+        """Loads an sequence from a json string and returns an Sequence object.
 
-            # reshape positions to 3d array
-            positions = np.reshape(positions, (np.shape(positions)[0], int(np.shape(positions)[1] / 3), 3))
+        Args:
+            json_str (str): The json string.
 
-            # Center Positions by subtracting the mean of each coordinate
-            positions[:, :, 0] -= np.mean(positions[:, :, 0])
-            positions[:, :, 1] -= np.mean(positions[:, :, 1])
-            positions[:, :, 2] -= np.mean(positions[:, :, 2])
+        Returns:
+            Sequence: a new Sequence instance from the given input.
+        """
+        # load, parse file from json and return class
+        json_data = json.loads(json_str)
+        positions = np.array(json_data["frames"])
+        timestamps = np.array(json_data["timestamps"])
 
-            # Adjust MoCap data to our target Coordinate System
-            # X_mocap = Left    ->  X_hma = Right   -->     Flip X-Axis
-            # Y_mocap = Up      ->  Y_hma = Front   -->     Switch Y and Z; Flip (new) Y-Axis
-            # Z_mocap = Back    ->  Z_hma = Up      -->     Switch Y and Z
+        # reshape positions to 3d array
+        positions = np.reshape(positions, (np.shape(positions)[0], int(np.shape(positions)[1] / 3), 3))
 
-            # Switch Y and Z axis.
-            # In Mocap Y points up and Z to the back -> We want Z to point up and Y to the front,
-            y_positions_mocap = positions[:, :, 1].copy()
-            z_positions_mocap = positions[:, :, 2].copy()
-            positions[:, :, 1] = z_positions_mocap
-            positions[:, :, 2] = y_positions_mocap
-            # MoCap coordinate system is left handed -> flip x-axis to adjust data for right handed coordinate system
-            positions[:, :, 0] *= -1
-            # Flip Y-Axis
-            # MoCap Z-Axis (our Y-Axis now) points "behind" the trainee, but we want it to point "forward"
-            positions[:, :, 1] *= -1
+        # Center Positions by subtracting the mean of each coordinate
+        positions[:, :, 0] -= np.mean(positions[:, :, 0])
+        positions[:, :, 1] -= np.mean(positions[:, :, 1])
+        positions[:, :, 2] -= np.mean(positions[:, :, 2])
 
-            # The target Body Part format
-            body_parts = {
-                "head": 0,
-                "neck": 1,
-                "shoulder_l": 2,
-                "shoulder_r": 3,
-                "elbow_l": 4,
-                "elbow_r": 5,
-                "wrist_l": 6,
-                "wrist_r": 7,
-                "torso": 8,
-                "pelvis": 9,
-                "hip_l": 10,
-                "hip_r": 11,
-                "knee_l": 12,
-                "knee_r": 13,
-                "ankle_l": 14,
-                "ankle_r": 15,
-            }
+        # Adjust MoCap data to our target Coordinate System
+        # X_mocap = Left    ->  X_hma = Right   -->     Flip X-Axis
+        # Y_mocap = Up      ->  Y_hma = Front   -->     Switch Y and Z; Flip (new) Y-Axis
+        # Z_mocap = Back    ->  Z_hma = Up      -->     Switch Y and Z
 
-            # Change body part indices according to the target body part format
-            positions_mocap = positions.copy()
-            positions[:, 0, :] = positions_mocap[:, 15, :]  # "head": 0
-            positions[:, 1, :] = positions_mocap[:, 3, :]  # "neck": 1
-            positions[:, 2, :] = positions_mocap[:, 2, :]  # "shoulder_l": 2
-            positions[:, 3, :] = positions_mocap[:, 14, :]  # "shoulder_r": 3
-            positions[:, 4, :] = positions_mocap[:, 1, :]  # "elbow_l": 4
-            positions[:, 5, :] = positions_mocap[:, 13, :]  # "elbow_r": 5
-            positions[:, 6, :] = positions_mocap[:, 0, :]  # "wrist_l": 6
-            positions[:, 7, :] = positions_mocap[:, 12, :]  # "wrist_r": 7
-            positions[:, 8, :] = positions_mocap[:, 4, :]  # "torso": 8
-            positions[:, 9, :] = positions_mocap[:, 5, :]  # "pelvis": 9
-            positions[:, 10, :] = positions_mocap[:, 8, :]  # "hip_l": 10
-            positions[:, 11, :] = positions_mocap[:, 11, :]  # "hip_r": 11
-            positions[:, 12, :] = positions_mocap[:, 7, :]  # "knee_l": 12
-            positions[:, 13, :] = positions_mocap[:, 10, :]  # "knee_r": 13
-            positions[:, 14, :] = positions_mocap[:, 6, :]  # "ankle_l": 14
-            positions[:, 15, :] = positions_mocap[:, 9, :]  # "ankle_r": 15
+        # Switch Y and Z axis.
+        # In Mocap Y points up and Z to the back -> We want Z to point up and Y to the front,
+        y_positions_mocap = positions[:, :, 1].copy()
+        z_positions_mocap = positions[:, :, 2].copy()
+        positions[:, :, 1] = z_positions_mocap
+        positions[:, :, 2] = y_positions_mocap
+        # MoCap coordinate system is left handed -> flip x-axis to adjust data for right handed coordinate system
+        positions[:, :, 0] *= -1
+        # Flip Y-Axis
+        # MoCap Z-Axis (our Y-Axis now) points "behind" the trainee, but we want it to point "forward"
+        positions[:, :, 1] *= -1
 
-            return cls(body_parts, positions, timestamps, name=name)
+        # The target Body Part format
+        body_parts = {
+            "head": 0,
+            "neck": 1,
+            "shoulder_l": 2,
+            "shoulder_r": 3,
+            "elbow_l": 4,
+            "elbow_r": 5,
+            "wrist_l": 6,
+            "wrist_r": 7,
+            "torso": 8,
+            "pelvis": 9,
+            "hip_l": 10,
+            "hip_r": 11,
+            "knee_l": 12,
+            "knee_r": 13,
+            "ankle_l": 14,
+            "ankle_r": 15,
+        }
+
+        # Change body part indices according to the target body part format
+        positions_mocap = positions.copy()
+        positions[:, 0, :] = positions_mocap[:, 15, :]  # "head": 0
+        positions[:, 1, :] = positions_mocap[:, 3, :]  # "neck": 1
+        positions[:, 2, :] = positions_mocap[:, 2, :]  # "shoulder_l": 2
+        positions[:, 3, :] = positions_mocap[:, 14, :]  # "shoulder_r": 3
+        positions[:, 4, :] = positions_mocap[:, 1, :]  # "elbow_l": 4
+        positions[:, 5, :] = positions_mocap[:, 13, :]  # "elbow_r": 5
+        positions[:, 6, :] = positions_mocap[:, 0, :]  # "wrist_l": 6
+        positions[:, 7, :] = positions_mocap[:, 12, :]  # "wrist_r": 7
+        positions[:, 8, :] = positions_mocap[:, 4, :]  # "torso": 8
+        positions[:, 9, :] = positions_mocap[:, 5, :]  # "pelvis": 9
+        positions[:, 10, :] = positions_mocap[:, 8, :]  # "hip_l": 10
+        positions[:, 11, :] = positions_mocap[:, 11, :]  # "hip_r": 11
+        positions[:, 12, :] = positions_mocap[:, 7, :]  # "knee_l": 12
+        positions[:, 13, :] = positions_mocap[:, 10, :]  # "knee_r": 13
+        positions[:, 14, :] = positions_mocap[:, 6, :]  # "ankle_l": 14
+        positions[:, 15, :] = positions_mocap[:, 9, :]  # "ankle_r": 15
+
+        return cls(body_parts, positions, timestamps, name=name)
 
     def _calc_joint_angles(self) -> np.ndarray:
         """Returns a 3-D list of joint angles for all frames, body parts and angle types."""
