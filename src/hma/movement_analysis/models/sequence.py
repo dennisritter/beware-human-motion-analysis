@@ -6,7 +6,6 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 import hma.movement_analysis.transformations as transformations
 import hma.movement_analysis.angle_representations as ar
-import time
 
 
 # TODO: Implement Lazy Loading for props that are expensive to calculate (e.g. joint angles, Scene_graph data)
@@ -98,9 +97,8 @@ class Sequence:
 
         if isinstance(item, slice):
             if item.start is None and item.stop is None and item.step is None:
-                # Fast Foward Slice for [:] (copy)
+                # Return a Deepcopy to improve copy performance (sequence[:])
                 return copy.deepcopy(self)
-            #     return Sequence(self.body_parts, self.positions, self.timestamps, self.name, self.joint_angles, copy.deepcopy(self.scene_graph))
             start, stop, step = item.indices(len(self))
         elif isinstance(item, int):
             start, stop, step = item, item + 1, 1
