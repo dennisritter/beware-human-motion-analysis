@@ -18,7 +18,7 @@ import hma.movement_analysis.transformations as transformations
 import sklearn.preprocessing as preprocessing
 
 squat_file = "data/exercises/squat.json"
-# filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json"
+filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json"
 # filename = "data/sequences/191024_tracking/single/biceps_curl_left/user-2/191024__single__biceps_curl_left__user-2__1.json"
 # filename = "data/sequences/191024_tracking/single/biceps_curl_right/user-2/191024__single__biceps_curl_right__user-2__1.json"
 # filename = "data/sequences/191024_tracking/single/triceps_extension_left/user-2/191024__single__triceps_extension_left__user-2__1.json"
@@ -28,9 +28,14 @@ squat_file = "data/exercises/squat.json"
 # filename = "data/sequences/test/100_frames.json"
 # f1 = "data/sequences/test/a.json"
 # f2 = "data/sequences/test/b.json"
-filename = "data/sequences/test/christopher_test.json"
 
 s = Sequence.from_mocap_file(filename)
+s2 = Sequence.from_mocap_file(filename)
+start = time.time()
+s = s.merge(s2)
+end = time.time()
+elapsed = end - start
+print(f"Merging speed: {elapsed}s")
 squat = Exercise.from_file(squat_file)
 EE = ExerciseEvaluator(squat, s)
 iterations = EE.find_iteration_keypoints(plot=True)
