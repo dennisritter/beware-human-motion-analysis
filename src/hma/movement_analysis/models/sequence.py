@@ -285,7 +285,7 @@ class Sequence:
             return cls.from_json(sequence_file.read())
 
     @classmethod
-    def from_mocap_file(cls, path: str, name: str = 'sequence') -> 'Sequence':
+    def from_mocap_file(cls, path: str, name: str = 'Sequence') -> 'Sequence':
         """Loads an sequence .json file and returns an Sequence object.
 
         Args:
@@ -295,10 +295,10 @@ class Sequence:
             Sequence: a new Sequence instance from the given input.
         """
         with open(path, 'r') as sequence_file:
-            return from_mocap_json(sequence_file.read(), name)
+            return Sequence.from_mocap_json(sequence_file.read(), name)
 
     @classmethod
-    def from_mocap_json(cls, json_str: str, name: str = 'sequence') -> 'Sequence':
+    def from_mocap_json(cls, json_str: str, name: str = 'Sequence') -> 'Sequence':
         """Loads an sequence from a json string and returns an Sequence object.
 
         Args:
