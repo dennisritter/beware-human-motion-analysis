@@ -6,6 +6,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 import hma.movement_analysis.transformations as transformations
 import hma.movement_analysis.angle_representations as ar
+import time
 
 
 # TODO: Implement Lazy Loading for props that are expensive to calculate (e.g. joint angles, Scene_graph data)
@@ -94,9 +95,13 @@ class Sequence:
         Raises NotImplementedError if index is given as tuple.
         Raises TypeError if item is not of type int or slice.
         """
+
         if isinstance(item, slice):
+            if item.start is None and item.stop is None and item.step is None:
+                # Fast Foward Slice for [:] (copy)
+                return copy.deepcopy(self)
+            #     return Sequence(self.body_parts, self.positions, self.timestamps, self.name, self.joint_angles, copy.deepcopy(self.scene_graph))
             start, stop, step = item.indices(len(self))
-            # return Seq([self[i] for i in range(start, stop, step)])
         elif isinstance(item, int):
             start, stop, step = item, item + 1, 1
         elif isinstance(item, tuple):
@@ -414,47 +419,33 @@ class Sequence:
 
         # Copy the given sequence to not change it implicitly
         sequence = sequence[:]
-
         # concatenate positions, timestamps and angles
         self.positions = np.concatenate((self.positions, sequence.positions), axis=0)
+
         self.timestamps = np.concatenate((self.timestamps, sequence.timestamps), axis=0)
 
-        # Concatenate scene_graph data lists
-        for node in self.scene_graph.nodes:
-            for vector_list in self.scene_graph.nodes[node]['coordinate_system'].keys():
-                if vector_list and vector_list in sequence.scene_graph.nodes[node]['coordinate_system']:
-                    self.scene_graph.nodes[node]['coordinate_system'][vector_list] = np.concatenate(
-                        (self.scene_graph.nodes[node]['coordinate_system'][vector_list], sequence.scene_graph.nodes[node]['coordinate_system'][vector_list]))
-                # If appending sequence has no data in scene_graph, add it beforehand
-                elif vector_list and vector_list not in sequence.scene_graph.nodes[node]['coordinate_system']:
-                    # pylint -> Ignore private function call warning as it is called from the class itself
-                    # pylint: disable=W0212
-                    sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
-                    self.scene_graph.nodes[node]['coordinate_system'][vector_list] = np.concatenate(
-                        (self.scene_graph.nodes[node]['coordinate_system'][vector_list], sequence.scene_graph.nodes[node]['coordinate_system'][vector_list]))
-            for angle_list in self.scene_graph.nodes[node]['angles'].keys():
-                if angle_list and angle_list in sequence.scene_graph.nodes[node]['angles']:
-                    self.scene_graph.nodes[node]['angles'][angle_list] = np.concatenate(
-                        (self.scene_graph.nodes[node]['angles'][angle_list], sequence.scene_graph.nodes[node]['angles'][angle_list]))
-                elif angle_list and angle_list not in sequence.scene_graph.nodes[node]['angles']:
-                    # pylint -> Ignore private function call warning as it is called from the class itself
-                    # pylint: disable=W0212
-                    sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
-                    self.scene_graph.nodes[node]['angles'][angle_list] = np.concatenate(
-                        (self.scene_graph.nodes[node]['angles'][angle_list], sequence.scene_graph.nodes[node]['angles'][angle_list]))
-
+        for node in sequence.scene_graph.nodes:
+            merge_node_data = sequence.scene_graph.nodes[node]
+            node_data = self.scene_graph.nodes[node]
+            # Concatenate Coordinate System data
+            node_data['coordinate_system']['origin'] = np.concatenate(
+                (node_data['coordinate_system']['origin'], merge_node_data['coordinate_system']['origin']))
+            node_data['coordinate_system']['x_axis'] = np.concatenate(
+                (node_data['coordinate_system']['x_axis'], merge_node_data['coordinate_system']['x_axis']))
+            node_data['coordinate_system']['y_axis'] = np.concatenate(
+                (node_data['coordinate_system']['y_axis'], merge_node_data['coordinate_system']['y_axis']))
+            node_data['coordinate_system']['z_axis'] = np.concatenate(
+                (node_data['coordinate_system']['z_axis'], merge_node_data['coordinate_system']['z_axis']))
+            # Concatenate angle data
+            if 'rotation_matrix' in node_data['angles'].keys():
+                node_data['angles']['rotation_matrix'] = np.concatenate((node_data['angles']['rotation_matrix'], merge_node_data['angles']['rotation_matrix']))
+                node_data['angles']['euler_xyz'] = np.concatenate((node_data['angles']['euler_xyz'], merge_node_data['angles']['euler_xyz']))
+                node_data['angles']['euler_yxz'] = np.concatenate((node_data['angles']['euler_yxz'], merge_node_data['angles']['euler_yxz']))
+                node_data['angles']['euler_zxz'] = np.concatenate((node_data['angles']['euler_zxz'], merge_node_data['angles']['euler_zxz']))
         for edge1, edge2 in self.scene_graph.edges:
-            for data_list in self.scene_graph[edge1][edge2].keys():
-                if data_list and data_list in sequence.scene_graph[edge1][edge2]:
-                    self.scene_graph[edge1][edge2][data_list] = np.concatenate(
-                        (self.scene_graph[edge1][edge2][data_list], sequence.scene_graph[edge1][edge2][data_list]))
-                # If appending sequence has no data in scene_graph, add it beforehand
-                elif data_list and data_list not in sequence.scene_graph[edge1][edge2]:
-                    # pylint -> Ignore private function call warning as it is called from the class itself
-                    # pylint: disable=W0212
-                    sequence._fill_scenegraph(sequence.scene_graph, sequence.positions)
-                    self.scene_graph[edge1][edge2][data_list] = np.concatenate(
-                        (self.scene_graph[edge1][edge2][data_list], sequence.scene_graph[edge1][edge2][data_list]))
+            merge_edge_data = sequence.scene_graph[edge1][edge2]
+            edge_data = self.scene_graph[edge1][edge2]
+            edge_data['transformation'] = np.concatenate((edge_data['transformation'], merge_edge_data['transformation']))
 
         self.joint_angles = np.concatenate((self.joint_angles, sequence.joint_angles), axis=0)
 
