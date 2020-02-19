@@ -10,8 +10,7 @@ import hma.movement_analysis.angle_representations as ar
 
 # TODO: Implement Lazy Loading for props that are expensive to calculate (e.g. joint angles, Scene_graph data)
 # TODO: Test from_json and to_json methods for whether they (de)serialize the scene_graph properly
-# TODO: Consider outsourcing medical joint_angle calculations and attribute to another module/script/class
-#       Maybe a place to handle medical related stuff would be nice to get a clean seperation.
+# TODO: Consider outsourcing medical joint_angle calculations and attribute to another module/script/class. Maybe a place to handle medical related stuff would be nice to get a clean seperation.
 # Ignore pylint 'Function redefined warning' as Sequence is imported for pyright
 # pylint: disable=E0102
 class Sequence:
@@ -381,6 +380,22 @@ class Sequence:
 
         return cls(body_parts, positions, timestamps, name=name)
 
+    def _get_joint_start_dist_x(self, joint_positions_x):
+        """Returns the sum of distances of all frames to the starting x-position. 
+            
+        Args:
+            joint_positions_x (np.ndarray): The 3-D euclidean x-positions of a joint node.
+        """
+        return np.sum(np.absolute(np.absolute(joint_positions_x) - abs(joint_positions_x[0])))
+
+    def _get_joint_start_dist_y(self, joint_positions_y):
+        """Returns the sum of distances of all frames to the starting y-position.
+
+        Args:
+            joint_positions_y (np.ndarray): The 3-D euclidean y-positions of a joint node.
+        """
+        return np.sum(np.absolute(np.absolute(joint_positions_y) - abs(joint_positions_y[0])))
+
     def _calc_joint_angles(self) -> np.ndarray:
         """Returns a 3-D list of joint angles for all frames, body parts and angle types."""
         n_frames = len(self.positions)
@@ -396,7 +411,19 @@ class Sequence:
             if 'angles' in self.scene_graph.nodes[node].keys():
                 angles_dict = self.scene_graph.nodes[node]['angles']
                 if node in ball_joints:
-                    joint_angles[:, body_part[node]] = ar.medical_from_euler_batch('xyz', angles_dict['euler_xyz'], node)
+                    # TODO: Hacky/Naive/Simple solution.. ==> How can we determine order of motions more reliably?
+                    # * NOTE:   We assume, that the axis, on which the child node moved more, gives information about whether
+                    # *         the current nodes' performed motion has been a flexion followed by an abduction or vice versa.
+                    # *         If start_dist_x < start_dist_y, more motion occured 'frontal', which indicates a flexion->abduction order (=> Use XYZ-Euler).
+                    # *         If start_dist_x > start_dist_y, more motion occured 'sideways', which indicates a abduction->flexion order (=> Use YXZ-Euler).
+                    child_node = list(self.scene_graph.successors(node))[0]
+                    start_dist_x = self._get_joint_start_dist_x(self.positions[:, self.body_parts[child_node], 0])
+                    start_dist_y = self._get_joint_start_dist_x(self.positions[:, self.body_parts[child_node], 1])
+                    if start_dist_x < start_dist_y:
+                        joint_angles[:, body_part[node]] = ar.medical_from_euler_batch('xyz', angles_dict['euler_xyz'], node)
+                    else:
+                        joint_angles[:, body_part[node]] = ar.medical_from_euler_batch('yxz', angles_dict['euler_yxz'], node)
+
                 elif node in non_ball_joints:
                     joint_angles[:, body_part[node]] = ar.medical_from_euler_batch('zxz', angles_dict['euler_zxz'], node)
                 else:

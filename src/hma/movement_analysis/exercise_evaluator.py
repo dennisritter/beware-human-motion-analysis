@@ -59,8 +59,9 @@ class ExerciseEvaluator:
         # As the sequence attribute has changed, we have to recalculate target_angles and prio_angles.
         self.target_angles = self._get_target_angles()
         self.prio_angles = self._get_prio_angles()
+        # !Deprecated Remove? (done in Sequence class now)
         # And finally process the sequences' ball joint angles again.
-        self._process_sequence_ball_joint_angles()
+        # self._process_sequence_ball_joint_angles()
 
     def set_exercise(self, ex: Exercise):
         """Assigns the given exercise to the exercise attribute and performs
@@ -75,8 +76,9 @@ class ExerciseEvaluator:
         self.prio_angles = self._get_prio_angles()
         # Assign unprocessed sequence to sequence to process the original (unprocessed) angles.
         self.sequence = self.unprocessed_sequence
-        # And finally process the sequences' ball joint angles again.
-        self._process_sequence_ball_joint_angles()
+        # !Deprecated Remove? (done in Sequence class now)
+        # # And finally process the sequences' ball joint angles again.
+        # self._process_sequence_ball_joint_angles()
 
     def _get_prio_angles(self) -> list:
         """Returns a list of tuples containing a body part mapped in Sequence.body_parts and the AngleType for that body part which is prioritised.
@@ -503,6 +505,7 @@ class ExerciseEvaluator:
         return results
 
     def _process_sequence_ball_joint_angles(self):
+        # !Deprecated Remove? (done in Sequence class now)
         """Processes this ExerciseEvaluators sequences' ball joint angles for
         all ball joints and applies changes to the sequence.
 
@@ -527,6 +530,7 @@ class ExerciseEvaluator:
             seq.joint_angles[i][bps["hip_r"]] = [processed_rh[0], processed_rh[1], seq.joint_angles[i][bps["hip_r"]][AngleTypes.IN_EX_ROT.value]]
 
     def _process_ball_joint_angles(self, angle_flex_ex: float, angle_abd_add: float, bp_idx: int, ignore_flex_abd90_delta: int = 20) -> tuple:
+        # !Deprecated Remove? (done in Sequence class now)
         """Processes ball joint angles to improve clinical representation of
         those.
 
@@ -557,22 +561,23 @@ class ExerciseEvaluator:
         """
         # Check if angle-vector.y is higher than origin and adjust abduction/adduction angles if conditions are met.
         # If flexion angle is >90.0, angle-vector.y is higher than origin because flexion angle represents a rotation about the X-Axis
-        if angle_flex_ex > 90.0 or angle_flex_ex < -90:
-            for prio_angle in self.prio_angles:
-                # TODO: Maybe it is better to check for the expected range of motion instead of priority
-                # If Abduction/Adduction is a prio angle type, fix the 90° limitation
-                if prio_angle[0] == bp_idx and prio_angle[1] == AngleTypes.AB_AD:
-                    if angle_abd_add < 0:
-                        angle_abd_add = -180 - angle_abd_add
 
-                    if angle_abd_add > 0:
-                        angle_abd_add = 180 - angle_abd_add
+        # if angle_flex_ex > 90.0 or angle_flex_ex < -90:
+        #     for prio_angle in self.prio_angles:
+        #         # TODO: Maybe it is better to check for the expected range of motion instead of priority
+        #         # If Abduction/Adduction is a prio angle type, fix the 90° limitation
+        #         if prio_angle[0] == bp_idx and prio_angle[1] == AngleTypes.AB_AD:
+        #             if angle_abd_add < 0:
+        #                 angle_abd_add = -180 - angle_abd_add
 
-        # Set Flexion/Extension to 0.0° when angle-vector is close to X-Axis.
-        # -> Flexion/Extension angles get very sensitive and error prone when close to X-Axis because it represents a rotation around it.
-        full_absolute_abd_add = 90.0
-        if abs(full_absolute_abd_add - abs(angle_abd_add)) < ignore_flex_abd90_delta:
-            angle_flex_ex = 0.0
+        #             if angle_abd_add > 0:
+        #                 angle_abd_add = 180 - angle_abd_add
+
+        # # Set Flexion/Extension to 0.0° when angle-vector is close to X-Axis.
+        # # -> Flexion/Extension angles get very sensitive and error prone when close to X-Axis because it represents a rotation around it.
+        # full_absolute_abd_add = 90.0
+        # if abs(full_absolute_abd_add - abs(angle_abd_add)) < ignore_flex_abd90_delta:
+        #     angle_flex_ex = 0.0
 
         return angle_flex_ex, angle_abd_add
 
