@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="humanmotionanalysis",
-    version="0.0.1",
+    version="0.1.0",
     author="IISY at Beuth",
     author_email="iisy@beuth-hochschule.de",
     description="Human Motion Analysis",
