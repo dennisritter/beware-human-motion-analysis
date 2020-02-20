@@ -1,7 +1,6 @@
 import json
 import tslearn.metrics as ts
-from hma.movement_analysis.pose_processor import PoseProcessor
-from hma.movement_analysis.enums.pose_format_enum import PoseFormatEnum
+from hma.movement_analysis.models.sequence import Sequence
 from hma.movement_analysis import exercise_loader
 from hma.movement_analysis.helpers import reformat_angles_dtw
 from hma.movement_analysis.exercise_evaluator import ExerciseEvaluator
@@ -10,25 +9,23 @@ from hma.movement_analysis.skeleton_visualiser import SkeletonVisualiser
 
 def load_sequence_example():
     """Loading a sequence from file"""
-    mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
     filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json"
-    sequence = mocap_poseprocessor.load(filename)
+    sequence = Sequence.from_mocap_file(filename)
     return sequence
 
 
 # load_sequence_example()
 
 
-def visualise_sequence_example(frames_from_to: list = [0, 1]):
+def visualise_sequence_example(filename: str = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json",
+                               frames_from_to: list = [0, 1]):
     """Loading and visualising a sequence from file"""
-    mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
-    filename = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json"
-    sequence = mocap_poseprocessor.load(filename)
+    sequence = Sequence.from_mocap_file(filename)
     skeleton_vis = SkeletonVisualiser(sequence[frames_from_to[0]:frames_from_to[1]])
     skeleton_vis.show()
 
 
-# visualise_sequence_example([0, 1])
+# visualise_sequence_example()
 
 
 def load_exercise_example():
@@ -41,14 +38,13 @@ def load_exercise_example():
 
 def identify_exercise_type_example():
     """Identify the type of an exercise"""
-    mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
     filename_q = "data/sequences/191024_tracking/single/squat/user-3/191024__single__squat__user-3__1.json"
     filename_squat_gt = "data/sequences/191024_tracking/single/squat/user-2/191024__single__squat__user-2__1.json"
     filename_biceps_curl_left_gt = "data/sequences/191024_tracking/single/biceps_curl_left/user-2/191024__single__biceps_curl_left__user-2__1.json"
 
-    sequence_q = mocap_poseprocessor.load(filename_q, str(filename_q).split('\\')[-1])
-    sequence_squat_gt = mocap_poseprocessor.load(filename_squat_gt, "Squat Ground-Truth")
-    sequence_biceps_curl_left_gt = mocap_poseprocessor.load(filename_biceps_curl_left_gt, "Biceps Curl Left Ground-Truth")
+    sequence_q = Sequence.from_mocap_file(filename_q, str(filename_q).split('\\')[-1])
+    sequence_squat_gt = Sequence.from_mocap_file(filename_squat_gt, "Squat Ground-Truth")
+    sequence_biceps_curl_left_gt = Sequence.from_mocap_file(filename_biceps_curl_left_gt, "Biceps Curl Left Ground-Truth")
 
     angles_q = reformat_angles_dtw(sequence_q)
     angles_squat_gt = reformat_angles_dtw(sequence_squat_gt)
@@ -66,15 +62,15 @@ def identify_exercise_type_example():
     print(f"path: {path_biceps_curl_left_gt}")
     print(f"-----")
 
+
 # identify_exercise_type_example()
 
 
 def identify_single_iteration_subsequences(plot=False):
     """Identify subsequences consisting of a single exercise repitition"""
     # Load Sequence and Exercise
-    mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
     filename = "data/sequences/191024_tracking/multi/squat/user-3/191024__multi__squat__user-3__0.json"
-    sequence = mocap_poseprocessor.load(filename, str(filename).split('\\')[-1])
+    sequence = Sequence.from_mocap_file(filename, str(filename).split('\\')[-1])
     squat = exercise_loader.load("data/exercises/squat.json")
     # Init ExerciseEvaluiator with an Exercise and a Sequence
     EE = ExerciseEvaluator(squat, sequence)
@@ -88,12 +84,12 @@ def identify_single_iteration_subsequences(plot=False):
 # identify_single_iteration_subsequences(plot=True)
 
 
-def rate_exercise_performance(plot=False):
+def rate_exercise_performance(filename: str = "data/sequences/191024_tracking/multi/squat/user-2/191024__multi__squat__user-2__1.json",
+                              output_name: str = "data/rating_result_",
+                              plot=False):
     """Rating trainees exercise execution performance - Angle Comparison Method"""
     # Load Sequence and Exercise
-    mocap_poseprocessor = PoseProcessor(PoseFormatEnum.MOCAP)
-    filename = "data/sequences/191024_tracking/multi/squat/user-2/191024__multi__squat__user-2__1.json"
-    sequence = mocap_poseprocessor.load(filename, str(filename).split('\\')[-1])
+    sequence = Sequence.from_mocap_file(filename, str(filename).split('\\')[-1])
     squat = exercise_loader.load("data/exercises/squat.json")
     # Init ExerciseEvaluiator with an Exercise and a Sequence
     EE = ExerciseEvaluator(squat, sequence)
@@ -112,7 +108,7 @@ def rate_exercise_performance(plot=False):
             turning_frame = it[1]
             rating_result = EE.evaluate(turning_frame)
             # Create result JSON file
-            with open(f"data/rating_result_{i}.json", 'w') as outfile:
+            with open(f"{output_name}{i}.json", 'w') as outfile:
                 # The Results are structured in the following way:
                 # 1. Dimension = Frame
                 # 2. Dimension = Body Part (null means there are no angles for that body part)
@@ -122,4 +118,4 @@ def rate_exercise_performance(plot=False):
         print("No iterations identified. Unable to rate execution performance.")
 
 
-# rate_exercise_performance()
+# rate_exercise_performance(plot=True)

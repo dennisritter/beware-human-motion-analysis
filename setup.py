@@ -14,17 +14,7 @@ setuptools.setup(
     url="https://gitlab.beuth-hochschule.de/iisy/humanmotionanalysis",
     package_dir={'': 'src'},
     packages=setuptools.find_namespace_packages(where='src'),
-    install_requires=[
-            'numpy',
-            'matplotlib',
-            'pandas',
-            'scikit-learn',
-            'scipy',
-            'seaborn',
-            'cython',
-            'tslearn',
-            'fastdtw'
-    ],
+    install_requires=['numpy', 'matplotlib', 'pandas', 'scikit-learn', 'scipy', 'seaborn', 'cython', 'tslearn', 'fastdtw', 'networkx', 'plotly'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
