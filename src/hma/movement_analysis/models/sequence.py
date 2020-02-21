@@ -381,8 +381,8 @@ class Sequence:
         return cls(body_parts, positions, timestamps, name=name)
 
     def _get_joint_start_dist_x(self, joint_positions_x):
-        """Returns the sum of distances of all frames to the starting x-position. 
-            
+        """Returns the sum of distances of all frames to the starting x-position.
+
         Args:
             joint_positions_x (np.ndarray): The 3-D euclidean x-positions of a joint node.
         """
