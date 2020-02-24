@@ -3,6 +3,7 @@ from statistics import mean
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import hma.movement_analysis.medical_joint_angles as ma
 from scipy.signal import argrelextrema, savgol_filter
 from .models.exercise import Exercise
 from .enums.angle_target_states import AngleTargetStates
@@ -38,6 +39,8 @@ class ExerciseEvaluator:
         self.exercise = exercise
         # The sequence to evaluate
         self.sequence = sequence[:]
+        # The medical joint angles for the given sequence
+        self.sequence_joint_angles = ma.calc_joint_angles(sequence)
         # Hold the unprocessed angles in case the exercise changes
         self.unprocessed_sequence = self.sequence[:]
         # The target_angles for each body part
@@ -202,7 +205,7 @@ class ExerciseEvaluator:
         for prio_idx, (body_part_idx, angle_type) in enumerate(self.prio_angles):
 
             # Get calculated angles of a specific type for a specific body part for all frames
-            angles = seq.joint_angles[:, body_part_idx, angle_type.value]
+            angles = self.sequence_joint_angles[:, body_part_idx, angle_type.value]
 
             # Apply a Savitzky-Golay Filter to get a list of 'smoothed' angles.
             savgol_window = 51
@@ -464,6 +467,7 @@ class ExerciseEvaluator:
             Example indexing of a specific result: result[<frame>][<body_part_index>][<angle_type.value>]
         """
         seq = self.sequence[sequence_range]
+        joint_angles = self.sequence_joint_angles
         bps = seq.body_parts
 
         results = []
@@ -472,21 +476,21 @@ class ExerciseEvaluator:
             if frame == switch_state_idx + 1:
                 current_target_state = AngleTargetStates.START
             # Shoulders
-            shoulder_left_angle_flex_ex = seq.joint_angles[frame][bps["shoulder_l"]][AngleTypes.FLEX_EX.value]
-            shoulder_left_angle_abd_add = seq.joint_angles[frame][bps["shoulder_l"]][AngleTypes.AB_AD.value]
-            shoulder_right_angle_flex_ex = seq.joint_angles[frame][bps["shoulder_r"]][AngleTypes.FLEX_EX.value]
-            shoulder_right_angle_abd_add = seq.joint_angles[frame][bps["shoulder_r"]][AngleTypes.AB_AD.value]
+            shoulder_left_angle_flex_ex = joint_angles[frame][bps["shoulder_l"]][AngleTypes.FLEX_EX.value]
+            shoulder_left_angle_abd_add = joint_angles[frame][bps["shoulder_l"]][AngleTypes.AB_AD.value]
+            shoulder_right_angle_flex_ex = joint_angles[frame][bps["shoulder_r"]][AngleTypes.FLEX_EX.value]
+            shoulder_right_angle_abd_add = joint_angles[frame][bps["shoulder_r"]][AngleTypes.AB_AD.value]
             # Hips
-            hip_left_angle_flex_ex = seq.joint_angles[frame][bps["hip_l"]][AngleTypes.FLEX_EX.value]
-            hip_left_angle_abd_add = seq.joint_angles[frame][bps["hip_l"]][AngleTypes.AB_AD.value]
-            hip_right_angle_flex_ex = seq.joint_angles[frame][bps["hip_r"]][AngleTypes.FLEX_EX.value]
-            hip_right_angle_abd_add = seq.joint_angles[frame][bps["hip_r"]][AngleTypes.AB_AD.value]
+            hip_left_angle_flex_ex = joint_angles[frame][bps["hip_l"]][AngleTypes.FLEX_EX.value]
+            hip_left_angle_abd_add = joint_angles[frame][bps["hip_l"]][AngleTypes.AB_AD.value]
+            hip_right_angle_flex_ex = joint_angles[frame][bps["hip_r"]][AngleTypes.FLEX_EX.value]
+            hip_right_angle_abd_add = joint_angles[frame][bps["hip_r"]][AngleTypes.AB_AD.value]
             # Elbows
-            elbow_left_angle_flex_ex = seq.joint_angles[frame][bps["elbow_l"]][AngleTypes.FLEX_EX.value]
-            elbow_right_angle_flex_ex = seq.joint_angles[frame][bps["elbow_r"]][AngleTypes.FLEX_EX.value]
+            elbow_left_angle_flex_ex = joint_angles[frame][bps["elbow_l"]][AngleTypes.FLEX_EX.value]
+            elbow_right_angle_flex_ex = joint_angles[frame][bps["elbow_r"]][AngleTypes.FLEX_EX.value]
             # Knees
-            knee_left_angle_flex_ex = seq.joint_angles[frame][bps["knee_l"]][AngleTypes.FLEX_EX.value]
-            knee_right_angle_flex_ex = seq.joint_angles[frame][bps["knee_r"]][AngleTypes.FLEX_EX.value]
+            knee_left_angle_flex_ex = joint_angles[frame][bps["knee_l"]][AngleTypes.FLEX_EX.value]
+            knee_right_angle_flex_ex = joint_angles[frame][bps["knee_r"]][AngleTypes.FLEX_EX.value]
 
             # Everything gets overridden? WHY?
             frame_result = [None] * len(bps)
@@ -514,20 +518,22 @@ class ExerciseEvaluator:
                                             from where the flexion/extension angle is ignored. Default=20;
         """
         seq = self.sequence
+        joint_angles = self.sequence_joint_angles
         bps = seq.body_parts
         for i in range(len(seq)):
-            processed_ls = self._process_ball_joint_angles(seq.joint_angles[i][bps["shoulder_l"]][AngleTypes.FLEX_EX.value],
-                                                           seq.joint_angles[i][bps["shoulder_l"]][AngleTypes.AB_AD.value], bps["shoulder_l"])
-            seq.joint_angles[i][bps["shoulder_l"]] = [processed_ls[0], processed_ls[1], seq.joint_angles[i][bps["shoulder_l"]][AngleTypes.IN_EX_ROT.value]]
-            processed_rs = self._process_ball_joint_angles(seq.joint_angles[i][bps["shoulder_r"]][AngleTypes.FLEX_EX.value],
-                                                           seq.joint_angles[i][bps["shoulder_r"]][AngleTypes.AB_AD.value], bps["shoulder_r"])
-            seq.joint_angles[i][bps["shoulder_r"]] = [processed_rs[0], processed_rs[1], seq.joint_angles[i][bps["shoulder_r"]][AngleTypes.IN_EX_ROT.value]]
-            processed_lh = self._process_ball_joint_angles(seq.joint_angles[i][bps["hip_l"]][AngleTypes.FLEX_EX.value],
-                                                           seq.joint_angles[i][bps["hip_l"]][AngleTypes.AB_AD.value], bps["hip_l"])
-            seq.joint_angles[i][bps["hip_l"]] = [processed_lh[0], processed_lh[1], seq.joint_angles[i][bps["hip_l"]][AngleTypes.IN_EX_ROT.value]]
-            processed_rh = self._process_ball_joint_angles(seq.joint_angles[i][bps["hip_r"]][AngleTypes.FLEX_EX.value],
-                                                           seq.joint_angles[i][bps["hip_r"]][AngleTypes.AB_AD.value], bps["hip_r"])
-            seq.joint_angles[i][bps["hip_r"]] = [processed_rh[0], processed_rh[1], seq.joint_angles[i][bps["hip_r"]][AngleTypes.IN_EX_ROT.value]]
+            processed_ls = self._process_ball_joint_angles(joint_angles[i][bps["shoulder_l"]][AngleTypes.FLEX_EX.value],
+                                                           joint_angles[i][bps["shoulder_l"]][AngleTypes.AB_AD.value], bps["shoulder_l"])
+            joint_angles[i][bps["shoulder_l"]] = [processed_ls[0], processed_ls[1], joint_angles[i][bps["shoulder_l"]][AngleTypes.IN_EX_ROT.value]]
+            processed_rs = self._process_ball_joint_angles(joint_angles[i][bps["shoulder_r"]][AngleTypes.FLEX_EX.value],
+                                                           joint_angles[i][bps["shoulder_r"]][AngleTypes.AB_AD.value], bps["shoulder_r"])
+            joint_angles[i][bps["shoulder_r"]] = [processed_rs[0], processed_rs[1], joint_angles[i][bps["shoulder_r"]][AngleTypes.IN_EX_ROT.value]]
+            processed_lh = self._process_ball_joint_angles(joint_angles[i][bps["hip_l"]][AngleTypes.FLEX_EX.value],
+                                                           joint_angles[i][bps["hip_l"]][AngleTypes.AB_AD.value], bps["hip_l"])
+            joint_angles[i][bps["hip_l"]] = [processed_lh[0], processed_lh[1], joint_angles[i][bps["hip_l"]][AngleTypes.IN_EX_ROT.value]]
+            processed_rh = self._process_ball_joint_angles(joint_angles[i][bps["hip_r"]][AngleTypes.FLEX_EX.value],
+                                                           joint_angles[i][bps["hip_r"]][AngleTypes.AB_AD.value], bps["hip_r"])
+            joint_angles[i][bps["hip_r"]] = [processed_rh[0], processed_rh[1], joint_angles[i][bps["hip_r"]][AngleTypes.IN_EX_ROT.value]]
+        self.sequence_joint_angles = joint_angles
 
     def _process_ball_joint_angles(self, angle_flex_ex: float, angle_abd_add: float, bp_idx: int, ignore_flex_abd90_delta: int = 20) -> tuple:
         # !Deprecated Remove? (done in Sequence class now)
