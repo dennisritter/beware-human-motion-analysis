@@ -5,12 +5,9 @@ import networkx as nx
 import numpy as np
 from scipy.spatial.transform import Rotation
 import hma.movement_analysis.transformations as transformations
-import hma.movement_analysis.angle_representations as ar
 
 
-# TODO: Implement Lazy Loading for props that are expensive to calculate (e.g. joint angles, Scene_graph data)
 # TODO: Test from_json and to_json methods for whether they (de)serialize the scene_graph properly
-# TODO: Consider outsourcing medical joint_angle calculations and attribute to another module/script/class. Maybe a place to handle medical related stuff would be nice to get a clean seperation.
 # Ignore pylint 'Function redefined warning' as Sequence is imported for pyright
 # pylint: disable=E0102
 class Sequence:
@@ -21,16 +18,9 @@ class Sequence:
         positions (list): The tracked body part positions for each frame.
         timestamps (list): The timestamps for each tracked frame.
         name (str): The name of this sequence.
-        joint_angles (list): The calculated angles derived from the tracked positions of this sequence
         scene_graph (networkx.DiGraph): A Directed Graph defining the hierarchy between body parts that will be filled with related data.
     """
-    def __init__(self,
-                 body_parts: dict,
-                 positions: np.ndarray,
-                 timestamps: np.ndarray,
-                 name: str = 'sequence',
-                 joint_angles: list = None,
-                 scene_graph: nx.DiGraph = None):
+    def __init__(self, body_parts: dict, positions: np.ndarray, timestamps: np.ndarray, name: str = 'sequence', scene_graph: nx.DiGraph = None):
         self.name = name
         # Number, order and label of tracked body parts
         # Example: { "head": 0, "neck": 1, ... }
@@ -74,15 +64,8 @@ class Sequence:
         ]) if scene_graph is None else scene_graph.copy()
         self._fill_scenegraph(self.scene_graph, self.positions)
 
-        # Stores joint angles for each frame
-        # NOTE: Body part indices are the indices stored in self.body_parts.
-        # NOTE: If angles have been computed, the stored value is a dictionary with at least one key "flexion_extension"
-        #       and a "abduction_adduction" key for ball joints.
-        # NOTE: If no angles have been computed for a particular joint, the stored value is None.
-        self.joint_angles = self._calc_joint_angles() if joint_angles is None else np.array(joint_angles)
-
     def __len__(self) -> int:
-        return len(self.joint_angles)
+        return len(self.timestamps)
 
     def __getitem__(self, item) -> 'Sequence':
         """Returns the sub-sequence item. You can either specifiy one element by index or use numpy-like slicing.
@@ -120,8 +103,7 @@ class Sequence:
                 if data_list:
                     scene_graph[edge1][edge2][data_list] = scene_graph[edge1][edge2][data_list][start:stop:step]
 
-        return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.name, self.joint_angles[start:stop:step],
-                        scene_graph)
+        return Sequence(self.body_parts, self.positions[start:stop:step], self.timestamps[start:stop:step], self.name, scene_graph)
 
     def _get_pelvis_cs_positions(self, positions):
         """Transforms all points in positions parameter so they are relative to the pelvis. X-Axis = right, Y-Axis = front, Z-Axis = up. """
@@ -251,7 +233,6 @@ class Sequence:
             'body_parts': self.body_parts,
             'positions': self.positions.tolist(),
             'timestamps': self.timestamps.tolist(),
-            'joint_angles': self.joint_angles.tolist(),
             # 'scene_graph': nx.readwrite.json_graph.adjacency_data(self.scene_graph)
         }
         return json.dumps(json_dict)
@@ -380,56 +361,6 @@ class Sequence:
 
         return cls(body_parts, positions, timestamps, name=name)
 
-    def _get_joint_start_dist_x(self, joint_positions_x):
-        """Returns the sum of distances of all frames to the starting x-position.
-
-        Args:
-            joint_positions_x (np.ndarray): The 3-D euclidean x-positions of a joint node.
-        """
-        return np.sum(np.absolute(np.absolute(joint_positions_x) - abs(joint_positions_x[0])))
-
-    def _get_joint_start_dist_y(self, joint_positions_y):
-        """Returns the sum of distances of all frames to the starting y-position.
-
-        Args:
-            joint_positions_y (np.ndarray): The 3-D euclidean y-positions of a joint node.
-        """
-        return np.sum(np.absolute(np.absolute(joint_positions_y) - abs(joint_positions_y[0])))
-
-    def _calc_joint_angles(self) -> np.ndarray:
-        """Returns a 3-D list of joint angles for all frames, body parts and angle types."""
-        n_frames = len(self.positions)
-        n_body_parts = len(self.scene_graph.nodes)
-        n_angle_types = 3
-        body_part = self.body_parts
-
-        joint_angles = np.full((n_frames, n_body_parts, n_angle_types), None)
-        ball_joints = ['shoulder_l', 'shoulder_r', 'hip_l', 'hip_r']
-        non_ball_joints = ['elbow_l', 'elbow_r', 'knee_l', 'knee_r']
-
-        for node in self.scene_graph.nodes:
-            if 'angles' in self.scene_graph.nodes[node].keys():
-                angles_dict = self.scene_graph.nodes[node]['angles']
-                if node in ball_joints:
-                    # TODO: Hacky/Naive/Simple solution.. ==> How can we determine order of motions more reliably?
-                    # * NOTE:   We assume, that the axis, on which the child node moved more, gives information about whether
-                    # *         the current nodes' performed motion has been a flexion followed by an abduction or vice versa.
-                    # *         If start_dist_x < start_dist_y, more motion occured 'frontal', which indicates a flexion->abduction order (=> Use XYZ-Euler).
-                    # *         If start_dist_x > start_dist_y, more motion occured 'sideways', which indicates a abduction->flexion order (=> Use YXZ-Euler).
-                    child_node = list(self.scene_graph.successors(node))[0]
-                    start_dist_x = self._get_joint_start_dist_x(self.positions[:, self.body_parts[child_node], 0])
-                    start_dist_y = self._get_joint_start_dist_x(self.positions[:, self.body_parts[child_node], 1])
-                    if start_dist_x < start_dist_y:
-                        joint_angles[:, body_part[node]] = ar.medical_from_euler_batch('xyz', angles_dict['euler_xyz'], node)
-                    else:
-                        joint_angles[:, body_part[node]] = ar.medical_from_euler_batch('yxz', angles_dict['euler_yxz'], node)
-
-                elif node in non_ball_joints:
-                    joint_angles[:, body_part[node]] = ar.medical_from_euler_batch('zxz', angles_dict['euler_zxz'], node)
-                else:
-                    joint_angles[:, body_part[node]] = np.array([None, None, None])
-        return joint_angles
-
     def get_positions_2d(self) -> np.ndarray:
         """Returns the positions for all keypoints in shape: (num_frames, num_bodyparts * xyz)."""
         return np.reshape(self.positions, (self.positions.shape[0], -1))
@@ -437,7 +368,7 @@ class Sequence:
     def merge(self, sequence) -> 'Sequence':
         """Returns the merged two sequences.
 
-        Raises ValueError if either the body_parts, the poseformat or the body_parts and keys within the joint_angles do not match!
+        Raises ValueError if either the body_parts, the poseformat or the body_parts do not match!
         """
         if self.body_parts != sequence.body_parts:
             raise ValueError('body_parts of both sequences do not match!')
@@ -471,8 +402,6 @@ class Sequence:
             merge_edge_data = sequence.scene_graph[edge1][edge2]
             edge_data = self.scene_graph[edge1][edge2]
             edge_data['transformation'] = np.concatenate((edge_data['transformation'], merge_edge_data['transformation']))
-
-        self.joint_angles = np.concatenate((self.joint_angles, sequence.joint_angles), axis=0)
 
         return self
 
