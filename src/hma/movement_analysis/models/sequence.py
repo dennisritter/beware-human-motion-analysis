@@ -318,22 +318,20 @@ class Sequence:
         positions[:, :, 1] -= np.mean(positions[:, :, 1])
         positions[:, :, 2] -= np.mean(positions[:, :, 2])
 
-        # Adjust MIR data to our target Coordinate System
-        # X_mocap = Left    ->  X_hma = Right   -->     Flip X-Axis
-        # Y_mocap = Up      ->  Y_hma = Front   -->     Switch Y and Z; Flip (new) Y-Axis
-        # Z_mocap = Back    ->  Z_hma = Up      -->     Switch Y and Z
-
-        # # Switch Y and Z axis.
-        # # In MIR Y points up and Z to the back -> We want Z to point up and Y to the front,
-        # y_positions_mka = positions[:, :, 1].copy()
-        # z_positions_mka = positions[:, :, 2].copy()
-        # positions[:, :, 1] = z_positions_mocap
-        # positions[:, :, 2] = y_positions_mocap
-        # # MIR coordinate system is left handed -> flip x-axis to adjust data for right handed coordinate system
-        # positions[:, :, 0] *= -1
-        # # Flip Y-Axis
-        # # MIR Z-Axis (our Y-Axis now) points "behind" the trainee, but we want it to point "forward"
-        # positions[:, :, 1] *= -1
+        # MKA X points left -> HMA X points right
+        # MKA Y points down -> HMA Y points front
+        # MKA Z points backwards -> HMA Z points up
+        # Switch Y/Z
+        y_positions_mka = positions[:, :, 1].copy()
+        z_positions_mka = positions[:, :, 2].copy()
+        positions[:, :, 1] = z_positions_mka
+        positions[:, :, 2] = y_positions_mka
+        # Flip X
+        positions[:, :, 0] *= -1
+        # Flip Y
+        positions[:, :, 1] *= -1
+        # Flip Z
+        positions[:, :, 2] *= -1
 
         # The target Body Part format
         body_parts = {
