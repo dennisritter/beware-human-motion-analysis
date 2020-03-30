@@ -227,6 +227,7 @@ class Sequence:
 
     def to_json(self) -> str:
         # TODO: serialize scene_graph. Als ndarrays must be transferred to lists before.
+        # !Do we need this anymore? We only need specialized methods for each tracking format don't we?
         """Returns the sequence instance as a json-formatted string."""
         json_dict = {
             'name': self.name,
@@ -239,6 +240,7 @@ class Sequence:
 
     @classmethod
     def from_json(cls, json_str: str) -> 'Sequence':
+        # !Do we need this anymore? We only need specialized methods for each tracking format don't we?
         """Creates a new Sequence instance from a json-formatted string.
 
         Args:
@@ -268,8 +270,8 @@ class Sequence:
             return cls.from_json(sequence_file.read())
 
     @classmethod
-    def from_mocap_file(cls, path: str, name: str = 'Sequence') -> 'Sequence':
-        """Loads an sequence .json file and returns an Sequence object.
+    def from_mir_file(cls, path: str, name: str = 'Sequence') -> 'Sequence':
+        """Loads an sequence .json file in Mocap Intel RealSense format and returns an Sequence object.
 
         Args:
             path (str): Path to the json file
@@ -281,8 +283,102 @@ class Sequence:
             return Sequence.from_mocap_json(sequence_file.read(), name)
 
     @classmethod
+    def from_mka_file(cls, path: str, name: str = 'Sequence') -> 'Sequence':
+        """Loads an sequence .json file in Mocap Kinect Azure format and returns an Sequence object.
+
+        Args:
+            path (str): Path to the json file
+
+        Returns:
+            Sequence: a new Sequence instance from the given input.
+        """
+        with open(path, 'r') as sequence_file:
+            return Sequence.from_mir_json(sequence_file.read(), name)
+
+    @classmethod
+    def from_mir_json(cls, json_str: str, name: str = 'Sequence') -> 'Sequence':
+        """Loads an sequence from a json string in Mocap Intel RealSense format and returns an Sequence object.
+
+        Args:
+            json_str (str): The json string.
+
+        Returns:
+            Sequence: a new Sequence instance from the given input.
+        """
+        # load, parse file from json and return class
+        json_data = json.loads(json_str)
+        positions = np.array(json_data["positions"])
+        timestamps = np.array(json_data["timestamps"])
+
+        # reshape positions to 3d array
+        positions = np.reshape(positions, (np.shape(positions)[0], int(np.shape(positions)[1] / 3), 3))
+
+        # Center Positions by subtracting the mean of each coordinate
+        positions[:, :, 0] -= np.mean(positions[:, :, 0])
+        positions[:, :, 1] -= np.mean(positions[:, :, 1])
+        positions[:, :, 2] -= np.mean(positions[:, :, 2])
+
+        # Adjust MIR data to our target Coordinate System
+        # X_mocap = Left    ->  X_hma = Right   -->     Flip X-Axis
+        # Y_mocap = Up      ->  Y_hma = Front   -->     Switch Y and Z; Flip (new) Y-Axis
+        # Z_mocap = Back    ->  Z_hma = Up      -->     Switch Y and Z
+
+        # # Switch Y and Z axis.
+        # # In MIR Y points up and Z to the back -> We want Z to point up and Y to the front,
+        # y_positions_mka = positions[:, :, 1].copy()
+        # z_positions_mka = positions[:, :, 2].copy()
+        # positions[:, :, 1] = z_positions_mocap
+        # positions[:, :, 2] = y_positions_mocap
+        # # MIR coordinate system is left handed -> flip x-axis to adjust data for right handed coordinate system
+        # positions[:, :, 0] *= -1
+        # # Flip Y-Axis
+        # # MIR Z-Axis (our Y-Axis now) points "behind" the trainee, but we want it to point "forward"
+        # positions[:, :, 1] *= -1
+
+        # The target Body Part format
+        body_parts = {
+            "head": 0,
+            "neck": 1,
+            "shoulder_l": 2,
+            "shoulder_r": 3,
+            "elbow_l": 4,
+            "elbow_r": 5,
+            "wrist_l": 6,
+            "wrist_r": 7,
+            "torso": 8,
+            "pelvis": 9,
+            "hip_l": 10,
+            "hip_r": 11,
+            "knee_l": 12,
+            "knee_r": 13,
+            "ankle_l": 14,
+            "ankle_r": 15,
+        }
+
+        # Change body part indices according to the target body part format
+        positions_mka = positions.copy()
+        positions[:, 0, :] = positions_mka[:, 26, :]  # "head": 0
+        positions[:, 1, :] = positions_mka[:, 3, :]  # "neck": 1
+        positions[:, 2, :] = positions_mka[:, 5, :]  # "shoulder_l": 2
+        positions[:, 3, :] = positions_mka[:, 12, :]  # "shoulder_r": 3
+        positions[:, 4, :] = positions_mka[:, 6, :]  # "elbow_l": 4
+        positions[:, 5, :] = positions_mka[:, 13, :]  # "elbow_r": 5
+        positions[:, 6, :] = positions_mka[:, 7, :]  # "wrist_l": 6
+        positions[:, 7, :] = positions_mka[:, 14, :]  # "wrist_r": 7
+        positions[:, 8, :] = positions_mka[:, 2, :]  # "torso": 8
+        positions[:, 9, :] = positions_mka[:, 0, :]  # "pelvis": 9
+        positions[:, 10, :] = positions_mka[:, 18, :]  # "hip_l": 10
+        positions[:, 11, :] = positions_mka[:, 22, :]  # "hip_r": 11
+        positions[:, 12, :] = positions_mka[:, 19, :]  # "knee_l": 12
+        positions[:, 13, :] = positions_mka[:, 23, :]  # "knee_r": 13
+        positions[:, 14, :] = positions_mka[:, 20, :]  # "ankle_l": 14
+        positions[:, 15, :] = positions_mka[:, 24, :]  # "ankle_r": 15
+
+        return cls(body_parts, positions, timestamps, name=name)
+
+    @classmethod
     def from_mocap_json(cls, json_str: str, name: str = 'Sequence') -> 'Sequence':
-        """Loads an sequence from a json string and returns an Sequence object.
+        """Loads an sequence from a json string in Mocap Intel RealSense format and returns an Sequence object.
 
         Args:
             json_str (str): The json string.
@@ -303,21 +399,21 @@ class Sequence:
         positions[:, :, 1] -= np.mean(positions[:, :, 1])
         positions[:, :, 2] -= np.mean(positions[:, :, 2])
 
-        # Adjust MoCap data to our target Coordinate System
+        # Adjust MIR data to our target Coordinate System
         # X_mocap = Left    ->  X_hma = Right   -->     Flip X-Axis
         # Y_mocap = Up      ->  Y_hma = Front   -->     Switch Y and Z; Flip (new) Y-Axis
         # Z_mocap = Back    ->  Z_hma = Up      -->     Switch Y and Z
 
         # Switch Y and Z axis.
-        # In Mocap Y points up and Z to the back -> We want Z to point up and Y to the front,
+        # In MIR Y points up and Z to the back -> We want Z to point up and Y to the front,
         y_positions_mocap = positions[:, :, 1].copy()
         z_positions_mocap = positions[:, :, 2].copy()
         positions[:, :, 1] = z_positions_mocap
         positions[:, :, 2] = y_positions_mocap
-        # MoCap coordinate system is left handed -> flip x-axis to adjust data for right handed coordinate system
+        # MIR coordinate system is left handed -> flip x-axis to adjust data for right handed coordinate system
         positions[:, :, 0] *= -1
         # Flip Y-Axis
-        # MoCap Z-Axis (our Y-Axis now) points "behind" the trainee, but we want it to point "forward"
+        # MIR Z-Axis (our Y-Axis now) points "behind" the trainee, but we want it to point "forward"
         positions[:, :, 1] *= -1
 
         # The target Body Part format
