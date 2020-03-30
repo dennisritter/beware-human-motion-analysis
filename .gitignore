@@ -126,8 +126,7 @@ dmypy.json
 #VSCode
 .vscode
 
-
-data/sequences/dennis
-data/sequences/philippe
-data/sequences/levente
+# Sequence data
 data/sequences/*
+# HTML plotly plots
+skeleton.html
