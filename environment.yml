@@ -16,5 +16,6 @@ dependencies:
   - seaborn=0.9.*
   - tslearn=0.1.*
   - plotly=4.4.*
+  - chart-studio=1.0.*
   - plotly_express=0.4.*
   - networkx=2.4.*
