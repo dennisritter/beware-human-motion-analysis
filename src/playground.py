@@ -26,7 +26,6 @@ filename = "data/sequences/mka_sequences/hannah_squat_1.json"
 
 ### Check Sequence angles ang iterations
 seq = Sequence.from_mka_file(filename)
-seq = seq[20:30]
 sv = SkeletonVisualiser(seq)
 sv.show()
 # exe = Exercise.from_file(exercise)

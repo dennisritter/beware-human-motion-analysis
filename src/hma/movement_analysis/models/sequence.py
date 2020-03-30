@@ -280,7 +280,7 @@ class Sequence:
             Sequence: a new Sequence instance from the given input.
         """
         with open(path, 'r') as sequence_file:
-            return Sequence.from_mocap_json(sequence_file.read(), name)
+            return Sequence.from_mir_json(sequence_file.read(), name)
 
     @classmethod
     def from_mka_file(cls, path: str, name: str = 'Sequence') -> 'Sequence':
@@ -293,10 +293,10 @@ class Sequence:
             Sequence: a new Sequence instance from the given input.
         """
         with open(path, 'r') as sequence_file:
-            return Sequence.from_mir_json(sequence_file.read(), name)
+            return Sequence.from_mka_json(sequence_file.read(), name)
 
     @classmethod
-    def from_mir_json(cls, json_str: str, name: str = 'Sequence') -> 'Sequence':
+    def from_mka_json(cls, json_str: str, name: str = 'Sequence') -> 'Sequence':
         """Loads an sequence from a json string in Mocap Intel RealSense format and returns an Sequence object.
 
         Args:
@@ -356,6 +356,7 @@ class Sequence:
         }
 
         # Change body part indices according to the target body part format
+        # TODO: Adjust scene graph format to fit optimal kinect azure format
         positions_mka = positions.copy()
         positions[:, 0, :] = positions_mka[:, 26, :]  # "head": 0
         positions[:, 1, :] = positions_mka[:, 3, :]  # "neck": 1
@@ -365,7 +366,7 @@ class Sequence:
         positions[:, 5, :] = positions_mka[:, 13, :]  # "elbow_r": 5
         positions[:, 6, :] = positions_mka[:, 7, :]  # "wrist_l": 6
         positions[:, 7, :] = positions_mka[:, 14, :]  # "wrist_r": 7
-        positions[:, 8, :] = positions_mka[:, 2, :]  # "torso": 8
+        positions[:, 8, :] = positions_mka[:, 1, :]  # "torso": 8 -> SpineNavel
         positions[:, 9, :] = positions_mka[:, 0, :]  # "pelvis": 9
         positions[:, 10, :] = positions_mka[:, 18, :]  # "hip_l": 10
         positions[:, 11, :] = positions_mka[:, 22, :]  # "hip_r": 11
@@ -374,10 +375,12 @@ class Sequence:
         positions[:, 14, :] = positions_mka[:, 20, :]  # "ankle_l": 14
         positions[:, 15, :] = positions_mka[:, 24, :]  # "ankle_r": 15
 
+        positions = positions[:, :16]
+
         return cls(body_parts, positions, timestamps, name=name)
 
     @classmethod
-    def from_mocap_json(cls, json_str: str, name: str = 'Sequence') -> 'Sequence':
+    def from_mir_json(cls, json_str: str, name: str = 'Sequence') -> 'Sequence':
         """Loads an sequence from a json string in Mocap Intel RealSense format and returns an Sequence object.
 
         Args:
