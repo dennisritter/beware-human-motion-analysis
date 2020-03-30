@@ -1,5 +1,6 @@
 """Visualises a skeleton from a Sequence in a webbrowser 3-D canvas."""
 import plotly.graph_objects as go
+import chart_studio.plotly as py
 from hma.movement_analysis import transformations
 
 
@@ -10,8 +11,8 @@ class SkeletonVisualiser:
         sequence (Sequence): The motion sequence to visualise the skeleton from.
     """
     def __init__(
-            self,
-            sequence,
+        self,
+        sequence,
     ):
 
         self.sequence = sequence[:]
@@ -23,7 +24,10 @@ class SkeletonVisualiser:
         frames = self._get_frames()
 
         fig = go.Figure(data=traces, layout=layout, frames=frames)
-        fig.show()
+        print("Generating Skeleton Plot...")
+        fig.write_html('skeleton.html', auto_open=False)
+        # print(f"Plot URL: {py.plot(fig, filename='skeleton', auto_open=False)}")
+        # fig.show()
 
     def _get_layout(self):
         """Returns a Plotly layout."""
