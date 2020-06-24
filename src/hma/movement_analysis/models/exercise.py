@@ -1,6 +1,7 @@
 """Contains the code for the Exercise model."""
 import json
 import logging
+from typing import Union
 
 
 class Exercise:
@@ -24,25 +25,23 @@ class Exercise:
     def to_json(self) -> str:
         """Returns the exercise instance as a json-formatted string."""
         # return json.dumps(self.__dict__)  # does not work because of logger
-        json_dict = {
-            'name': self.name,
-            'angles': self.angles,
-            'userId': self.userId,
-            'description': self.description
-        }
+        json_dict = {'name': self.name, 'angles': self.angles, 'userId': self.userId, 'description': self.description}
         return json.dumps(json_dict)
 
     @classmethod
-    def from_json(cls, json_str: str) -> 'Exercise':
+    def from_json(cls, json_data: Union[str, dict]) -> 'Exercise':
         """Creates a new Exercise instance from a json-formatted string.
 
         Args:
-            json_str (str): The json-formatted string.
+            json_data Union[str, dict]: The json-formatted string or dict.
 
         Returns:
             Exercise: a new Exercise instance from the given input.
         """
-        json_dict = json.loads(json_str)
+        if isinstance(json_data, str):
+            json_dict = json.loads(json_data)
+        else:
+            json_dict = json_data
         return cls(**json_dict)
 
     @classmethod
