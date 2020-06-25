@@ -1,9 +1,12 @@
 """Contains the code for the sequence model including the scenegraph and angle computation."""
-import json
 import copy
+import json
+from typing import Union
+
 import networkx as nx
 import numpy as np
 from scipy.spatial.transform import Rotation
+
 import hma.movement_analysis.transformations as transformations
 
 
@@ -239,17 +242,21 @@ class Sequence:
         return json.dumps(json_dict)
 
     @classmethod
-    def from_json(cls, json_str: str) -> 'Sequence':
+    def from_json(cls, json_data: Union[str, dict]) -> 'Sequence':
         # !Do we need this anymore? We only need specialized methods for each tracking format don't we?
         """Creates a new Sequence instance from a json-formatted string.
 
         Args:
-            json_str (str): The json-formatted string.
+            json_data Union[str, dict]: The json-formatted string or dict.
 
         Returns:
             Exercise: a new Sequence instance from the given input.
         """
-        json_dict = json.loads(json_str)
+        if isinstance(json_data, str):
+            json_dict = json.loads(json_data)
+        else:
+            json_dict = json_data
+
         # TODO: Test if this works properly
         if 'scene_graph' in json_dict.keys():
             json_dict['scene_graph'] = nx.readwrite.json_graph.adjacency_data(json_dict['scene_graph'])
@@ -296,19 +303,23 @@ class Sequence:
             return Sequence.from_mka_json(sequence_file.read(), name)
 
     @classmethod
-    def from_mka_json(cls, json_str: str, name: str = 'Sequence') -> 'Sequence':
+    def from_mka_json(cls, json_data: Union[str, dict], name: str = 'Sequence') -> 'Sequence':
         """Loads an sequence from a json string in Mocap Intel RealSense format and returns an Sequence object.
 
         Args:
-            json_str (str): The json string.
+            json_data Union[str, dict]: The json-formatted string or dict.
 
         Returns:
             Sequence: a new Sequence instance from the given input.
         """
         # load, parse file from json and return class
-        json_data = json.loads(json_str)
-        positions = np.array(json_data["positions"])
-        timestamps = np.array(json_data["timestamps"])
+        if isinstance(json_data, str):
+            json_dict = json.loads(json_data)
+        else:
+            json_dict = json_data
+
+        positions = np.array(json_dict["positions"])
+        timestamps = np.array(json_dict["timestamps"])
 
         # reshape positions to 3d array
         positions = np.reshape(positions, (np.shape(positions)[0], int(np.shape(positions)[1] / 3), 3))
@@ -378,19 +389,23 @@ class Sequence:
         return cls(body_parts, positions, timestamps, name=name)
 
     @classmethod
-    def from_mir_json(cls, json_str: str, name: str = 'Sequence') -> 'Sequence':
+    def from_mir_json(cls, json_data: Union[str, dict], name: str = 'Sequence') -> 'Sequence':
         """Loads an sequence from a json string in Mocap Intel RealSense format and returns an Sequence object.
 
         Args:
-            json_str (str): The json string.
+            json_data Union[str, dict]: The json-formatted string or dict.
 
         Returns:
             Sequence: a new Sequence instance from the given input.
         """
         # load, parse file from json and return class
-        json_data = json.loads(json_str)
-        positions = np.array(json_data["frames"])
-        timestamps = np.array(json_data["timestamps"])
+        if isinstance(json_data, str):
+            json_dict = json.loads(json_data)
+        else:
+            json_dict = json_data
+
+        positions = np.array(json_dict["frames"])
+        timestamps = np.array(json_dict["timestamps"])
 
         # reshape positions to 3d array
         positions = np.reshape(positions, (np.shape(positions)[0], int(np.shape(positions)[1] / 3), 3))
